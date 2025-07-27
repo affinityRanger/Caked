@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missing You - Chaos of Doubt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(45deg, #1a0000, #8b0000, #2d0000, #dc143c);
+            background-size: 400% 400%;
+            animation: chaosBackground 8s ease-in-out infinite;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+            position: relative;
+        }
+
+        @keyframes chaosBackground {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+
+        .chaos-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .broken-heart {
+            position: absolute;
+            font-size: 8rem;
+            color: #ff1744;
+            z-index: 10;
+            animation: heartbreak 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 23, 68, 0.8));
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .broken-heart:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1));
+        }
+
+        .main-heart {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12rem;
+        }
+
+        .main-heart.playing {
+            animation: heartbeat 0.8s ease-in-out infinite;
+            color: #ff0040;
+            filter: drop-shadow(0 0 50px rgba(255, 0, 64, 1));
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.15);
+            }
+        }
+
+        @keyframes heartbreak {
+            0%, 100% { 
+                transform: translate(-50%, -50%) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            25% { 
+                transform: translate(-50%, -50%) rotate(-5deg) scale(1.1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(-50%, -50%) rotate(5deg) scale(0.9);
+                opacity: 1;
+            }
+            75% { 
+                transform: translate(-50%, -50%) rotate(-3deg) scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 3rem;
+            animation: floatChaos 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes floatChaos {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 0.7;
+            }
+            25% { 
+                transform: translateY(-30px) rotate(45deg) scale(1.2);
+                opacity: 1;
+            }
+            50% { 
+                transform: translateY(-10px) rotate(-30deg) scale(0.8);
+                opacity: 0.9;
+            }
+            75% { 
+                transform: translateY(-40px) rotate(60deg) scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .chaos-text {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+            animation: chaosFloat 4s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        .chaos-text:hover {
+            color: #ff1744;
+            transform: scale(1.1);
+            text-shadow: 0 0 20px rgba(255, 23, 68, 0.8);
+        }
+
+        @keyframes chaosFloat {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translateY(-20px) rotate(2deg);
+                opacity: 1;
+            }
+        }
+
+        .image-frame {
+            position: absolute;
+            width: 150px;
+            height: 120px;
+            border: 3px solid rgba(255, 23, 68, 0.8);
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-align: center;
+            animation: frameFloat 5s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .image-frame:hover {
+            border-color: #ff1744;
+            background: rgba(255, 23, 68, 0.1);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 23, 68, 0.5);
+        }
+
+        @keyframes frameFloat {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            33% { 
+                transform: translateY(-15px) rotate(1deg);
+                opacity: 1;
+            }
+            66% { 
+                transform: translateY(-5px) rotate(-1deg);
+                opacity: 0.9;
+            }
+        }
+
+        .tear {
+            position: absolute;
+            color: #87ceeb;
+            font-size: 2rem;
+            animation: tearFall 3s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        @keyframes tearFall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .music-chaos {
+            position: absolute;
+            background: rgba(139, 0, 0, 0.8);
+            border: 2px solid #ff1744;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            animation: musicSpin 4s linear infinite;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .music-chaos:hover {
+            background: rgba(255, 23, 68, 0.9);
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(255, 23, 68, 0.7);
+        }
+
+        .music-chaos.playing {
+            background: rgba(255, 23, 68, 1);
+            box-shadow: 0 0 40px rgba(255, 23, 68, 0.9);
+            animation: musicSpin 1s linear infinite;
+        }
+
+        @keyframes musicSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(0.9); }
+            75% { transform: rotate(270deg) scale(1.05); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 23, 68, 0.8);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 23, 68, 1);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.5);
+        }
+
+        .glitch {
+            animation: glitch 2s ease-in-out infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+            10% { 
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+            20% { 
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+            30% { 
+                transform: translate(2px, 2px);
+                filter: hue-rotate(270deg);
+            }
+            40% { 
+                transform: translate(2px, -2px);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+
+
+        .audio-status {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .audio-status.show {
+            opacity: 1;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .broken-heart {
+                font-size: 6rem;
+            }
+            .main-heart {
+                font-size: 8rem;
+            }
+            .chaos-text {
+                font-size: 1.2rem;
+            }
+            .image-frame {
+                width: 120px;
+                height: 90px;
+                font-size: 0.8rem;
+            }
+            .music-chaos {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio elements -->
+    <audio id="mainHeartAudio" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+        <!-- Fallback audio -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCT2a3vPHdiMFl8wD3LtZDAhqkuc4gk9zVcb7Tr8CG0Nc1D7P1eP5EAi1JTCNNPgdBj+v3/zCeiEEL4DS89o1HUBGDLTt3sL4ECa3eQE4FnD0fCAFBKDM1c2a2/9Y" type="audio/wav">
+    </audio>
+
+    <audio id="musicAudio1" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+    </audio>
+
+    <audio id="musicAudio2" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+    </audio>
+
+    <audio id="musicAudio3" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+    </audio>
+
+    <audio id="musicAudio4" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+    </audio>
+
+    <div class="chaos-container">
+        <button class="back-button" onclick="goBack()">← Back to Choice</button>
+        
+
+
+        <!-- Main broken heart -->
+        <div class="broken-heart main-heart" onclick="playMainMusic()" id="mainHeart">💔</div>
+        
+        <!-- Floating broken hearts -->
+        <div class="floating-heart" style="top: 10%; left: 20%; animation-delay: -1s;">🖤</div>
+        <div class="floating-heart" style="top: 80%; left: 80%; animation-delay: -3s;">💔</div>
+        <div class="floating-heart" style="top: 30%; left: 90%; animation-delay: -5s;">🥀</div>
+        <div class="floating-heart" style="top: 70%; left: 10%; animation-delay: -2s;">⚫</div>
+        <div class="floating-heart" style="top: 15%; left: 70%; animation-delay: -4s;">🖤</div>
+        
+        <!-- Chaotic text messages -->
+        <div class="chaos-text glitch" style="top: 15%; left: 15%; animation-delay: -1s;">
+            "I miss your laugh..."
+        </div>
+        <div class="chaos-text" style="top: 25%; right: 10%; animation-delay: -2s;">
+            "Empty without you"
+        </div>
+        <div class="chaos-text glitch" style="bottom: 20%; left: 25%; animation-delay: -3s;">
+            "What if you say no?"
+        </div>
+        <div class="chaos-text" style="top: 40%; left: 5%; animation-delay: -4s;">
+            "Lost in thoughts of you"
+        </div>
+        <div class="chaos-text glitch" style="bottom: 40%; right: 20%; animation-delay: -5s;">
+            "My heart aches..."
+        </div>
+        <div class="chaos-text" style="top: 60%; right: 15%; animation-delay: -6s;">
+            "Dreaming of your smile"
+        </div>
+        
+        <!-- Image placeholders scattered chaotically -->
+        <div class="image-frame" style="top: 5%; right: 25%; animation-delay: -1s;" onclick="showImagePrompt(1)">
+            📸<br>Memory of you<br>Click to add
+        </div>
+        <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" onclick="showImagePrompt(2)">
+            📷<br>Our moment<br>Click to add
+        </div>
+        <div class="image-frame" style="top: 45%; right: 5%; animation-delay: -2s;" onclick="showImagePrompt(3)">
+            🖼️<br>Missing this<br>Click to add
+        </div>
+        <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" onclick="showImagePrompt(4)">
+            📸<br>Your beauty<br>Click to add
+        </div>
+        <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" onclick="showImagePrompt(5)">
+            📷<br>Lonely times<br>Click to add
+        </div>
+        
+        <!-- Music chaos buttons -->
+        <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" onclick="playMusic(1)" id="musicBtn1">🎵</div>
+        <div class="music-chaos" style="bottom: 25%; left: 15%; animation-delay: -2s;" onclick="playMusic(2)" id="musicBtn2">🎶</div>
+        <div class="music-chaos" style="top: 65%; left: 60%; animation-delay: -3s;" onclick="playMusic(3)" id="musicBtn3">🎼</div>
+        <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" onclick="playMusic(4)" id="musicBtn4">🎧</div>
+        
+        <div class="audio-status" id="audioStatus">🎵 Now Playing...</div>
+    </div>
+
+    <script>
+        let currentAudio = null;
+        let currentPlayingElement = null;
+
+        // Create falling tears
+        function createTear() {
+            const tear = document.createElement('div');
+            tear.className = 'tear';
+            tear.innerHTML = '💧';
+            tear.style.left = Math.random() * 100 + '%';
+            tear.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(tear);
+            
+            setTimeout(() => {
+                if (tear.parentNode) {
+                    tear.remove();
+                }
+            }, 4000);
+        }
+
+        // Create tears periodically
+        setInterval(createTear, 800);
+
+        // Go back to landing page
+        function goBack() {
+            stopAllAudio();
+            window.location.href = './index.html';
+        }
+
+        // Stop all audio
+        function stopAllAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            
+            // Reset all visual states
+            document.querySelectorAll('.music-chaos').forEach(btn => {
+                btn.classList.remove('playing');
+            });
+            
+            const mainHeart = document.getElementById('mainHeart');
+            mainHeart.classList.remove('playing');
+            
+            hideAudioStatus();
+            currentAudio = null;
+            currentPlayingElement = null;
+        }
+
+        // Show audio status
+        function showAudioStatus(message) {
+            const status = document.getElementById('audioStatus');
+            status.textContent = message;
+            status.classList.add('show');
+        }
+
+        // Hide audio status
+        function hideAudioStatus() {
+            const status = document.getElementById('audioStatus');
+            status.classList.remove('show');
+        }
+
+        // Play audio with fallback
+        function playAudioWithFallback(audioElement, title, visualElement) {
+            stopAllAudio();
+            
+            currentAudio = audioElement;
+            currentPlayingElement = visualElement;
+            
+            // Add visual feedback
+            if (visualElement) {
+                visualElement.classList.add('playing');
+            }
+            
+            showAudioStatus(`🎵 ${title}`);
+            
+            // Try to play the audio
+            const playPromise = audioElement.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Audio started successfully
+                    console.log('Audio playing:', title);
+                }).catch(error => {
+                    console.log('Audio play failed, using Web Audio API fallback');
+                    playToneSequence(title, visualElement);
+                });
+            }
+            
+            // Handle audio end
+            audioElement.onended = () => {
+                if (visualElement) {
+                    visualElement.classList.remove('playing');
+                }
+                hideAudioStatus();
+                currentAudio = null;
+                currentPlayingElement = null;
+            };
+        }
+
+        // Fallback: Create audio tones using Web Audio API
+        function playToneSequence(title, visualElement) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Create a melancholic tone sequence
+                const frequencies = [220, 196, 174, 155, 138]; // A3 to C#3 - sad descending
+                let currentFreq = 0;
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequencies[0], audioContext.currentTime);
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
+                
+                // Change frequency every 0.5 seconds
+                const interval = setInterval(() => {
+                    currentFreq++;
+                    if (currentFreq < frequencies.length) {
+                        oscillator.frequency.setValueAtTime(frequencies[currentFreq], audioContext.currentTime);
+                    } else {
+                        clearInterval(interval);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+                        setTimeout(() => {
+                            oscillator.stop();
+                            if (visualElement) {
+                                visualElement.classList.remove('playing');
+                            }
+                            hideAudioStatus();
+                        }, 500);
+                    }
+                }, 500);
+                
+                oscillator.start();
+                
+            } catch (error) {
+                console.log('Web Audio API failed, showing message only');
+                setTimeout(() => {
+                    if (visualElement) {
+                        visualElement.classList.remove('playing');
+                    }
+                    hideAudioStatus();
+                }, 2000);
+            }
+        }
+
+        // Music functionality
+        function playMusic(num) {
+            const audioElement = document.getElementById(`musicAudio${num}`);
+            const buttonElement = document.getElementById(`musicBtn${num}`);
+            const titles = [
+                "Someone Like You - Adele",
+                "Fix You - Coldplay", 
+                "The Night We Met - Lord Huron",
+                "Say Something - A Great Big World"
+            ];
+            
+            playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
+            
+            // Create explosion effect
+            createMusicExplosion(buttonElement);
+        }
+
+        // Main heart music
+        function playMainMusic() {
+            const audioElement = document.getElementById('mainHeartAudio');
+            const heartElement = document.getElementById('mainHeart');
+            
+            playAudioWithFallback(audioElement, "Missing You - Heartbreak Symphony", heartElement);
+            
+            // Create explosion of broken hearts
+            createHeartExplosion();
+        }
+
+        // Create heart explosion effect
+        function createHeartExplosion() {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '💔';
+                    heart.style.position = 'absolute';
+                    heart.style.left = '50%';
+                    heart.style.top = '50%';
+                    heart.style.fontSize = '3rem';
+                    heart.style.zIndex = '15';
+                    heart.style.pointerEvents = 'none';
+                    heart.style.color = '#ff1744';
+                    heart.style.filter = 'drop-shadow(0 0 20px rgba(255, 23, 68, 0.8))';
+                    
+                    const angle = (360 / 10) * i;
+                    const distance = 200 + Math.random() * 100;
+                    const radians = angle * Math.PI / 180;
+                    
+                    heart.style.animation = `explodeHeart${i} 2s ease-out forwards`;
+                    
+                    // Create unique explosion animation
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes explodeHeart${i} {
+                            0% {
+                                transform: translate(-50%, -50%) rotate(0deg) scale(1);
+                                opacity: 1;
+                            }
+                            100% {
+                                transform: translate(-50%, -50%) 
+                                           translate(${Math.cos(radians) * distance}px, 
+                                                    ${Math.sin(radians) * distance}px) 
+                                           rotate(720deg) scale(0);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    document.body.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        if (heart.parentNode) {
+                            heart.remove();
+                        }
+                        if (style.parentNode) {
+                            style.remove();
+                        }
+                    }, 2000);
+                }, i * 100);
+            }
+        }
+
+        // Create music explosion effect
+        function createMusicExplosion(element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const note = document.createElement('div');
+                    const notes = ['🎵', '🎶', '🎼', '🎤', '🎧'];
+                    note.innerHTML = notes[Math.floor(Math.random() * notes.length)];
+                    note.style.position = 'fixed';
+                    note.style.left = centerX + 'px';
+                    note.style.top = centerY + 'px';
+                    note.style.fontSize = '2rem';
+                    note.style.zIndex = '15';
+                    note.style.pointerEvents = 'none';
+                    note.style.color = '#ff1744';
+                    
+                    const angle = Math.random() * 360;
+                    const distance = 100 + Math.random() * 50;
+                    const radians = angle * Math.PI / 180;
+                    
+                    note.style.animation = `explodeNote${i}-${Date.now()} 1.5s ease-out forwards`;
+                    
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes explodeNote${i}-${Date.now()} {
+                            0% {
+                                transform: translate(-50%, -50%) scale(1);
+                                opacity: 1;
+                            }
+                            100% {
+                                transform: translate(-50%, -50%) 
+                                           translate(${Math.cos(radians) * distance}px, 
+                                                    ${Math.sin(radians) * distance}px) 
+                                           scale(0);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    document.body.appendChild(note);
+                    
+                    setTimeout(() => {
+                        if (note.parentNode) {
+                            note.remove();
+                        }
+                        if (style.parentNode) {
+                            style.remove();
+                        }
+                    }, 1500);
+                }, i * 150);
+            }
+        }
+
+        // Image prompt functionality
+        function showImagePrompt(num) {
+            const messages = [
+                "📸 Add a photo of a memory that haunts you...\n(Save as assets/images/missing1.jpg)",
+                "📷 Add a photo of a moment you wish you could relive...\n(Save as assets/images/missing2.jpg)",
+                "🖼️ Add a photo of something that reminds you of her...\n(Save as assets/images/missing3.jpg)",
+                "📸 Add a photo of her that breaks your heart...\n(Save as assets/images/missing4.jpg)",
+                "📷 Add a photo of your loneliest moment...\n(Save as assets/images/missing5.jpg)"
+            ];
+            
+            alert(messages[num - 1]);
+            
+            // Add glitch effect to the frame
+            event.target.classList.add('glitch');
+            setTimeout(() => {
+                event.target.classList.remove('glitch');
+            }, 2000);
+        }
+
+        // Random glitch effects
+        setInterval(() => {
+            const elements = document.querySelectorAll('.chaos-text, .image-frame');
+            const randomElement = elements[Math.floor(Math.random() * elements.length)];
+            randomElement.classList.add('glitch');
+            
+            setTimeout(() => {
+                randomElement.classList.remove('glitch');
+            }, 1000);
+        }, 3000);
+
+        // Initialize audio elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set volume for all audio elements
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach(audio => {
+                audio.volume = 0.3; // Set to 30% volume
+                audio.loop = false;
+            });
+        });
+    </script>
+</body>
+</html>

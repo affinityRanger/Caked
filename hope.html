@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rose Garden</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 50%, #8e24aa 100%);
+      min-height: 100vh;
+      font-family: 'Georgia', serif;
+      overflow-x: hidden;
+      padding-bottom: 80px;
+      position: relative;
+    }
+
+    /* Loading Screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 50%, #8e24aa 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 1s ease-out;
+    }
+
+    .loading-rose {
+      font-size: 4rem;
+      animation: spin 2s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 1.5rem;
+      text-align: center;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Stars Background */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Music Toggle Button */
+    .music-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      font-size: 1.5rem;
+    }
+
+    .music-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .music-toggle.playing {
+      animation: musicPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes musicPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 3.5rem;
+      color: white;
+      margin-bottom: 50px;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+      animation: titleGlow 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .title:hover {
+      transform: scale(1.05);
+      text-shadow: 2px 2px 20px rgba(255,255,255,0.7);
+    }
+
+    /* Hidden Popup Message */
+    .title-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,240,250,0.95));
+      padding: 30px 40px;
+      border-radius: 25px;
+      border: 3px solid #ff69b4;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      z-index: 6000;
+      max-width: 400px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .title-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .title-popup h3 {
+      color: #c71585;
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      font-family: cursive;
+    }
+
+    .title-popup p {
+      color: #b30059;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+
+    .title-popup .close-popup {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .title-popup .close-popup:hover {
+      background: linear-gradient(135deg, #ff1493, #dc143c);
+      transform: translateY(-2px);
+    }
+
+    /* Overlay for popup */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 5500;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
+      50% { text-shadow: 2px 2px 20px rgba(255,255,255,0.5); }
+    }
+
+    /* Roses Container - Linear Horizontal Layout */
+    .roses-container {
+      display: flex;
+      flex-direction: row;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      flex-wrap: wrap;
+    }
+
+    .rose-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .rose-wrapper:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .rose-wrapper:active {
+      transform: scale(0.98);
+      background: rgba(74, 20, 140, 0.6);
+      border: 1px solid rgba(142, 36, 170, 0.8);
+    }
+
+    .rose {
+      position: relative;
+      width: 120px;
+      height: 200px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Custom Rose Image Styles */
+    .rose-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+      animation: roseBloom 4s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
+
+    .rose-image:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes roseBloom {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.05) rotate(2deg); }
+    }
+
+    .rose-label {
+      color: white;
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 5000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,240,250,0.95));
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+      animation: modalSlideIn 0.5s ease-out;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close:hover { color: #ff1493; }
+
+    .modal h2 {
+      color: #c71585;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 2rem;
+    }
+
+    .heart {
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .message {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .user-message {
+      display: none;
+      margin-top: 15px;
+      padding: 15px 20px;
+      background: rgba(255, 240, 250, 0.9);
+      border-left: 4px solid #ff99cc;
+      border-radius: 12px;
+      font-style: italic;
+      font-family: 'Cursive', serif;
+      color: #b30059;
+      animation: fadeIn 0.4s ease-in-out;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .add-message-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #ffe0f0, #ffcce5);
+      border: 1px solid #ff99cc;
+      border-radius: 25px;
+      font-weight: bold;
+      color: #c71585;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .add-message-btn:hover {
+      background: linear-gradient(135deg, #ffcce5, #ffb3d9);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 153, 204, 0.3);
+    }
+
+    .photo-container {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .photo {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 15px;
+      border: 3px solid #ff99cc;
+      transition: transform 0.3s ease;
+    }
+
+    .photo:hover {
+      transform: scale(1.1);
+    }
+
+    .music-controls {
+      text-align: center;
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .music-selector {
+      margin-bottom: 15px;
+    }
+
+    .music-selector select {
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid #ff69b4;
+      border-radius: 10px;
+      padding: 8px 15px;
+      font-size: 1rem;
+      color: #c71585;
+      cursor: pointer;
+      outline: none;
+      min-width: 200px;
+    }
+
+    .music-player-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .control-btn {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      min-width: 80px;
+    }
+
+    .control-btn:hover {
+      background: linear-gradient(135deg, #ff1493, #dc143c);
+      transform: translateY(-2px);
+    }
+
+    .control-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .now-playing {
+      margin-top: 10px;
+      color: white;
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    .play-btn {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .play-btn:hover {
+      background: linear-gradient(135deg, #ff1493, #dc143c);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 60px 20px 40px;
+      font-family: cursive;
+      color: #fff;
+      opacity: 0.9;
+      position: relative;
+      z-index: 3;
+    }
+
+    footer p {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+    }
+
+    /* Message Icon in Footer */
+    .footer-message-container {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .message-icon {
+      font-size: 2rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      animation: bounce 2s infinite;
+    }
+
+    .message-icon:hover {
+      transform: scale(1.2);
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .title { font-size: 2.5rem; }
+      .modal-content { margin: 10% auto; padding: 20px; }
+      .rose { width: 100px; height: 160px; }
+      .roses-container { 
+        flex-direction: column; 
+        gap: 30px; 
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-rose">🌹</div>
+    <div class="loading-text">
+      Blooming for you...<br>
+      <small>Preparing your garden of love</small>
+    </div>
+  </div>
+
+  <!-- Hidden Title Popup -->
+  <div class="title-popup" id="titlePopup">
+    <p>My heart's garden 💜</p>
+  </div>
+
+  <!-- Background Music -->
+  <audio id="backgroundMusic" loop>
+    <source src="assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCT2a3vPHdiMF" type="audio/wav">
+  </audio>
+
+  <!-- Music Toggle Button -->
+  <div class="music-toggle" id="musicToggle" onclick="toggleBackgroundMusic()">
+    🎵
+  </div>
+
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <h1 class="title" onclick="titleClick()">✨La Sam✨</h1>
+
+    <div class="roses-container">
+      <!-- Rose 1 -->
+      <div class="rose-wrapper" onclick="openModal('modal1')">
+        <div class="rose">
+          <img src="assets/images/rose1.png" alt="First Bloom Rose" class="rose-image">
+        </div>
+        <div class="rose-label">First Bloom</div>
+      </div>
+
+      <!-- Rose 2 -->
+      <div class="rose-wrapper" onclick="openModal('modal2')">
+        <div class="rose">
+          <img src="assets/images/rose2.png" alt="Heart's Robbed Rose" class="rose-image">
+        </div>
+        <div class="rose-label">Heart's Robbed</div>
+      </div>
+
+      <!-- Rose 3 -->
+      <div class="rose-wrapper" onclick="openModal('modal3')">
+        <div class="rose">
+          <img src="assets/images/rose3.png" alt="Forever Rose" class="rose-image">
+        </div>
+        <div class="rose-label">Forever</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <!-- Modal 1 -->
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('modal1')">&times;</span>
+      <h2>First Bloom <span class="heart">💕</span></h2>
+      <div class="message">"I think I'm a crack addict.frfr"</div>
+      <button class="add-message-btn" onclick="showSavedMessage('msg1')">💌 Read Message</button>
+      <div id="msg1" class="user-message">
+        I saw you and I fell—suddenly, endlessly. Hit me too like a truck. Funny you still hit me like a truck no matter what the outcome. That smile on your face makes it easy to trust you. I swear na si mstari I literally skip a beat when I see a photo of you. Anyway nione mbleina tu nikisema izi vitu😂
+      </div>
+      <div class="photo-container">
+        <img src="assets/images/Crack.jpg" alt="Smile" class="photo">
+        <img src="assets/images/photo2.jpg" alt="Memory" class="photo">
+      </div>
+      <div class="music-controls">
+        <div class="music-selector">
+          <select id="musicSelect1" onchange="selectSong(1, this.value)">
+            <option value="">🎵 Choose a song...</option>
+            <option value="song1.mp3">Dreamin' - PARTYNEXTDOOR</option>
+            <option value="song2.mp3">Best Part - Daniel Caesar</option>
+            <option value="song3.mp3">Golden - Jill Scott</option>
+            <option value="song4.mp3">Adorn - Miguel</option>
+            <option value="song5.mp3">Come Through - H.E.R.</option>
+            <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
+            <option value="song7.mp3">Love Galore - SZA</option>
+          </select>
+        </div>
+        <div class="music-player-controls">
+          <button class="control-btn" id="playBtn1" onclick="togglePlay(1)" disabled>▶️ Play</button>
+          <button class="control-btn" onclick="stopMusic(1)">⏹️ Stop</button>
+        </div>
+        <div class="now-playing" id="nowPlaying1">Select a song to play</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2 -->
+  <div id="modal2" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('modal2')">&times;</span>
+      <h2>Heart's Robbed<span class="heart">💖</span></h2>
+      <div class="message">"And I don't want it back you can keep it Make it dirty but keep it safe for me."</div>
+      <button class="add-message-btn" onclick="showSavedMessage('msg2')">💌 Read Message</button>
+      <div id="msg2" class="user-message">
+        Can I tell you somethin' Crazy I never thought you'd be my type too since we met at the beginning. Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real kiss I heard was with you. The one you saw on those opera😂
+      </div>
+      <div class="photo-container">
+        <img src="assets/images/photo3.jpg" alt="Dancing" class="photo">
+        <img src="assets/images/photo4.jpg" alt="Laughs" class="photo">
+      </div>
+      <div class="music-controls">
+        <div class="music-selector">
+          <select id="musicSelect2" onchange="selectSong(2, this.value)">
+            <option value="">🎵 Choose a song...</option>
+            <option value="song1.mp3">Dreamin' - PARTYNEXTDOOR</option>
+            <option value="song2.mp3">Best Part - Daniel Caesar</option>
+            <option value="song3.mp3">Golden - Jill Scott</option>
+            <option value="song4.mp3">Adorn - Miguel</option>
+            <option value="song5.mp3">Come Through - H.E.R.</option>
+            <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
+            <option value="song7.mp3">Love Galore - SZA</option>
+          </select>
+        </div>
+        <div class="music-player-controls">
+          <button class="control-btn" id="playBtn2" onclick="togglePlay(2)" disabled>▶️ Play</button>
+          <button class="control-btn" onclick="stopMusic(2)">⏹️ Stop</button>
+        </div>
+        <div class="now-playing" id="nowPlaying2">Select a song to play</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3 -->
+  <div id="modal3" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('modal3')">&times;</span>
+      <h2>Forever <span class="heart">💝</span></h2>
+      <div class="message">"Come to me. I will make you believe we're forever."</div>
+      <button class="add-message-btn" onclick="showSavedMessage('msg3')">💌 Read Message</button>
+      <div id="msg3" class="user-message">
+        I promise never to hurt or make you feel any type of way. I don't even know if this makes you comfortable. I figured you'd like some of the things I'm good at even though not talking. This is just a taste of what I have in store for you. Forget how you know me. Let me show you some of the other me.
+      </div>
+      <div class="photo-container">
+        <img src="assets/images/photo5.jpg" alt="Together" class="photo">
+        <img src="assets/images/photo6.jpg" alt="Future" class="photo">
+      </div>
+      <div class="music-controls">
+        <div class="music-selector">
+          <select id="musicSelect3" onchange="selectSong(3, this.value)">
+            <option value="">🎵 Choose a song...</option>
+            <option value="song1.mp3">Dreamin' - PARTYNEXTDOOR</option>
+            <option value="song2.mp3">Best Part - Daniel Caesar</option>
+            <option value="song3.mp3">Golden - Jill Scott</option>
+            <option value="song4.mp3">Adorn - Miguel</option>
+            <option value="song5.mp3">Come Through - H.E.R.</option>
+            <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
+            <option value="song7.mp3">Love Galore - SZA</option>
+          </select>
+        </div>
+        <div class="music-player-controls">
+          <button class="control-btn" id="playBtn3" onclick="togglePlay(3)" disabled>▶️ Play</button>
+          <button class="control-btn" onclick="stopMusic(3)">⏹️ Stop</button>
+        </div>
+        <div class="now-playing" id="nowPlaying3">Select a song to play</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Girl you better fucking read every single letter from a-z🌹</p>
+    <p>Made with 💖 by your favorite person</p>
+    
+    <div class="footer-message-container">
+      <span class="message-icon" onclick="showSavedMessage('msg4')">💌</span>
+    </div>
+    
+    <div id="msg4" class="user-message">
+      I need you so much. I want you to get that bad. I'm no Drake nor PND but sure I can rock you. Give me the location. I learnt a thing or two since we met.😎
+      I don't even know if I'm doing corny things here or if you'll even like it. Honestly if you like I don't mind looking like a geek.
+    </div>
+  </footer>
+
+  <audio id="roseAudio1" preload="auto"></audio>
+  <audio id="roseAudio2" preload="auto"></audio>
+  <audio id="roseAudio3" preload="auto"></audio>
+
+  <script>
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    const musicToggle = document.getElementById("musicToggle");
+    let backgroundMusicPlaying = false;
+
+    // Individual audio players for each modal
+    const audioPlayers = {
+      1: document.getElementById("roseAudio1"),
+      2: document.getElementById("roseAudio2"),
+      3: document.getElementById("roseAudio3")
+    };
+
+    let currentlyPlaying = {};
+
+    // Song selection
+    function selectSong(modalId, songFile) {
+      if (songFile) {
+        audioPlayers[modalId].src = `assets/audio/${songFile}`;
+        audioPlayers[modalId].volume = 0.6;
+        document.getElementById(`playBtn${modalId}`).disabled = false;
+        document.getElementById(`nowPlaying${modalId}`).textContent = `Ready: ${songFile.replace('.mp3', '')}`;
+      } else {
+        document.getElementById(`playBtn${modalId}`).disabled = true;
+        document.getElementById(`nowPlaying${modalId}`).textContent = 'Select a song to play';
+      }
+    }
+
+    // Toggle play/pause
+    function togglePlay(modalId) {
+      const audio = audioPlayers[modalId];
+      const playBtn = document.getElementById(`playBtn${modalId}`);
+      const nowPlaying = document.getElementById(`nowPlaying${modalId}`);
+      
+      if (audio.paused) {
+        // Stop other playing audio
+        Object.keys(audioPlayers).forEach(id => {
+          if (id != modalId && !audioPlayers[id].paused) {
+            audioPlayers[id].pause();
+            document.getElementById(`playBtn${id}`).textContent = '▶️ Play';
+          }
+        });
+        
+        audio.play();
+        playBtn.textContent = '⏸️ Pause';
+        nowPlaying.textContent = `Now playing: ${audio.src.split('/').pop().replace('.mp3', '')}`;
+        currentlyPlaying[modalId] = true;
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶️ Play';
+        nowPlaying.textContent = `Paused: ${audio.src.split('/').pop().replace('.mp3', '')}`;
+        currentlyPlaying[modalId] = false;
+      }
+    }
+
+    // Stop music
+    function stopMusic(modalId) {
+      const audio = audioPlayers[modalId];
+      const playBtn = document.getElementById(`playBtn${modalId}`);
+      const nowPlaying = document.getElementById(`nowPlaying${modalId}`);
+      
+      audio.pause();
+      audio.currentTime = 0;
+      playBtn.textContent = '▶️ Play';
+      nowPlaying.textContent = `Stopped: ${audio.src.split('/').pop().replace('.mp3', '')}`;
+      currentlyPlaying[modalId] = false;
+    }
+
+    // Auto-update button text when song ends
+    Object.keys(audioPlayers).forEach(modalId => {
+      audioPlayers[modalId].addEventListener('ended', () => {
+        document.getElementById(`playBtn${modalId}`).textContent = '▶️ Play';
+        document.getElementById(`nowPlaying${modalId}`).textContent = `Finished: ${audioPlayers[modalId].src.split('/').pop().replace('.mp3', '')}`;
+        currentlyPlaying[modalId] = false;
+      });
+    });
+
+    // Loading Screen Animation
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        document.getElementById('loadingScreen').classList.add('fade-out');
+        setTimeout(() => {
+          document.getElementById('loadingScreen').style.display = 'none';
+          initializeBackground();
+          // Auto-start background music after loading
+          setTimeout(startBackgroundMusic, 1000);
+        }, 1000);
+      }, 2000);
+    });
+
+    // Initialize background elements
+    function initializeBackground() {
+      createStars();
+    }
+
+    // Create twinkling stars
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Background music controls
+    function startBackgroundMusic() {
+      backgroundMusic.volume = 0.3;
+      const playPromise = backgroundMusic.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          backgroundMusicPlaying = true;
+          musicToggle.classList.add('playing');
+        }).catch(error => {
+          console.log('Auto-play prevented by browser');
+        });
+      }
+    }
+
+    function toggleBackgroundMusic() {
+      if (backgroundMusicPlaying) {
+        backgroundMusic.pause();
+        backgroundMusicPlaying = false;
+        musicToggle.classList.remove('playing');
+        musicToggle.textContent = '🔇';
+      } else {
+        backgroundMusic.play();
+        backgroundMusicPlaying = true;
+        musicToggle.classList.add('playing');
+        musicToggle.textContent = '🎵';
+      }
+    }
+
+    function openModal(id) {
+      document.getElementById(id).style.display = "block";
+    }
+
+    window.onclick = function (event) {
+      const modals = ["modal1", "modal2", "modal3"];
+      for (let id of modals) {
+        const modal = document.getElementById(id);
+        if (event.target == modal) {
+          modal.style.display = "none";
+          // Stop all audio when modal closes
+          Object.keys(audioPlayers).forEach(modalId => {
+            if (!audioPlayers[modalId].paused) {
+              audioPlayers[modalId].pause();
+              document.getElementById(`playBtn${modalId}`).textContent = '▶️ Play';
+            }
+          });
+        }
+      }
+    };
+
+    function showSavedMessage(messageId) {
+      const msg = document.getElementById(messageId);
+      if (msg) {
+        msg.style.display = 'block';
+        // Add a gentle scroll to the message
+        setTimeout(() => {
+          msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+    }
+
+    // Title click functionality - Small thought bubble
+    function titleClick() {
+      const popup = document.getElementById('titlePopup');
+      
+      if (popup.classList.contains('show')) {
+        popup.classList.remove('show');
+      } else {
+        popup.classList.add('show');
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          popup.classList.remove('show');
+        }, 3000);
+      }
+      
+      // Add a special effect to the title
+      const title = document.querySelector('.title');
+      title.style.transform = 'scale(1.1)';
+      title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
+      
+      setTimeout(() => {
+        title.style.transform = 'scale(1)';
+        title.style.textShadow = '2px 2px 10px rgba(0,0,0,0.3)';
+      }, 300);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+      // Stop all audio when modal closes
+      Object.keys(audioPlayers).forEach(modalId => {
+        if (!audioPlayers[modalId].paused) {
+          audioPlayers[modalId].pause();
+          document.getElementById(`playBtn${modalId}`).textContent = '▶️ Play';
+        }
+      });
+    }
+
+    // Handle background music user interaction requirement
+    document.addEventListener('click', function() {
+      if (!backgroundMusicPlaying && backgroundMusic.paused) {
+        startBackgroundMusic();
+      }
+    }, { once: true });
+  </script>
+</body>
+</html>
