@@ -89,38 +89,210 @@
       50% { opacity: 1; transform: scale(1.2); }
     }
 
-    /* Music Toggle Button */
-    .music-toggle {
+    /* Music Button - Floating Button */
+    .music-button {
       position: fixed;
       top: 20px;
       right: 20px;
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
       width: 60px;
       height: 60px;
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 1000;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 4px 20px rgba(255, 20, 147, 0.4);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .music-button:hover {
+      transform: scale(1.1) rotate(5deg);
+      background: linear-gradient(135deg, #ff1493, #dc143c);
+      box-shadow: 0 8px 30px rgba(255, 20, 147, 0.6);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .music-button:active {
+      transform: scale(0.95);
+    }
+
+    .music-button-icon {
       font-size: 1.5rem;
-    }
-
-    .music-toggle:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
-    }
-
-    .music-toggle.playing {
-      animation: musicPulse 1s ease-in-out infinite;
+      color: white;
+      animation: musicPulse 2s ease-in-out infinite;
     }
 
     @keyframes musicPulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.1); }
+    }
+
+    .music-button.playing .music-button-icon {
+      animation: musicSpin 4s linear infinite;
+    }
+
+    @keyframes musicSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Music Popup */
+    .music-popup {
+      position: fixed;
+      top: 90px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      width: 320px;
+      padding: 25px;
+      z-index: 999;
+      backdrop-filter: blur(20px);
+      transform: translateY(-20px) scale(0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .music-popup.show {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .music-popup::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      right: 30px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 10px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .music-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .close-popup {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .close-popup:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .background-music-selector select {
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid #ff69b4;
+      border-radius: 12px;
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      color: #c71585;
+      cursor: pointer;
+      outline: none;
+      width: 100%;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .background-music-selector select:hover {
+      border-color: #ff1493;
+      box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+    }
+
+    .background-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .bg-control-btn {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bg-control-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .bg-control-btn:hover::before {
+      left: 100%;
+    }
+
+    .bg-control-btn:hover {
+      background: linear-gradient(135deg, #ff1493, #dc143c);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+    }
+
+    .bg-control-btn:disabled {
+      background: linear-gradient(135deg, #ccc, #999);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .bg-control-btn:disabled::before {
+      display: none;
+    }
+
+    .bg-now-playing {
+      color: white;
+      font-size: 0.8rem;
+      font-style: italic;
+      text-align: center;
+      opacity: 0.9;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Background Music */
+    .background-music {
+      display: none;
     }
 
     /* Main Container */
@@ -172,13 +344,6 @@
       opacity: 1;
     }
 
-    .title-popup h3 {
-      color: #c71585;
-      font-size: 1.8rem;
-      margin-bottom: 15px;
-      font-family: cursive;
-    }
-
     .title-popup p {
       color: #b30059;
       font-size: 1.1rem;
@@ -187,47 +352,12 @@
       margin-bottom: 20px;
     }
 
-    .title-popup .close-popup {
-      background: linear-gradient(135deg, #ff69b4, #ff1493);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-
-    .title-popup .close-popup:hover {
-      background: linear-gradient(135deg, #ff1493, #dc143c);
-      transform: translateY(-2px);
-    }
-
-    /* Overlay for popup */
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 5500;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .popup-overlay.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
     @keyframes titleGlow {
       0%, 100% { text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
       50% { text-shadow: 2px 2px 20px rgba(255,255,255,0.5); }
     }
 
-    /* Roses Container - Linear Horizontal Layout */
+    /* Roses Container */
     .roses-container {
       display: flex;
       flex-direction: row;
@@ -272,14 +402,23 @@
       justify-content: center;
     }
 
-    /* Custom Rose Image Styles */
     .rose-image {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
+      border-radius: 15px;
       filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
       animation: roseBloom 4s ease-in-out infinite;
       transition: transform 0.3s ease;
+    }
+
+    .rose-image.emoji {
+      object-fit: contain;
+      font-size: 6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0;
     }
 
     .rose-image:hover {
@@ -422,92 +561,11 @@
       border-radius: 15px;
       border: 3px solid #ff99cc;
       transition: transform 0.3s ease;
+      cursor: pointer;
     }
 
     .photo:hover {
       transform: scale(1.1);
-    }
-
-    .music-controls {
-      text-align: center;
-      margin-top: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-    }
-
-    .music-selector {
-      margin-bottom: 15px;
-    }
-
-    .music-selector select {
-      background: rgba(255, 255, 255, 0.9);
-      border: 2px solid #ff69b4;
-      border-radius: 10px;
-      padding: 8px 15px;
-      font-size: 1rem;
-      color: #c71585;
-      cursor: pointer;
-      outline: none;
-      min-width: 200px;
-    }
-
-    .music-player-controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      align-items: center;
-      margin-top: 15px;
-    }
-
-    .control-btn {
-      background: linear-gradient(135deg, #ff69b4, #ff1493);
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      min-width: 80px;
-    }
-
-    .control-btn:hover {
-      background: linear-gradient(135deg, #ff1493, #dc143c);
-      transform: translateY(-2px);
-    }
-
-    .control-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .now-playing {
-      margin-top: 10px;
-      color: white;
-      font-size: 0.9rem;
-      font-style: italic;
-    }
-
-    .play-btn {
-      background: linear-gradient(135deg, #ff69b4, #ff1493);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-
-    .play-btn:hover {
-      background: linear-gradient(135deg, #ff1493, #dc143c);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
     }
 
     /* Footer */
@@ -527,7 +585,6 @@
       text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
     }
 
-    /* Message Icon in Footer */
     .footer-message-container {
       margin: 20px 0;
       display: flex;
@@ -562,6 +619,17 @@
         flex-direction: column; 
         gap: 30px; 
       }
+      
+      .music-popup {
+        width: 280px;
+        right: 10px;
+      }
+      
+      .music-button {
+        width: 50px;
+        height: 50px;
+        right: 15px;
+      }
     }
   </style>
 </head>
@@ -571,25 +639,49 @@
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-rose">🌹</div>
     <div class="loading-text">
-      Blooming for you...<br>
-      <small>Preparing your garden of love</small>
+      My love letter to...the baddest I know 💜<br>
+      <small>Usiblash sana</small>
     </div>
   </div>
 
   <!-- Hidden Title Popup -->
   <div class="title-popup" id="titlePopup">
-    <p>My heart's garden 💜</p>
+    <p>Remember I used to call you this and you would blash about it.💜😂😌good times at times</p>
+    <p>Into yo like I'm a driller.</p>
   </div>
 
-  <!-- Background Music -->
-  <audio id="backgroundMusic" loop>
+  <!-- Background Music (Keep this exactly where it is) -->
+  <audio id="globalAudio" loop class="background-music" preload="auto">
     <source src="assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
-    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCT2a3vPHdiMF" type="audio/wav">
   </audio>
 
-  <!-- Music Toggle Button -->
-  <div class="music-toggle" id="musicToggle" onclick="toggleBackgroundMusic()">
-    🎵
+  <!-- Music Button -->
+  <div class="music-button" id="musicButton" onclick="toggleMusicPopup()">
+    <div class="music-button-icon">🎵</div>
+  </div>
+
+  <!-- Music Popup -->
+  <div class="music-popup" id="musicPopup">
+    <div class="music-header">
+      <span>🎵 Music Player</span>
+      <button class="close-popup" onclick="toggleMusicPopup()">×</button>
+    </div>
+    <div class="background-music-selector">
+      <select id="globalMusicSelect" onchange="selectGlobalSong(this.value)">
+        <option value="PARTYNEXTDOOR - Dreamin.mp3">Dreamin' - PARTYNEXTDOOR</option>
+        <option value="PARTYNEXTDOOR-TRAUMA">PARTYNEXTDOOR-TRAUMA</option>
+        <option value="song3.mp3">Golden - Jill Scott</option>
+        <option value="song4.mp3">Adorn - Miguel</option>
+        <option value="song5.mp3">Come Through - H.E.R.</option>
+        <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
+        <option value="song7.mp3">Love Galore - SZA</option>
+      </select>
+    </div>
+    <div class="background-controls">
+      <button class="bg-control-btn" id="globalPlayBtn" onclick="toggleGlobalMusic()">▶️ Play</button>
+      <button class="bg-control-btn" onclick="stopGlobalMusic()">⏹️ Stop</button>
+    </div>
+    <div class="bg-now-playing" id="globalNowPlaying">Ready: Dreamin' - PARTYNEXTDOOR</div>
   </div>
 
   <!-- Stars Background -->
@@ -602,7 +694,7 @@
       <!-- Rose 1 -->
       <div class="rose-wrapper" onclick="openModal('modal1')">
         <div class="rose">
-          <img src="assets/images/rose1.png" alt="First Bloom Rose" class="rose-image">
+          <img class="rose-image" id="rose1Image" src="assets/images/rose-unsplash.jpg" alt="Rose 1">
         </div>
         <div class="rose-label">First Bloom</div>
       </div>
@@ -610,7 +702,7 @@
       <!-- Rose 2 -->
       <div class="rose-wrapper" onclick="openModal('modal2')">
         <div class="rose">
-          <img src="assets/images/rose2.png" alt="Heart's Robbed Rose" class="rose-image">
+          <img class="rose-image" id="rose2Image" src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=300&h=400&fit=crop" alt="Rose 2">
         </div>
         <div class="rose-label">Heart's Robbed</div>
       </div>
@@ -618,7 +710,7 @@
       <!-- Rose 3 -->
       <div class="rose-wrapper" onclick="openModal('modal3')">
         <div class="rose">
-          <img src="assets/images/rose3.png" alt="Forever Rose" class="rose-image">
+          <img class="rose-image" id="rose3Image" src="https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=300&h=400&fit=crop" alt="Rose 3">
         </div>
         <div class="rose-label">Forever</div>
       </div>
@@ -631,33 +723,14 @@
     <div class="modal-content">
       <span class="close" onclick="closeModal('modal1')">&times;</span>
       <h2>First Bloom <span class="heart">💕</span></h2>
-      <div class="message">"I think I'm a crack addict.frfr"</div>
+      <div class="message">"I think I'm a crack addict. frfr"</div>
       <button class="add-message-btn" onclick="showSavedMessage('msg1')">💌 Read Message</button>
       <div id="msg1" class="user-message">
         I saw you and I fell—suddenly, endlessly. Hit me too like a truck. Funny you still hit me like a truck no matter what the outcome. That smile on your face makes it easy to trust you. I swear na si mstari I literally skip a beat when I see a photo of you. Anyway nione mbleina tu nikisema izi vitu😂
       </div>
       <div class="photo-container">
-        <img src="assets/images/Crack.jpg" alt="Smile" class="photo">
-        <img src="assets/images/photo2.jpg" alt="Memory" class="photo">
-      </div>
-      <div class="music-controls">
-        <div class="music-selector">
-          <select id="musicSelect1" onchange="selectSong(1, this.value)">
-            <option value="">🎵 Choose a song...</option>
-            <option value="song1.mp3">Dreamin' - PARTYNEXTDOOR</option>
-            <option value="song2.mp3">Best Part - Daniel Caesar</option>
-            <option value="song3.mp3">Golden - Jill Scott</option>
-            <option value="song4.mp3">Adorn - Miguel</option>
-            <option value="song5.mp3">Come Through - H.E.R.</option>
-            <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
-            <option value="song7.mp3">Love Galore - SZA</option>
-          </select>
-        </div>
-        <div class="music-player-controls">
-          <button class="control-btn" id="playBtn1" onclick="togglePlay(1)" disabled>▶️ Play</button>
-          <button class="control-btn" onclick="stopMusic(1)">⏹️ Stop</button>
-        </div>
-        <div class="now-playing" id="nowPlaying1">Select a song to play</div>
+        <img class="photo" src="assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this)">
+        <img class="photo" src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=300&fit=crop" alt="Memory 2" onclick="enlargePhoto(this)">
       </div>
     </div>
   </div>
@@ -666,34 +739,15 @@
   <div id="modal2" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('modal2')">&times;</span>
-      <h2>Heart's Robbed<span class="heart">💖</span></h2>
+      <h2>Heart's Robbed <span class="heart">💖</span></h2>
       <div class="message">"And I don't want it back you can keep it Make it dirty but keep it safe for me."</div>
       <button class="add-message-btn" onclick="showSavedMessage('msg2')">💌 Read Message</button>
       <div id="msg2" class="user-message">
         Can I tell you somethin' Crazy I never thought you'd be my type too since we met at the beginning. Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real kiss I heard was with you. The one you saw on those opera😂
       </div>
       <div class="photo-container">
-        <img src="assets/images/photo3.jpg" alt="Dancing" class="photo">
-        <img src="assets/images/photo4.jpg" alt="Laughs" class="photo">
-      </div>
-      <div class="music-controls">
-        <div class="music-selector">
-          <select id="musicSelect2" onchange="selectSong(2, this.value)">
-            <option value="">🎵 Choose a song...</option>
-            <option value="song1.mp3">Dreamin' - PARTYNEXTDOOR</option>
-            <option value="song2.mp3">Best Part - Daniel Caesar</option>
-            <option value="song3.mp3">Golden - Jill Scott</option>
-            <option value="song4.mp3">Adorn - Miguel</option>
-            <option value="song5.mp3">Come Through - H.E.R.</option>
-            <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
-            <option value="song7.mp3">Love Galore - SZA</option>
-          </select>
-        </div>
-        <div class="music-player-controls">
-          <button class="control-btn" id="playBtn2" onclick="togglePlay(2)" disabled>▶️ Play</button>
-          <button class="control-btn" onclick="stopMusic(2)">⏹️ Stop</button>
-        </div>
-        <div class="now-playing" id="nowPlaying2">Select a song to play</div>
+        <img class="photo" src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?w=300&h=300&fit=crop" alt="Memory 3" onclick="enlargePhoto(this)">
+        <img class="photo" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&h=300&fit=crop" alt="Memory 4" onclick="enlargePhoto(this)">
       </div>
     </div>
   </div>
@@ -709,28 +763,17 @@
         I promise never to hurt or make you feel any type of way. I don't even know if this makes you comfortable. I figured you'd like some of the things I'm good at even though not talking. This is just a taste of what I have in store for you. Forget how you know me. Let me show you some of the other me.
       </div>
       <div class="photo-container">
-        <img src="assets/images/photo5.jpg" alt="Together" class="photo">
-        <img src="assets/images/photo6.jpg" alt="Future" class="photo">
+        <img class="photo" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" alt="Memory 5" onclick="enlargePhoto(this)">
+        <img class="photo" src="https://images.unsplash.com/photo-1494790108755-2616c0763c65?w=300&h=300&fit=crop" alt="Memory 6" onclick="enlargePhoto(this)">
       </div>
-      <div class="music-controls">
-        <div class="music-selector">
-          <select id="musicSelect3" onchange="selectSong(3, this.value)">
-            <option value="">🎵 Choose a song...</option>
-            <option value="song1.mp3">Dreamin' - PARTYNEXTDOOR</option>
-            <option value="song2.mp3">Best Part - Daniel Caesar</option>
-            <option value="song3.mp3">Golden - Jill Scott</option>
-            <option value="song4.mp3">Adorn - Miguel</option>
-            <option value="song5.mp3">Come Through - H.E.R.</option>
-            <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
-            <option value="song7.mp3">Love Galore - SZA</option>
-          </select>
-        </div>
-        <div class="music-player-controls">
-          <button class="control-btn" id="playBtn3" onclick="togglePlay(3)" disabled>▶️ Play</button>
-          <button class="control-btn" onclick="stopMusic(3)">⏹️ Stop</button>
-        </div>
-        <div class="now-playing" id="nowPlaying3">Select a song to play</div>
-      </div>
+    </div>
+  </div>
+
+  <!-- Photo Enlargement Modal -->
+  <div id="photoModal" class="modal">
+    <div class="modal-content" style="max-width: 80%; text-align: center;">
+      <span class="close" onclick="closeModal('photoModal')">&times;</span>
+      <img id="enlargedPhoto" style="max-width: 100%; max-height: 70vh; border-radius: 15px; margin-top: 20px;">
     </div>
   </div>
 
@@ -745,100 +788,163 @@
     <div id="msg4" class="user-message">
       I need you so much. I want you to get that bad. I'm no Drake nor PND but sure I can rock you. Give me the location. I learnt a thing or two since we met.😎
       I don't even know if I'm doing corny things here or if you'll even like it. Honestly if you like I don't mind looking like a geek.
+      But I also feel this would have been sugar melon sweet if it was in better terms😅
+      <p> <big>I just pressed the big red button😂</big></p>
+      <p> Damn that big read button😖memories😌 Damn that big red button Started all dat. Couldnt resist I'm sorry. But who wouldnt, remember I asked what the fuk why does it taste like strawberrry pinapple punch😔Damn that
+      big red button.</p>
+      <p> Was gonna put it in a diamond pendant or somthin' I aint rich though, if you choose this a yelloe diamond dagger will get</p>
     </div>
   </footer>
 
-  <audio id="roseAudio1" preload="auto"></audio>
-  <audio id="roseAudio2" preload="auto"></audio>
-  <audio id="roseAudio3" preload="auto"></audio>
-
   <script>
-    const backgroundMusic = document.getElementById("backgroundMusic");
-    const musicToggle = document.getElementById("musicToggle");
-    let backgroundMusicPlaying = false;
+    const globalAudio = document.getElementById("globalAudio");
+    const musicButton = document.getElementById("musicButton");
+    const musicPopup = document.getElementById("musicPopup");
+    let musicPopupVisible = false;
+    let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
 
-    // Individual audio players for each modal
-    const audioPlayers = {
-      1: document.getElementById("roseAudio1"),
-      2: document.getElementById("roseAudio2"),
-      3: document.getElementById("roseAudio3")
-    };
-
-    let currentlyPlaying = {};
-
-    // Song selection
-    function selectSong(modalId, songFile) {
-      if (songFile) {
-        audioPlayers[modalId].src = `assets/audio/${songFile}`;
-        audioPlayers[modalId].volume = 0.6;
-        document.getElementById(`playBtn${modalId}`).disabled = false;
-        document.getElementById(`nowPlaying${modalId}`).textContent = `Ready: ${songFile.replace('.mp3', '')}`;
-      } else {
-        document.getElementById(`playBtn${modalId}`).disabled = true;
-        document.getElementById(`nowPlaying${modalId}`).textContent = 'Select a song to play';
-      }
-    }
-
-    // Toggle play/pause
-    function togglePlay(modalId) {
-      const audio = audioPlayers[modalId];
-      const playBtn = document.getElementById(`playBtn${modalId}`);
-      const nowPlaying = document.getElementById(`nowPlaying${modalId}`);
-      
-      if (audio.paused) {
-        // Stop other playing audio
-        Object.keys(audioPlayers).forEach(id => {
-          if (id != modalId && !audioPlayers[id].paused) {
-            audioPlayers[id].pause();
-            document.getElementById(`playBtn${id}`).textContent = '▶️ Play';
-          }
-        });
-        
-        audio.play();
-        playBtn.textContent = '⏸️ Pause';
-        nowPlaying.textContent = `Now playing: ${audio.src.split('/').pop().replace('.mp3', '')}`;
-        currentlyPlaying[modalId] = true;
-      } else {
-        audio.pause();
-        playBtn.textContent = '▶️ Play';
-        nowPlaying.textContent = `Paused: ${audio.src.split('/').pop().replace('.mp3', '')}`;
-        currentlyPlaying[modalId] = false;
-      }
-    }
-
-    // Stop music
-    function stopMusic(modalId) {
-      const audio = audioPlayers[modalId];
-      const playBtn = document.getElementById(`playBtn${modalId}`);
-      const nowPlaying = document.getElementById(`nowPlaying${modalId}`);
-      
-      audio.pause();
-      audio.currentTime = 0;
-      playBtn.textContent = '▶️ Play';
-      nowPlaying.textContent = `Stopped: ${audio.src.split('/').pop().replace('.mp3', '')}`;
-      currentlyPlaying[modalId] = false;
-    }
-
-    // Auto-update button text when song ends
-    Object.keys(audioPlayers).forEach(modalId => {
-      audioPlayers[modalId].addEventListener('ended', () => {
-        document.getElementById(`playBtn${modalId}`).textContent = '▶️ Play';
-        document.getElementById(`nowPlaying${modalId}`).textContent = `Finished: ${audioPlayers[modalId].src.split('/').pop().replace('.mp3', '')}`;
-        currentlyPlaying[modalId] = false;
-      });
-    });
-
-    // Loading Screen Animation
+    // Initialize audio on page load
     window.addEventListener('load', function() {
+      // Set up audio properties
+      globalAudio.volume = 0.4;
+      globalAudio.loop = true;
+      
+      // Start loading screen
       setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('fade-out');
         setTimeout(() => {
           document.getElementById('loadingScreen').style.display = 'none';
           initializeBackground();
-          // Auto-start background music after loading
-          setTimeout(startBackgroundMusic, 1000);
+          // Try to auto-play music after loading screen
+          startAutoPlay();
         }, 1000);
       }, 2000);
+    });
+
+    // Auto-play function
+    function startAutoPlay() {
+      // Try to play automatically
+      globalAudio.play().then(() => {
+        // Success - music is playing
+        musicButton.classList.add('playing');
+        document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+        document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+      }).catch(error => {
+        // Auto-play failed (most browsers block auto-play)
+        console.log('Auto-play failed, user interaction required:', error);
+        document.getElementById('globalNowPlaying').textContent = 'Click play to start music';
+      });
+    }
+
+    // Get display name for song
+    function getSongDisplayName(songFile) {
+      const songNames = {
+        'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
+        'song2.mp3': 'PARTYNEXTDOOR-TRAUMA',
+        'song3.mp3': 'Golden - Jill Scott',
+        'song4.mp3': 'Adorn - Miguel',
+        'song5.mp3': 'Come Through - H.E.R.',
+        'song6.mp3': 'Stay Ready - Jhené Aiko',
+        'song7.mp3': 'Love Galore - SZA'
+      };
+      return songNames[songFile] || songFile.replace('.mp3', '');
+    }
+
+    // Music popup toggle
+    function toggleMusicPopup() {
+      musicPopupVisible = !musicPopupVisible;
+      if (musicPopupVisible) {
+        musicPopup.classList.add('show');
+      } else {
+        musicPopup.classList.remove('show');
+      }
+    }
+
+    // Close popup when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!musicButton.contains(event.target) && !musicPopup.contains(event.target)) {
+        musicPopup.classList.remove('show');
+        musicPopupVisible = false;
+      }
+    });
+
+    // Global music functions
+    function selectGlobalSong(songFile) {
+      if (songFile) {
+        const wasPlaying = !globalAudio.paused;
+        
+        globalAudio.src = `assets/audio/${songFile}`;
+        globalAudio.volume = 0.4;
+        currentSong = songFile;
+        
+        if (wasPlaying) {
+          globalAudio.play().then(() => {
+            document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(songFile)}`;
+            musicButton.classList.add('playing');
+            document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+          }).catch(error => {
+            console.log('Failed to play new song:', error);
+            musicButton.classList.remove('playing');
+            document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+            document.getElementById('globalNowPlaying').textContent = `Failed to load: ${getSongDisplayName(songFile)}`;
+          });
+        } else {
+          document.getElementById('globalNowPlaying').textContent = `Ready: ${getSongDisplayName(songFile)}`;
+        }
+      }
+    }
+
+    function toggleGlobalMusic() {
+      if (globalAudio.paused) {
+        // Try to play
+        globalAudio.play().then(() => {
+          musicButton.classList.add('playing');
+          document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+          document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+        }).catch(error => {
+          console.log('Music play failed:', error);
+          document.getElementById('globalNowPlaying').textContent = `Error: Could not play ${getSongDisplayName(currentSong)}`;
+        });
+      } else {
+        // Pause the music
+        globalAudio.pause();
+        musicButton.classList.remove('playing');
+        document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+        document.getElementById('globalNowPlaying').textContent = `Paused: ${getSongDisplayName(currentSong)}`;
+      }
+    }
+
+    function stopGlobalMusic() {
+      globalAudio.pause();
+      globalAudio.currentTime = 0;
+      musicButton.classList.remove('playing');
+      document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+      document.getElementById('globalNowPlaying').textContent = `Stopped: ${getSongDisplayName(currentSong)}`;
+    }
+
+    // Handle music ended event
+    globalAudio.addEventListener('ended', () => {
+      musicButton.classList.remove('playing');
+      document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+      document.getElementById('globalNowPlaying').textContent = `Finished: ${getSongDisplayName(currentSong)}`;
+    });
+
+    // Handle audio loading events
+    globalAudio.addEventListener('loadstart', () => {
+      document.getElementById('globalNowPlaying').textContent = 'Loading...';
+    });
+
+    globalAudio.addEventListener('canplaythrough', () => {
+      if (globalAudio.paused) {
+        document.getElementById('globalNowPlaying').textContent = `Ready: ${getSongDisplayName(currentSong)}`;
+      }
+    });
+
+    globalAudio.addEventListener('error', (e) => {
+      console.log('Audio error:', e);
+      document.getElementById('globalNowPlaying').textContent = `Error loading: ${getSongDisplayName(currentSong)}`;
+      musicButton.classList.remove('playing');
+      document.getElementById('globalPlayBtn').textContent = '▶️ Play';
     });
 
     // Initialize background elements
@@ -860,52 +966,28 @@
       }
     }
 
-    // Background music controls
-    function startBackgroundMusic() {
-      backgroundMusic.volume = 0.3;
-      const playPromise = backgroundMusic.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          backgroundMusicPlaying = true;
-          musicToggle.classList.add('playing');
-        }).catch(error => {
-          console.log('Auto-play prevented by browser');
-        });
-      }
-    }
-
-    function toggleBackgroundMusic() {
-      if (backgroundMusicPlaying) {
-        backgroundMusic.pause();
-        backgroundMusicPlaying = false;
-        musicToggle.classList.remove('playing');
-        musicToggle.textContent = '🔇';
-      } else {
-        backgroundMusic.play();
-        backgroundMusicPlaying = true;
-        musicToggle.classList.add('playing');
-        musicToggle.textContent = '🎵';
-      }
+    // Photo enlargement function
+    function enlargePhoto(img) {
+      const modal = document.getElementById('photoModal');
+      const enlargedPhoto = document.getElementById('enlargedPhoto');
+      enlargedPhoto.src = img.src;
+      modal.style.display = 'block';
     }
 
     function openModal(id) {
       document.getElementById(id).style.display = "block";
     }
 
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
     window.onclick = function (event) {
-      const modals = ["modal1", "modal2", "modal3"];
+      const modals = ["modal1", "modal2", "modal3", "photoModal"];
       for (let id of modals) {
         const modal = document.getElementById(id);
         if (event.target == modal) {
           modal.style.display = "none";
-          // Stop all audio when modal closes
-          Object.keys(audioPlayers).forEach(modalId => {
-            if (!audioPlayers[modalId].paused) {
-              audioPlayers[modalId].pause();
-              document.getElementById(`playBtn${modalId}`).textContent = '▶️ Play';
-            }
-          });
         }
       }
     };
@@ -946,23 +1028,12 @@
       }, 300);
     }
 
-    function closeModal(id) {
-      document.getElementById(id).style.display = "none";
-      // Stop all audio when modal closes
-      Object.keys(audioPlayers).forEach(modalId => {
-        if (!audioPlayers[modalId].paused) {
-          audioPlayers[modalId].pause();
-          document.getElementById(`playBtn${modalId}`).textContent = '▶️ Play';
-        }
-      });
-    }
-
-    // Handle background music user interaction requirement
-    document.addEventListener('click', function() {
-      if (!backgroundMusicPlaying && backgroundMusic.paused) {
-        startBackgroundMusic();
-      }
-    }, { once: true });
+    // Initialize audio when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      globalAudio.volume = 0.4;
+      globalAudio.loop = true;
+    });
   </script>
+
 </body>
 </html>

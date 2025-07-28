@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Two Roses - Landing</title>
+  <title>Two Roses - Choose Your Path</title>
   <style>
     * {
       margin: 0;
@@ -15,6 +15,7 @@
       height: 100vh;
       overflow: hidden;
       font-family: 'Georgia', serif;
+      background: #000;
     }
 
     .container {
@@ -32,77 +33,111 @@
       position: relative;
       transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       cursor: pointer;
+      overflow: hidden;
     }
 
     .left-side {
-      background: linear-gradient(135deg, #6a0dad 0%, #9370db 50%, #dda0dd 100%);
-      overflow: hidden;
+      background: linear-gradient(135deg, #4a0e4e 0%, #6a0dad 30%, #9370db 70%, #dda0dd 100%);
+      box-shadow: inset 0 0 100px rgba(138, 43, 226, 0.3);
     }
 
     .right-side {
-      background: linear-gradient(135deg, #8b0000 0%, #dc143c 50%, #2f0000 100%);
-      overflow: hidden;
+      background: linear-gradient(135deg, #2f0000 0%, #8b0000 30%, #dc143c 70%, #4a0000 100%);
+      box-shadow: inset 0 0 100px rgba(139, 0, 0, 0.3);
     }
 
     .side:hover {
-      flex: 1.2;
+      flex: 1.3;
+      filter: brightness(1.2) saturate(1.2);
+    }
+
+    .side:not(:hover) {
+      filter: brightness(0.8) saturate(0.8);
     }
 
     .rose-container {
       z-index: 2;
+      transform: translateY(0);
+      transition: all 0.5s ease;
+    }
+
+    .side:hover .rose-container {
+      transform: translateY(-20px);
     }
 
     .rose {
       font-size: 8rem;
-      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
-      transition: transform 0.5s ease;
+      filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.5));
+      transition: all 0.5s ease;
+      text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
     }
 
     .side:hover .rose {
-      transform: scale(1.1) rotate(5deg);
-      filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.4));
+      transform: scale(1.2) rotate(8deg);
+      filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.6));
+      animation: rosePulse 2s infinite ease-in-out;
+    }
+
+    @keyframes rosePulse {
+      0%, 100% { text-shadow: 0 0 40px rgba(255, 255, 255, 0.3); }
+      50% { text-shadow: 0 0 60px rgba(255, 255, 255, 0.6); }
     }
 
     .text {
       margin-top: 2rem;
       text-align: center;
       color: white;
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 300;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       opacity: 0.9;
-      transition: all 0.3s ease;
+      transition: all 0.5s ease;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
 
     .side:hover .text {
       opacity: 1;
-      transform: translateY(-5px);
+      transform: translateY(-10px);
+      font-size: 2.2rem;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
     }
 
     .subtitle {
       margin-top: 1rem;
-      font-size: 1rem;
+      font-size: 1.1rem;
       opacity: 0.7;
       font-style: italic;
+      transition: all 0.3s ease;
+    }
+
+    .side:hover .subtitle {
+      opacity: 1;
+      transform: translateY(-5px);
     }
 
     .divider {
       position: absolute;
       left: 50%;
-      top: 0;
-      width: 2px;
-      height: 100%;
-      background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+      top: 10%;
+      width: 3px;
+      height: 80%;
+      background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(255,255,255,0.2) 20%, 
+        rgba(255,255,255,0.6) 50%, 
+        rgba(255,255,255,0.2) 80%, 
+        transparent 100%);
       transform: translateX(-50%);
       z-index: 3;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
     .glow {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 200px;
-      height: 200px;
+      width: 300px;
+      height: 300px;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -110,22 +145,22 @@
     }
 
     .left-side .glow {
-      background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, transparent 70%);
-      animation: pulse 3s infinite ease-in-out;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.4) 0%, rgba(147, 112, 219, 0.2) 50%, transparent 70%);
+      animation: pulse 4s infinite ease-in-out;
     }
 
     .right-side .glow {
-      background: radial-gradient(circle, rgba(139, 0, 0, 0.3) 0%, transparent 70%);
-      animation: pulse 3s infinite ease-in-out reverse;
+      background: radial-gradient(circle, rgba(139, 0, 0, 0.4) 0%, rgba(220, 20, 60, 0.2) 50%, transparent 70%);
+      animation: pulse 4s infinite ease-in-out reverse;
     }
 
     @keyframes pulse {
       0%, 100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.4;
       }
       50% {
-        transform: translate(-50%, -50%) scale(1.1);
+        transform: translate(-50%, -50%) scale(1.2);
         opacity: 0.8;
       }
     }
@@ -135,48 +170,96 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 3rem;
-      color: rgba(255, 255, 255, 0.8);
+      font-size: 4rem;
+      color: rgba(255, 255, 255, 0.9);
       z-index: 4;
-      animation: fadeInOut 4s infinite ease-in-out;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      animation: fadeInOut 5s infinite ease-in-out;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+      font-weight: bold;
     }
 
     @keyframes fadeInOut {
       0%, 100% {
-        opacity: 0.3;
-        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(0.8) rotate(-5deg);
       }
       50% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
+        transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
       }
     }
 
     .petal {
       position: absolute;
-      width: 10px;
-      height: 15px;
+      width: 12px;
+      height: 18px;
       border-radius: 50% 0 50% 0;
-      animation: float 6s infinite ease-in-out;
+      animation: float 8s infinite ease-in-out;
       pointer-events: none;
+      opacity: 0.7;
     }
 
     .left-side .petal {
-      background: rgba(138, 43, 226, 0.3);
+      background: linear-gradient(45deg, rgba(138, 43, 226, 0.6), rgba(221, 160, 221, 0.4));
+      box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
     }
 
     .right-side .petal {
-      background: rgba(139, 0, 0, 0.3);
+      background: linear-gradient(45deg, rgba(139, 0, 0, 0.6), rgba(220, 20, 60, 0.4));
+      box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
     }
 
     @keyframes float {
-      0%, 100% {
+      0% {
         transform: translateY(100vh) rotate(0deg);
         opacity: 0;
       }
-      10%, 90% {
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .click-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1rem;
+      font-style: italic;
+      z-index: 5;
+      animation: hintPulse 3s infinite ease-in-out;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    .side.clicking {
+      transform: scale(1.05);
+      filter: brightness(1.5) saturate(1.5);
+    }
+
+    @keyframes sparkleFloat {
+      0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5) rotate(0deg);
+      }
+      50% {
         opacity: 1;
+        transform: translateY(-30px) scale(1) rotate(180deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.8) rotate(360deg);
       }
     }
 
@@ -187,22 +270,7 @@
       }
       100% {
         opacity: 0;
-        transform: translateY(100px) rotate(360deg) scale(0.3);
-      }
-    }
-
-    @keyframes sparkleFloat {
-      0% {
-        opacity: 0;
-        transform: translateY(0) scale(0.5);
-      }
-      50% {
-        opacity: 1;
-        transform: translateY(-20px) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-40px) scale(0.8);
+        transform: translateY(120px) rotate(720deg) scale(0.2);
       }
     }
 
@@ -212,23 +280,32 @@
       }
       .divider {
         top: 50%;
-        left: 0;
-        width: 100%;
-        height: 2px;
+        left: 10%;
+        width: 80%;
+        height: 3px;
         transform: translateY(-50%);
+      }
+      .rose {
+        font-size: 6rem;
+      }
+      .text {
+        font-size: 1.5rem;
+      }
+      .question-mark {
+        font-size: 3rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="side left-side" onclick="navigateToGarden()">
+    <div class="side left-side" onclick="navigateToGarden()" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
       <div class="glow"></div>
       <div class="rose-container">
         <div class="rose">🌹</div>
         <div class="text">
           HOPE
-          <div class="subtitle">Blooming with possibility</div>
+          <div class="subtitle">Blooming endlessly</div>
         </div>
       </div>
     </div>
@@ -236,94 +313,123 @@
     <div class="divider"></div>
     <div class="question-mark">?</div>
 
-    <div class="side right-side" onclick="navigateToDoubt()">
+    <div class="side right-side" onclick="navigateToDoubt()" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
       <div class="glow"></div>
       <div class="rose-container">
         <div class="rose">🥀</div>
         <div class="text">
           DOUBT
-          <div class="subtitle">Withering in uncertainty</div>
         </div>
       </div>
     </div>
+
+    <div class="click-hint">Pick my Queen</div>
   </div>
 
   <script>
+    let petalInterval;
+    let isPaused = false;
+
     function createPetal(side) {
+      if (isPaused) return;
+      
       const petal = document.createElement('div');
       petal.classList.add('petal');
       petal.style.left = Math.random() * 100 + '%';
-      petal.style.animationDelay = Math.random() * 6 + 's';
-      petal.style.animationDuration = (Math.random() * 3 + 4) + 's';
+      petal.style.animationDelay = Math.random() * 2 + 's';
+      petal.style.animationDuration = (Math.random() * 4 + 6) + 's';
       side.appendChild(petal);
 
       setTimeout(() => {
         if (petal.parentNode) {
           petal.remove();
         }
-      }, 8000);
+      }, 10000);
+    }
+
+    function pausePetals() {
+      isPaused = true;
+    }
+
+    function resumePetals() {
+      isPaused = false;
     }
 
     function createSparkleTransition() {
-      for (let i = 0; i < 15; i++) {
+      const sparkleEmojis = ['✨', '⭐', '💘', '💜', '💖'];
+      for (let i = 0; i < 20; i++) {
         setTimeout(() => {
           const sparkle = document.createElement('div');
-          sparkle.innerHTML = '✨';
+          sparkle.innerHTML = sparkleEmojis[Math.floor(Math.random() * sparkleEmojis.length)];
           sparkle.style.position = 'absolute';
-          sparkle.style.left = Math.random() * 50 + '%';
+          sparkle.style.left = Math.random() * 100 + '%';
           sparkle.style.top = Math.random() * 100 + '%';
-          sparkle.style.fontSize = '2rem';
+          sparkle.style.fontSize = (Math.random() * 1.5 + 1.5) + 'rem';
           sparkle.style.zIndex = '10';
           sparkle.style.pointerEvents = 'none';
-          sparkle.style.animation = 'sparkleFloat 0.8s ease-out forwards';
+          sparkle.style.animation = 'sparkleFloat 1.2s ease-out forwards';
           document.querySelector('.left-side').appendChild(sparkle);
-          setTimeout(() => sparkle.remove(), 800);
-        }, i * 50);
+          setTimeout(() => sparkle.remove(), 1200);
+        }, i * 60);
       }
     }
 
     function createBreakingHeartTransition() {
-      const heartPieces = ['💔', '🖤', '⚫', '💀'];
-      for (let i = 0; i < 20; i++) {
+      const darkEmojis = ['💔', '🖤', '⚫', '💀', '🥀', '⛈️'];
+      for (let i = 0; i < 25; i++) {
         setTimeout(() => {
           const piece = document.createElement('div');
-          piece.innerHTML = heartPieces[Math.floor(Math.random() * heartPieces.length)];
+          piece.innerHTML = darkEmojis[Math.floor(Math.random() * darkEmojis.length)];
           piece.style.position = 'absolute';
-          piece.style.left = Math.random() * 50 + '%';
+          piece.style.left = Math.random() * 100 + '%';
           piece.style.top = Math.random() * 100 + '%';
-          piece.style.fontSize = '1.5rem';
+          piece.style.fontSize = (Math.random() * 1 + 1.2) + 'rem';
           piece.style.zIndex = '10';
           piece.style.pointerEvents = 'none';
-          piece.style.animation = 'breakingFall 1s ease-in forwards';
+          piece.style.animation = 'breakingFall 1.5s ease-in forwards';
           document.querySelector('.right-side').appendChild(piece);
-          setTimeout(() => piece.remove(), 1000);
-        }, i * 40);
+          setTimeout(() => piece.remove(), 1500);
+        }, i * 50);
       }
     }
 
     function navigateToGarden() {
-      document.querySelector('.left-side').style.transform = 'scale(1.1)';
-      document.querySelector('.left-side').style.filter = 'brightness(1.2)';
+      const leftSide = document.querySelector('.left-side');
+      leftSide.classList.add('clicking');
       createSparkleTransition();
+      
       setTimeout(() => {
         window.location.href = 'hope.html';
-      }, 800);
+      }, 1200);
     }
 
     function navigateToDoubt() {
-      document.querySelector('.right-side').style.transform = 'scale(1.1)';
-      document.querySelector('.right-side').style.filter = 'brightness(0.8)';
+      const rightSide = document.querySelector('.right-side');
+      rightSide.classList.add('clicking');
       createBreakingHeartTransition();
+      
       setTimeout(() => {
         window.location.href = 'doubt.html';
-      }, 1000);
+      }, 1500);
     }
 
+    // Initialize petal animation
     const leftSide = document.querySelector('.left-side');
     const rightSide = document.querySelector('.right-side');
-    setInterval(() => {
+    
+    petalInterval = setInterval(() => {
       createPetal(leftSide);
       createPetal(rightSide);
+    }, 1200);
+
+    // Add some initial petals
+    setTimeout(() => {
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          createPetal(leftSide);
+          createPetal(rightSide);
+        }, i * 200);
+      }
     }, 1000);
   </script>
 </body>

@@ -164,6 +164,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(5px);
+            overflow: hidden;
         }
 
         .image-frame:hover {
@@ -171,6 +172,25 @@
             background: rgba(255, 23, 68, 0.1);
             transform: scale(1.05);
             box-shadow: 0 0 30px rgba(255, 23, 68, 0.5);
+        }
+
+        .image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .image-frame .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .image-frame.has-image .placeholder {
+            display: none;
         }
 
         @keyframes frameFloat {
@@ -267,6 +287,158 @@
             box-shadow: 0 0 20px rgba(255, 23, 68, 0.5);
         }
 
+        .message-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 23, 68, 0.8);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: messageGlow 2s ease-in-out infinite;
+        }
+
+        .message-icon:hover {
+            background: rgba(255, 23, 68, 1);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 23, 68, 0.7);
+        }
+
+        @keyframes messageGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 23, 68, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(255, 23, 68, 0.9);
+            }
+        }
+
+        .message-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            padding: 20px;
+        }
+
+        .message-content {
+            background: linear-gradient(135deg, #1a0000, #8b0000);
+            border: 3px solid #ff1744;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            position: relative;
+            animation: messageAppear 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @keyframes messageAppear {
+            0% {
+                transform: scale(0.3) rotate(10deg);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .message-header {
+            padding: 30px 40px 0 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .message-header h2 {
+            color: #ff1744;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 23, 68, 0.5);
+        }
+
+        .message-body {
+            padding: 0 40px 40px 40px;
+            overflow-y: auto;
+            flex: 1;
+            scrollbar-width: thin;
+            scrollbar-color: #ff1744 rgba(139, 0, 0, 0.3);
+        }
+
+        .message-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .message-body::-webkit-scrollbar-track {
+            background: rgba(139, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .message-body::-webkit-scrollbar-thumb {
+            background: #ff1744;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+        }
+
+        .message-body::-webkit-scrollbar-thumb:hover {
+            background: #ff0040;
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.8);
+        }
+
+        .message-body p {
+            color: white;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        .message-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .close-message {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ff1744;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .close-message:hover {
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .file-input {
+            display: none;
+        }
+
         .glitch {
             animation: glitch 2s ease-in-out infinite;
         }
@@ -293,8 +465,6 @@
                 filter: hue-rotate(360deg);
             }
         }
-
-
 
         .audio-status {
             position: absolute;
@@ -337,19 +507,55 @@
                 height: 60px;
                 font-size: 1.5rem;
             }
+            .message-content {
+                max-height: 85vh;
+                margin: 10px;
+            }
+            .message-header {
+                padding: 20px 20px 0 20px;
+            }
+            .message-header h2 {
+                font-size: 1.5rem;
+            }
+            .message-body {
+                padding: 0 20px 20px 20px;
+            }
+            .message-body p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .message-modal {
+                padding: 10px;
+            }
+            .message-content {
+                max-height: 90vh;
+            }
+            .message-header {
+                padding: 15px 15px 0 15px;
+            }
+            .message-header h2 {
+                font-size: 1.3rem;
+            }
+            .message-body {
+                padding: 0 15px 15px 15px;
+            }
+            .message-body p {
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Audio elements -->
     <audio id="mainHeartAudio" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
-        <!-- Fallback audio -->
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCT2a3vPHdiMFl8wD3LtZDAhqkuc4gk9zVcb7Tr8CG0Nc1D7P1eP5EAi1JTCNNPgdBj+v3/zCeiEEL4DS89o1HUBGDLTt3sL4ECa3eQE4FnD0fCAFBKDM1c2a2/9Y" type="audio/wav">
+        <source src="/assets/audio/PARTYNEXTDOOR - You ve Been Missed [Official Audio].mp3" type="audio/wav">
     </audio>
 
     <audio id="musicAudio1" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+        <source src="/assets/audio/PARTYNEXTDOOR - TRAUMA (Official Audio).mp3" type="audio/wav">
     </audio>
 
     <audio id="musicAudio2" preload="auto">
@@ -364,11 +570,17 @@
         <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
     </audio>
 
+    <!-- Hidden file inputs for photo uploads -->
+    <input type="file" id="fileInput1" class="file-input" accept="image/*" onchange="handleImageUpload(1, this)">
+    <input type="file" id="fileInput2" class="file-input" accept="image/*" onchange="handleImageUpload(2, this)">
+    <input type="file" id="fileInput3" class="file-input" accept="image/*" onchange="handleImageUpload(3, this)">
+    <input type="file" id="fileInput4" class="file-input" accept="image/*" onchange="handleImageUpload(4, this)">
+    <input type="file" id="fileInput5" class="file-input" accept="image/*" onchange="handleImageUpload(5, this)">
+
     <div class="chaos-container">
         <button class="back-button" onclick="goBack()">← Back to Choice</button>
+        <button class="message-icon" onclick="showMessage()">💌</button>
         
-
-
         <!-- Main broken heart -->
         <div class="broken-heart main-heart" onclick="playMainMusic()" id="mainHeart">💔</div>
         
@@ -399,21 +611,36 @@
             "Dreaming of your smile"
         </div>
         
-        <!-- Image placeholders scattered chaotically -->
-        <div class="image-frame" style="top: 5%; right: 25%; animation-delay: -1s;" onclick="showImagePrompt(1)">
-            📸<br>Memory of you<br>Click to add
+        <!-- Image frames with your pre-uploaded photos -->
+        <div class="image-frame" style="top: 5%; right: 25%; animation-delay: -1s;" id="imageFrame1">
+            <img src="assets/images/memory1.jpg" alt="Memory of us" onerror="showPlaceholder(1)">
+            <div class="placeholder" style="display: none;">
+                📸<br>Memory of you<br>Add photo as:<br>assets/images/memory1.jpg
+            </div>
         </div>
-        <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" onclick="showImagePrompt(2)">
-            📷<br>Our moment<br>Click to add
+        <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
+            <img src="assets/images/memory2.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
+            <div class="placeholder" style="display: none;">
+                📷<br>Our moment<br>Add photo as:<br>assets/images/memory2.jpg
+            </div>
         </div>
-        <div class="image-frame" style="top: 45%; right: 5%; animation-delay: -2s;" onclick="showImagePrompt(3)">
-            🖼️<br>Missing this<br>Click to add
+        <div class="image-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
+            <img src="assets/images/memory3.jpg" alt="Missing this" onerror="showPlaceholder(3)">
+            <div class="placeholder" style="display: none;">
+                🖼️<br>Missing this<br>Add photo as:<br>assets/images/memory3.jpg
+            </div>
         </div>
-        <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" onclick="showImagePrompt(4)">
-            📸<br>Your beauty<br>Click to add
+        <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
+            <img src="assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
+            <div class="placeholder" style="display: none;">
+                📸<br>Your beauty<br>Add photo as:<br>assets/images/memory4.jpg
+            </div>
         </div>
-        <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" onclick="showImagePrompt(5)">
-            📷<br>Lonely times<br>Click to add
+        <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
+            <img src="assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
+            <div class="placeholder" style="display: none;">
+                📷<br>Lonely times<br>Add photo as:<br>assets/images/memory5.jpg
+            </div>
         </div>
         
         <!-- Music chaos buttons -->
@@ -423,6 +650,66 @@
         <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" onclick="playMusic(4)" id="musicBtn4">🎧</div>
         
         <div class="audio-status" id="audioStatus">🎵 Now Playing...</div>
+    </div>
+
+    <!-- Message Modal -->
+    <div class="message-modal" id="messageModal">
+        <div class="message-content">
+            <button class="close-message" onclick="hideMessage()">&times;</button>
+            <div class="message-header">
+                <h2>💔 From My Heart to Yours 💔</h2>
+            </div>
+            <div class="message-body">
+                <p>
+                    I wonder if you think 'what if it could have worked out like I do'
+                </p>
+                <p>
+                    Do you miss what we had? Do you miss us?
+                </p>
+                <p>
+                    I know I messed up. Cool who doesn't at times but trust me I know why. Nita admit vizuri One day trust. But trust I've always been into you
+                </p>
+                <p>
+                    Nothing is a coincidence. From the start us meeting to... it was all there I hear you say I ain't ur type
+                </p>
+                <p>
+                    Cool and all but know this If its nothing you see I cant change or be its e8it for you to act the way you do
+                </p>
+                <p>
+                    Not a quitter though. I'll wait. I gotta million reasons why we are the perfect match. I saw that when I saw you helping those kids
+                </p>
+                <p>
+                    I'm already dead over you for that uniqueness. I'll collapse each day in my thoughts if I lose you. Just know that.
+                </p>
+                <p>
+                    I promise you I will give it my all. I take mine every seriously and I know you do too. I can see that
+                </p>
+                <p>
+                    And I can't stop hoping that maybe, just maybe, there's still a chance for us.
+                </p>
+                <p>
+                    <strong>I need you</strong>
+                </p>
+                
+                <p>
+                    I'm not asking for an answer right now. I'm just asking you to know although you know I'm cracked might collapse anytime take your time but you know👾
+                </p>
+                <p>
+                    Also we all got a free mind you know. But rarely does anything we think of happens. We hope. I heard you the first time not with me. But just what if? we can be friends I really dont mind.
+                </p>
+                <strong>I still got a million thimgs I wanna tell and experience with you.</strong>
+                <p>But its really your choice if we wanna date. It was never mine
+                </p>
+                <p>
+                    This might be the dumbest things I might have done😂 Go easy on me ok.
+                    I was learning from you. I've been striding for to long I thought you might the perfect one.
+                </p>
+                <strong>But I know you are the one</strong>
+                <p>
+                    Na tafathali hii si group project.
+                </p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -451,7 +738,27 @@
         // Go back to landing page
         function goBack() {
             stopAllAudio();
-            window.location.href = './index.html';
+            window.location.href = 'index.html';
+        }
+
+        // Show message modal
+        function showMessage() {
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+
+        // Hide message modal
+        function hideMessage() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        // Show placeholder if image fails to load
+        function showPlaceholder(num) {
+            const frame = document.getElementById(`imageFrame${num}`);
+            const img = frame.querySelector('img');
+            const placeholder = frame.querySelector('.placeholder');
+            
+            if (img) img.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'flex';
         }
 
         // Stop all audio
@@ -581,7 +888,7 @@
             const audioElement = document.getElementById(`musicAudio${num}`);
             const buttonElement = document.getElementById(`musicBtn${num}`);
             const titles = [
-                "Someone Like You - Adele",
+                "TRAUMA - PARTYNEXTDOOR",
                 "Fix You - Coldplay", 
                 "The Night We Met - Lord Huron",
                 "Say Something - A Great Big World"
@@ -715,25 +1022,6 @@
             }
         }
 
-        // Image prompt functionality
-        function showImagePrompt(num) {
-            const messages = [
-                "📸 Add a photo of a memory that haunts you...\n(Save as assets/images/missing1.jpg)",
-                "📷 Add a photo of a moment you wish you could relive...\n(Save as assets/images/missing2.jpg)",
-                "🖼️ Add a photo of something that reminds you of her...\n(Save as assets/images/missing3.jpg)",
-                "📸 Add a photo of her that breaks your heart...\n(Save as assets/images/missing4.jpg)",
-                "📷 Add a photo of your loneliest moment...\n(Save as assets/images/missing5.jpg)"
-            ];
-            
-            alert(messages[num - 1]);
-            
-            // Add glitch effect to the frame
-            event.target.classList.add('glitch');
-            setTimeout(() => {
-                event.target.classList.remove('glitch');
-            }, 2000);
-        }
-
         // Random glitch effects
         setInterval(() => {
             const elements = document.querySelectorAll('.chaos-text, .image-frame');
@@ -753,6 +1041,23 @@
                 audio.volume = 0.3; // Set to 30% volume
                 audio.loop = false;
             });
+        });
+
+        // Close message modal when clicking outside
+        document.getElementById('messageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideMessage();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideMessage();
+            }
+            if (e.key === 'm' || e.key === 'M') {
+                showMessage();
+            }
         });
     </script>
 </body>
