@@ -1,0 +1,14 @@
+# === Backend-specific ignores ===
+backend/node_modules/
+backend/.env
+backend/uploads/
+
+# === General file ignores ===
+*.log
+.DS_Store
+Thumbs.db
+
+# === Editor/IDE junk ===
+.vscode/
+.idea/
+*.swp
