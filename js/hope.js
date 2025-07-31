@@ -1,8 +1,14 @@
+// JavaScript code for the Roses Gallery
 const globalAudio = document.getElementById("globalAudio");
 const musicButton = document.getElementById("musicButton");
 const musicPopup = document.getElementById("musicPopup");
 let musicPopupVisible = false;
 let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
+// Exclamation popup functionality
+let exclamationPopupVisible = false;
+
+// Backend URL configuration
+const BACKEND_URL = 'http://localhost:3000'; // Change this to your backend URL in production
 
 // Initialize audio on page load
 window.addEventListener('load', function() {
@@ -24,12 +30,17 @@ window.addEventListener('load', function() {
 
 // Auto-play function
 function startAutoPlay() {
+  // Set the initial song source
+  globalAudio.src = `assets/audio/${currentSong}`;
+  
   // Try to play automatically
   globalAudio.play().then(() => {
     // Success - music is playing
     musicButton.classList.add('playing');
     document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
     document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    // Update the select dropdown to match current song
+    updateSelectDropdown();
   }).catch(error => {
     // Auto-play failed (most browsers block auto-play)
     console.log('Auto-play failed, user interaction required:', error);
@@ -37,51 +48,109 @@ function startAutoPlay() {
   });
 }
 
-// Song playlist array
+// Song playlist array - Make sure these files exist in your assets/audio folder
 const playlist = [
   'PARTYNEXTDOOR - Dreamin.mp3',
-  'song2.mp3',
-  'song3.mp3',
-  'song4.mp3',
-  'song5.mp3',
+  'PARTYNEXTDOOR - TRAUMA .mp3',
+  'KEEP IT-JUICE WRLD.mp3',
+  'PARTYNEXTDOOR - DEEPER.mp3',
+  'Juice WRLD - Grace.mp3',
   'song6.mp3',
   'song7.mp3'
 ];
-
 let currentSongIndex = 0;
 
-// Get display name for song
+// Get display name for song - Fixed mapping to match playlist
 function getSongDisplayName(songFile) {
   const songNames = {
     'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
-    'song2.mp3': 'PARTYNEXTDOOR-TRAUMA',
-    'song3.mp3': 'Golden - Jill Scott',
-    'song4.mp3': 'Adorn - Miguel',
-    'song5.mp3': 'Come Through - H.E.R.',
+    'PARTYNEXTDOOR - TRAUMA .mp3': 'PARTYNEXTDOOR - TRAUMA',
+    'KEEP IT-JUICE WRLD.mp3': 'KEEP IT - Juice WRLD',
+    'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
+    'Juice WRLD - Grace.mp3': 'Juice WRLD - Grace/Sam',
     'song6.mp3': 'Stay Ready - Jhené Aiko',
     'song7.mp3': 'Love Galore - SZA'
   };
   return songNames[songFile] || songFile.replace('.mp3', '');
 }
 
-// Play next song in playlist
+// Function to update the select dropdown to match current song
+function updateSelectDropdown() {
+  const select = document.getElementById('globalMusicSelect');
+  if (select && playlist.includes(currentSong)) {
+    select.value = currentSong;
+  }
+}
+
+// Enhanced play next song function with better error handling
 function playNextSong() {
+  console.log('Playing next song. Current index:', currentSongIndex);
+  
   currentSongIndex = (currentSongIndex + 1) % playlist.length;
   const nextSong = playlist[currentSongIndex];
   currentSong = nextSong;
   
+  console.log('Next song:', nextSong, 'New index:', currentSongIndex);
+  
+  // Set the new source
   globalAudio.src = `assets/audio/${nextSong}`;
   globalAudio.volume = 0.4;
   
+  // Update display immediately
+  document.getElementById('globalNowPlaying').textContent = `Loading: ${getSongDisplayName(nextSong)}`;
+  
+  // Update the select dropdown
+  updateSelectDropdown();
+  
+  // Try to play the next song
   globalAudio.play().then(() => {
+    console.log('Successfully playing:', nextSong);
     document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(nextSong)}`;
     musicButton.classList.add('playing');
     document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
   }).catch(error => {
     console.log('Failed to play next song:', error);
+    console.log('Trying to skip to next song...');
+    
+    // If this song fails, try the next one (but prevent infinite loop)
+    if (currentSongIndex < playlist.length - 1) {
+      playNextSong();
+    } else {
+      // If we've reached the end and still failing, stop
+      musicButton.classList.remove('playing');
+      document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+      document.getElementById('globalNowPlaying').textContent = `Failed to load: ${getSongDisplayName(nextSong)}`;
+    }
+  });
+}
+
+// Enhanced play previous song function
+function playPreviousSong() {
+  console.log('Playing previous song. Current index:', currentSongIndex);
+  
+  currentSongIndex = currentSongIndex === 0 ? playlist.length - 1 : currentSongIndex - 1;
+  const prevSong = playlist[currentSongIndex];
+  currentSong = prevSong;
+  
+  console.log('Previous song:', prevSong, 'New index:', currentSongIndex);
+  
+  globalAudio.src = `assets/audio/${prevSong}`;
+  globalAudio.volume = 0.4;
+  
+  document.getElementById('globalNowPlaying').textContent = `Loading: ${getSongDisplayName(prevSong)}`;
+  
+  // Update the select dropdown
+  updateSelectDropdown();
+  
+  globalAudio.play().then(() => {
+    document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(prevSong)}`;
+    musicButton.classList.add('playing');
+    document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+  }).catch(error => {
+    console.log('Failed to play previous song:', error);
     musicButton.classList.remove('playing');
     document.getElementById('globalPlayBtn').textContent = '▶️ Play';
-    document.getElementById('globalNowPlaying').textContent = `Failed to load: ${getSongDisplayName(nextSong)}`;
+    document.getElementById('globalNowPlaying').textContent = `Failed to load: ${getSongDisplayName(prevSong)}`;
   });
 }
 
@@ -95,9 +164,41 @@ function toggleMusicPopup() {
   }
 }
 
-// Close popup when clicking outside
+// Exclamation popup toggle
+function toggleExclamationPopup() {
+  const popup = document.getElementById('exclamationPopup');
+  const icon = document.getElementById('exclamationIcon');
+  
+  exclamationPopupVisible = !exclamationPopupVisible;
+  
+  if (exclamationPopupVisible) {
+    popup.classList.add('show');
+    icon.classList.add('active');
+  } else {
+    popup.classList.remove('show');
+    icon.classList.remove('active');
+  }
+}
+
+// Enhanced click outside handler for both popups
 document.addEventListener('click', function(event) {
-  if (!musicButton.contains(event.target) && !musicPopup.contains(event.target)) {
+  const popup = document.getElementById('exclamationPopup');
+  const icon = document.getElementById('exclamationIcon');
+  
+  // Handle exclamation popup
+  if (popup && icon && 
+      !popup.contains(event.target) && 
+      !icon.contains(event.target) && 
+      exclamationPopupVisible) {
+    popup.classList.remove('show');
+    icon.classList.remove('active');
+    exclamationPopupVisible = false;
+  }
+  
+  // Handle music popup (keep existing functionality)
+  if (musicButton && musicPopup && 
+      !musicButton.contains(event.target) && 
+      !musicPopup.contains(event.target)) {
     musicPopup.classList.remove('show');
     musicPopupVisible = false;
   }
@@ -105,16 +206,19 @@ document.addEventListener('click', function(event) {
 
 // Global music functions
 function selectGlobalSong(songFile) {
-  if (songFile) {
+  console.log('Selecting song:', songFile);
+  
+  if (songFile && playlist.includes(songFile)) {
     const wasPlaying = !globalAudio.paused;
     
     // Update current song index to match selected song
     currentSongIndex = playlist.indexOf(songFile);
-    if (currentSongIndex === -1) currentSongIndex = 0;
+    currentSong = songFile;
+    
+    console.log('Selected song index:', currentSongIndex);
     
     globalAudio.src = `assets/audio/${songFile}`;
     globalAudio.volume = 0.4;
-    currentSong = songFile;
     
     if (wasPlaying) {
       globalAudio.play().then(() => {
@@ -122,7 +226,7 @@ function selectGlobalSong(songFile) {
         musicButton.classList.add('playing');
         document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
       }).catch(error => {
-        console.log('Failed to play new song:', error);
+        console.log('Failed to play selected song:', error);
         musicButton.classList.remove('playing');
         document.getElementById('globalPlayBtn').textContent = '▶️ Play';
         document.getElementById('globalNowPlaying').textContent = `Failed to load: ${getSongDisplayName(songFile)}`;
@@ -130,11 +234,18 @@ function selectGlobalSong(songFile) {
     } else {
       document.getElementById('globalNowPlaying').textContent = `Ready: ${getSongDisplayName(songFile)}`;
     }
+  } else {
+    console.error('Song not found in playlist:', songFile);
   }
 }
 
 function toggleGlobalMusic() {
   if (globalAudio.paused) {
+    // Make sure we have a source set
+    if (!globalAudio.src || globalAudio.src === '') {
+      globalAudio.src = `assets/audio/${currentSong}`;
+    }
+    
     // Try to play
     globalAudio.play().then(() => {
       musicButton.classList.add('playing');
@@ -161,28 +272,50 @@ function stopGlobalMusic() {
   document.getElementById('globalNowPlaying').textContent = `Stopped: ${getSongDisplayName(currentSong)}`;
 }
 
-// Handle music ended event - Auto-play next song
+// Enhanced audio event listeners
 globalAudio.addEventListener('ended', () => {
-  // Automatically play the next song
+  console.log('Song ended, playing next song');
   playNextSong();
 });
 
-// Handle audio loading events
 globalAudio.addEventListener('loadstart', () => {
+  console.log('Started loading:', currentSong);
   document.getElementById('globalNowPlaying').textContent = 'Loading...';
 });
 
 globalAudio.addEventListener('canplaythrough', () => {
+  console.log('Can play through:', currentSong);
   if (globalAudio.paused) {
     document.getElementById('globalNowPlaying').textContent = `Ready: ${getSongDisplayName(currentSong)}`;
   }
 });
 
 globalAudio.addEventListener('error', (e) => {
-  console.log('Audio error:', e);
+  console.error('Audio error for', currentSong, ':', e);
+  console.log('Error details:', globalAudio.error);
+  
   document.getElementById('globalNowPlaying').textContent = `Error loading: ${getSongDisplayName(currentSong)}`;
   musicButton.classList.remove('playing');
   document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+  
+  // Try to play next song if current one fails
+  setTimeout(() => {
+    console.log('Trying next song due to error...');
+    playNextSong();
+  }, 1000);
+});
+
+// Add additional event listeners for debugging
+globalAudio.addEventListener('loadedmetadata', () => {
+  console.log('Loaded metadata for:', currentSong);
+});
+
+globalAudio.addEventListener('play', () => {
+  console.log('Started playing:', currentSong);
+});
+
+globalAudio.addEventListener('pause', () => {
+  console.log('Audio paused');
 });
 
 // Initialize background elements
@@ -193,6 +326,8 @@ function initializeBackground() {
 // Create twinkling stars
 function createStars() {
   const starsContainer = document.getElementById('stars');
+  if (!starsContainer) return;
+  
   for (let i = 0; i < 100; i++) {
     const star = document.createElement('div');
     star.className = 'star';
@@ -204,7 +339,7 @@ function createStars() {
   }
 }
 
-// Enhanced Photo enlargement function with proper positioning and mobile support
+// Enhanced Photo enlargement function with click-outside-to-close functionality
 function enlargePhoto(img) {
   const modal = document.getElementById('photoModal');
   const enlargedPhoto = document.getElementById('enlargedPhoto');
@@ -228,13 +363,14 @@ function enlargePhoto(img) {
   modal.style.opacity = '0';
   setTimeout(() => {
     modal.style.opacity = '1';
+    modal.classList.add('show');
   }, 10);
   
   // Reset any previous transforms
   enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(0.8)';
   setTimeout(() => {
     enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(1)';
-  }, 10);
+  }, 50);
 }
 
 // Enhanced close photo modal function
@@ -246,6 +382,8 @@ function closePhotoModal() {
   
   // Add fade-out animation
   modal.style.opacity = '0';
+  modal.classList.remove('show');
+  
   if (enlargedPhoto) {
     enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(0.8)';
   }
@@ -254,6 +392,10 @@ function closePhotoModal() {
     modal.style.display = 'none';
     // Restore body scrolling
     document.body.style.overflow = '';
+    // Clear the image source to save memory
+    if (enlargedPhoto) {
+      enlargedPhoto.src = '';
+    }
   }, 300);
 }
 
@@ -273,14 +415,19 @@ function closeModal(id) {
   }
 }
 
-// Enhanced window click handler with proper photo modal support
+// Enhanced window click handler with improved photo modal support
 window.onclick = function (event) {
   const photoModal = document.getElementById('photoModal');
   const enlargedPhoto = document.getElementById('enlargedPhoto');
   
-  // Handle photo modal
+  // Handle photo modal - close when clicking outside the image
   if (event.target === photoModal) {
     closePhotoModal();
+    return;
+  }
+  
+  // Prevent closing when clicking on the enlarged photo itself
+  if (enlargedPhoto && event.target === enlargedPhoto) {
     return;
   }
   
@@ -295,11 +442,42 @@ window.onclick = function (event) {
   }
 };
 
-// Add keyboard support for closing photo modal
+// Add keyboard support for closing modals
 document.addEventListener('keydown', function(event) {
-  const photoModal = document.getElementById('photoModal');
-  if (event.key === 'Escape' && photoModal && photoModal.style.display === 'flex') {
-    closePhotoModal();
+  if (event.key === 'Escape') {
+    // Close photo modal
+    const photoModal = document.getElementById('photoModal');
+    if (photoModal && (photoModal.style.display === 'flex' || photoModal.classList.contains('show'))) {
+      closePhotoModal();
+      return;
+    }
+    
+    // Close exclamation popup
+    const popup = document.getElementById('exclamationPopup');
+    const icon = document.getElementById('exclamationIcon');
+    if (popup && exclamationPopupVisible) {
+      popup.classList.remove('show');
+      if (icon) icon.classList.remove('active');
+      exclamationPopupVisible = false;
+      return;
+    }
+    
+    // Close music popup
+    if (musicPopupVisible) {
+      musicPopup.classList.remove('show');
+      musicPopupVisible = false;
+      return;
+    }
+    
+    // Close other modals
+    const modals = ["modal1", "modal2", "modal3"];
+    for (let id of modals) {
+      const modal = document.getElementById(id);
+      if (modal && modal.style.display === 'block') {
+        closeModal(id);
+        return;
+      }
+    }
   }
 });
 
@@ -350,9 +528,9 @@ function toggleSavedMessage(messageId) {
 function titleClick() {
   const popup = document.getElementById('titlePopup');
   
-  if (popup.classList.contains('show')) {
+  if (popup && popup.classList.contains('show')) {
     popup.classList.remove('show');
-  } else {
+  } else if (popup) {
     popup.classList.add('show');
     // Auto-hide after 3 seconds
     setTimeout(() => {
@@ -362,30 +540,175 @@ function titleClick() {
   
   // Add a special effect to the title
   const title = document.querySelector('.title');
-  title.style.transform = 'scale(1.1)';
-  title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
-  
-  setTimeout(() => {
-    title.style.transform = 'scale(1)';
-    title.style.textShadow = '2px 2px 10px rgba(0,0,0,0.3)';
-  }, 300);
+  if (title) {
+    title.style.transform = 'scale(1.1)';
+    title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
+    
+    setTimeout(() => {
+      title.style.transform = 'scale(1)';
+      title.style.textShadow = '2px 2px 10px rgba(0,0,0,0.3)';
+    }, 300);
+  }
 }
 
-// Initialize audio when DOM is ready
+// ===== NEW PHOTO GALLERY FUNCTIONS =====
+// Photo Gallery Functions
+function loadPhotoGallery(category = null) {
+  const galleryContainer = document.getElementById('photo-gallery');
+  
+  if (!galleryContainer) return;
+  
+  // Show loading message
+  galleryContainer.innerHTML = '<div class="loading">Loading photos...</div>';
+  
+  // Build API URL with category filter if provided
+  let apiUrl = `${BACKEND_URL}/api/photos`;
+  if (category) {
+    apiUrl += `?category=${category}`;
+  }
+  
+  // Fetch photos from backend API
+  fetch(apiUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(photos => {
+      // Clear loading message
+      galleryContainer.innerHTML = '';
+      
+      if (photos.length === 0) {
+        galleryContainer.innerHTML = '<div class="no-photos">No photos available</div>';
+        return;
+      }
+      
+      // Display photos
+      photos.forEach(photo => {
+        // Create main photo element
+        const photoElement = createPhotoElement(photo);
+        galleryContainer.appendChild(photoElement);
+        
+        // Create additional photos if they exist
+        if (photo.photos && photo.photos.length > 0) {
+          photo.photos.forEach(photoFilename => {
+            const additionalPhoto = {
+              title: photo.title,
+              mainImage: photoFilename,
+              category: photo.category
+            };
+            const additionalPhotoElement = createPhotoElement(additionalPhoto);
+            galleryContainer.appendChild(additionalPhotoElement);
+          });
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching photos:', error);
+      galleryContainer.innerHTML = `<div class="error">Error loading photos: ${error.message}</div>`;
+    });
+}
+
+function createPhotoElement(photo) {
+  const photoDiv = document.createElement('div');
+  photoDiv.className = 'photo-item';
+  
+  const img = document.createElement('img');
+  // Use the full backend URL for images
+  img.src = `${BACKEND_URL}/images/${photo.mainImage}`;
+  img.alt = photo.title;
+  img.className = 'photo';
+  
+  const caption = document.createElement('div');
+  caption.className = 'photo-caption';
+  caption.textContent = photo.title;
+  
+  photoDiv.appendChild(img);
+  photoDiv.appendChild(caption);
+  
+  // Add click event to enlarge photo
+  img.addEventListener('click', function() {
+    enlargePhoto(this);
+  });
+  
+  return photoDiv;
+}
+
+// Function to filter photos by category
+function filterPhotosByCategory(category) {
+  // Update active filter button
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  loadPhotoGallery(category);
+}
+
+// Function to load all photos
+function loadAllPhotos() {
+  // Update active filter button
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  loadPhotoGallery();
+}
+// ===== END NEW PHOTO GALLERY FUNCTIONS =====
+
+// Initialize audio when DOM is ready with enhanced photo modal support
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, initializing audio and photo modal support');
+  
   globalAudio.volume = 0.4;
   globalAudio.loop = false; // Disable loop since we're doing playlist progression
   
   // Initialize current song index
   currentSongIndex = playlist.indexOf(currentSong);
-  if (currentSongIndex === -1) currentSongIndex = 0;
+  if (currentSongIndex === -1) {
+    console.warn('Current song not found in playlist, defaulting to index 0');
+    currentSongIndex = 0;
+    currentSong = playlist[0];
+  }
   
-  // Add touch support for mobile devices
+  console.log('Initial song:', currentSong, 'Index:', currentSongIndex);
+  console.log('Full playlist:', playlist);
+  
+  // Add enhanced touch and click support for photos
   const photos = document.querySelectorAll('.photo');
   photos.forEach(photo => {
+    // Touch support for mobile devices
     photo.addEventListener('touchend', function(e) {
       e.preventDefault();
       enlargePhoto(this);
     });
+    
+    // Click support for desktop
+    photo.addEventListener('click', function(e) {
+      e.preventDefault();
+      enlargePhoto(this);
+    });
+    
+    // Prevent image dragging
+    photo.draggable = false;
   });
+  
+  // Enhanced photo modal event listener
+  const enlargedPhoto = document.getElementById('enlargedPhoto');
+  if (enlargedPhoto) {
+    // Prevent closing when clicking directly on the enlarged photo
+    enlargedPhoto.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+    
+    // Prevent image dragging
+    enlargedPhoto.draggable = false;
+  }
+  
+  // Load photo gallery if the container exists
+  loadPhotoGallery();
+  
+  console.log('Photo modal initialization complete');
 });

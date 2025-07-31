@@ -12,7 +12,7 @@
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-rose">🌹</div>
     <div class="loading-text">
-      My love letter to...the baddest I know 💜<br>
+      My letter to...the baddest I know 💜<br>
       <small>Usiblash sana</small>
     </div>
   </div>
@@ -24,8 +24,12 @@
   </div>
 
   <!-- Background Music (Keep this exactly where it is) -->
-  <audio id="globalAudio" loop class="background-music" preload="auto">
+  <audio id="globalAudio" class="background-music" preload="auto">
     <source src="assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
+    <source src="assets/audio/PARTYNEXTDOOR-TRAUMA.mp3" type="audio/mpeg">
+    <source src="assets/audio/KEEP IT-JUICE WRLD.mp3" type="audio/mpeg">
+    <source src="assets/audio/PARTYNEXTDOOR - DEEPER.mp3" type="audio/mpeg">
+    <source src="assets/audio/GRACE/SAM - Juice WRLD.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Music Button -->
@@ -42,16 +46,18 @@
     <div class="background-music-selector">
       <select id="globalMusicSelect" onchange="selectGlobalSong(this.value)">
         <option value="PARTYNEXTDOOR - Dreamin.mp3">Dreamin' - PARTYNEXTDOOR</option>
-        <option value="PARTYNEXTDOOR-TRAUMA">PARTYNEXTDOOR-TRAUMA</option>
-        <option value="song3.mp3">Golden - Jill Scott</option>
-        <option value="song4.mp3">Adorn - Miguel</option>
-        <option value="song5.mp3">Come Through - H.E.R.</option>
+        <option value="PARTYNEXTDOOR - TRAUMA .mp3">TRAUMA - PARTYNEXTDOOR</option>
+        <option value="KEEP IT-JUICE WRLD.mp3">KEEP IT - Juice WRLD</option>
+        <option value="PARTYNEXTDOOR - DEEPER.mp3">DEEPER - PARTYNEXTDOOR</option>
+        <option value="Juice WRLD - Grace.mp3">GRACE/SAM - Juice WRLD</option>
         <option value="song6.mp3">Stay Ready - Jhené Aiko</option>
         <option value="song7.mp3">Love Galore - SZA</option>
       </select>
     </div>
     <div class="background-controls">
+      <button class="bg-control-btn" onclick="playPreviousSong()">⏮️ Previous</button>
       <button class="bg-control-btn" id="globalPlayBtn" onclick="toggleGlobalMusic()">▶️ Play</button>
+      <button class="bg-control-btn" onclick="playNextSong()">⏭️ Next</button>
       <button class="bg-control-btn" onclick="stopGlobalMusic()">⏹️ Stop</button>
     </div>
     <div class="bg-now-playing" id="globalNowPlaying">Ready: Dreamin' - PARTYNEXTDOOR</div>
@@ -100,10 +106,19 @@
       <button class="add-message-btn" onclick="showSavedMessage('msg1')">💌 Read Message</button>
       <div id="msg1" class="user-message">
         I saw you and I fell—suddenly, endlessly. Hit me too like a truck. Funny you still hit me like a truck no matter what the outcome. That smile on your face makes it easy to trust you. I swear na si mstari I literally skip a beat when I see a photo of you. Anyway nione mbleina tu nikisema izi vitu😂
+        <p>I was so scared of being attached you wouldnt believe after what I'm doing. Iwish I went in with your mindset😞</p>
+        <p> But I also dont😅  I kinda know the outcome. I told you.</p>
+        <p> You havent changed much in this photos. Still got it in you even tjough you were like 11 here😂
+        </p>
+        <p> Izi ndo time natoka shule boarding narudi nikiski umesema tutaoana😂😂 sahii bruh unajifanya na ni prophecy inahappen right infront</p>
+        <p><big>NAIVE I GUESS😅 NOT!!</big></p>
+        <p>Kuna wtu siezi sahau experiences no matter what. </p>
+        <p> Anyway, kuongea na ww ilifanya nijue kuna vitu poa hujasahau. </p>
+        <p>Loving you is the Only law I will never brake</p>
       </div>
       <div class="photo-container">
         <img class="photo" src="assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this)">
-        <img class="photo" src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=300&fit=crop" alt="Memory 2" onclick="enlargePhoto(this)">
+        <img class="photo" src="assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this)">
       </div>
     </div>
   </div>
@@ -116,10 +131,13 @@
       <div class="message">"And I don't want it back you can keep it Make it dirty but keep it safe for me."</div>
       <button class="add-message-btn" onclick="showSavedMessage('msg2')">💌 Read Message</button>
       <div id="msg2" class="user-message">
-        Can I tell you somethin' Crazy I never thought you'd be my type too since we met at the beginning. Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real kiss I heard was with you. The one you saw on those opera😂
+        Can I tell you somethin' Crazy I never thought you'd be my type too since we met at the beginning. Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real experience with somebody was with you. No lie
+        <p>I guess its why I'm still here. Unless I wasnt your first then I am right in everything</p>
+        <p>The song TRAUMA is word for word what I'm trying to say</p>
+        <p>We were gonna be on a beach high together. You fr sweared</p>
       </div>
       <div class="photo-container">
-        <img class="photo" src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?w=300&h=300&fit=crop" alt="Memory 3" onclick="enlargePhoto(this)">
+        <img class="photo" src="assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this)">
         <img class="photo" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&h=300&fit=crop" alt="Memory 4" onclick="enlargePhoto(this)">
       </div>
     </div>
@@ -134,25 +152,55 @@
       <button class="add-message-btn" onclick="showSavedMessage('msg3')">💌 Read Message</button>
       <div id="msg3" class="user-message">
         I promise never to hurt or make you feel any type of way. I don't even know if this makes you comfortable. I figured you'd like some of the things I'm good at even though not talking. This is just a taste of what I have in store for you. Forget how you know me. Let me show you some of the other me.
+        <p> Lakini nilikua nimekudedi bado ukiwa semi-kienyo😂😂 sahii bruuh!! acha tu  </p>
+        <p>Suburban fyn shyt💜</p>
+        <p> Even if you choose the other side, I still cant belive I fumbled and stumbled on this girl😅😔things change</p>
       </div>
       <div class="photo-container">
-        <img class="photo" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" alt="Memory 5" onclick="enlargePhoto(this)">
-        <img class="photo" src="https://images.unsplash.com/photo-1494790108755-2616c0763c65?w=300&h=300&fit=crop" alt="Memory 6" onclick="enlargePhoto(this)">
+        <img class="photo" src="assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this)">
+        <img class="photo" src="assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this)">
+        <img class="photo" src="assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this)">
       </div>
+    </div>
+  </div>
+
+  <!-- Exclamation Button (Bottom Right) -->
+  <div id="exclamationIcon" class="exclamation-button" onclick="toggleExclamationPopup()">
+    <span class="exclamation-icon">!</span>
+  </div>
+
+  <!-- Exclamation Popup -->
+  <div id="exclamationPopup" class="exclamation-popup">
+    <div class="exclamation-header">
+      <span>💡 Brief Explanation of the letter</span>
+      <button class="exclamation-close" onclick="toggleExclamationPopup()">×</button>
+    </div>
+    <div class="exclamation-content">
+      <p>Start by clicking the name</p>
+      <p>
+      The music you here when you open this page is a song you told me you love. 
+      </p>
+      <p>The rest of the songs I have hand picked to explain myself. Some you are familiar with maybe some not.
+      </p>
+        I dont know whenever I hear DREAMING it just gives me your vibe. Its ingrained in me already. Not the music but the feeling.
+
+      </p>
+      <p>Hand drawn Roses. Just to show I still got it in me. 
+      
     </div>
   </div>
 
   <!-- Photo Enlargement Modal -->
   <div id="photoModal" class="modal">
     <div class="modal-content" style="max-width: 80%; text-align: center;">
-      <span class="close" onclick="closeModal('photoModal')">&times;</span>
+      <span class="close" onclick="closePhotoModal()">&times;</span>
       <img id="enlargedPhoto" style="max-width: 100%; max-height: 70vh; border-radius: 15px; margin-top: 20px;">
     </div>
   </div>
 
   <footer>
     <p>Girl you better fucking read every single letter from a-z🌹</p>
-    <p>Made with 💖 by your favorite person</p>
+    <p>Made with 💖 by your biggest fan</p>
     
     <div class="footer-message-container">
       <span class="message-icon" onclick="showSavedMessage('msg4')">💌</span>
@@ -167,8 +215,19 @@
       big red button.</p>
       <p> Was gonna put it in a diamond pendant or somthin' I aint rich though, a yellow diamond dagger will get if you choose this side.
       </p>
-      <p>Come my way!!
+      <p>Its true I cant get over you. I dicovered that later after you left. </p>
+      <p>The first 2 weeks afer whatever we broke happened I was joking around. Till later then I knew I aint going back. </p>
+      <p>. </p>
+      <p>If you knew how safe I played not to fumble into you 😔. I have a problem with girls that treat me good. Especially after they touch my hair and say they will help take care of itnI guess. </p>
+        <p>Call it whatever you want. You can phrase it how you like. I did mean everyword I said.
       </p>
+      <p>Come my way!! I dont say I will ever be perfect but I will always treat you second, only after me ofcourse😅
+      </p>
+      <p>All Love💜  no matter your desicion just know I aint giving up</p>
+      <p>Yo boy not like dat, not like them other guys</p>
+      <p>At least I deserve an unblock😖 </p>
+      <p> <big>PS I GOTTA PART II WITH ME SINGING</big> </p>
+      <p> If you wanna hear my Angelic singing voice. PND dont got nothing on me. Kama singeku tech bro ningekua msanii nishakushoo. </p>
     </div>
   </footer>
 

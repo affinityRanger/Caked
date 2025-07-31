@@ -10,7 +10,6 @@ function createPetal(side) {
   petal.style.animationDelay = Math.random() * 2 + 's';
   petal.style.animationDuration = (Math.random() * 4 + 6) + 's';
   side.appendChild(petal);
-
   setTimeout(() => {
     if (petal.parentNode) {
       petal.remove();
@@ -84,21 +83,183 @@ function navigateToDoubt() {
   }, 1500);
 }
 
-// Initialize petal animation
-const leftSide = document.querySelector('.left-side');
-const rightSide = document.querySelector('.right-side');
-
-petalInterval = setInterval(() => {
-  createPetal(leftSide);
-  createPetal(rightSide);
-}, 1200);
-
-// Add some initial petals
-setTimeout(() => {
-  for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-      createPetal(leftSide);
-      createPetal(rightSide);
-    }, i * 200);
+// File Manager Functions
+function toggleFileManager() {
+  const fileManager = document.getElementById('file-manager-container');
+  
+  if (fileManager.style.display === 'flex') {
+    fileManager.style.display = 'none';
+  } else {
+    fileManager.style.display = 'flex';
+    loadFileStructure();
   }
-}, 1000);
+}
+
+function loadFileStructure() {
+  const fileManager = document.getElementById('file-manager');
+  
+  // Show loading message
+  fileManager.innerHTML = '<div class="loading">Loading files...</div>';
+  
+  // Fetch file structure from backend API
+  fetch('/api/files')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Clear loading message
+      fileManager.innerHTML = '';
+      
+      // Display file structure
+      displayFileStructure(data, fileManager);
+    })
+    .catch(error => {
+      console.error('Error fetching file structure:', error);
+      fileManager.innerHTML = `<div class="error">Error loading files: ${error.message}</div>`;
+    });
+}
+
+function displayFileStructure(items, container) {
+  const ul = document.createElement('ul');
+  ul.className = 'file-tree';
+  
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.className = `file-item ${item.type}`;
+    
+    // Create file/folder icon
+    const icon = document.createElement('span');
+    icon.className = 'file-icon';
+    icon.textContent = item.type === 'folder' ? '📁' : getFileIcon(item.extension);
+    
+    // Create name element
+    const name = document.createElement('span');
+    name.className = 'file-name';
+    name.textContent = item.name;
+    
+    // Create file size element (for files)
+    const size = document.createElement('span');
+    if (item.type === 'file') {
+      size.className = 'file-size';
+      size.textContent = formatFileSize(item.size);
+    }
+    
+    // Add elements to list item
+    li.appendChild(icon);
+    li.appendChild(name);
+    if (item.type === 'file') {
+      li.appendChild(size);
+    }
+    
+    // Add click event for files
+    if (item.type === 'file') {
+      li.addEventListener('click', function() {
+        window.open(`/${item.path}`, '_blank');
+      });
+    }
+    
+    // Add folder contents if it's a folder
+    if (item.type === 'folder' && item.children && item.children.length > 0) {
+      const childContainer = document.createElement('div');
+      childContainer.className = 'folder-children';
+      childContainer.style.display = 'none';
+      
+      displayFileStructure(item.children, childContainer);
+      
+      // Toggle folder open/close
+      li.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (childContainer.style.display === 'none') {
+          childContainer.style.display = 'block';
+          icon.textContent = '📂'; // Open folder icon
+        } else {
+          childContainer.style.display = 'none';
+          icon.textContent = '📁'; // Closed folder icon
+        }
+      });
+      
+      li.appendChild(childContainer);
+    }
+    
+    ul.appendChild(li);
+  });
+  
+  container.appendChild(ul);
+}
+
+function getFileIcon(extension) {
+  if (!extension) return '📄';
+  
+  const iconMap = {
+    'html': '🌐',
+    'css': '🎨',
+    'js': '📜',
+    'json': '📋',
+    'md': '📝',
+    'txt': '📄',
+    'jpg': '🖼️',
+    'jpeg': '🖼️',
+    'png': '🖼️',
+    'gif': '🖼️',
+    'svg': '🖼️',
+    'mp4': '🎬',
+    'mp3': '🎵',
+    'wav': '🎵',
+    'pdf': '📕',
+    'zip': '📦',
+    'rar': '📦'
+  };
+  
+  return iconMap[extension.toLowerCase()] || '📄';
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Initialize petal animation
+document.addEventListener('DOMContentLoaded', function() {
+  const leftSide = document.querySelector('.left-side');
+  const rightSide = document.querySelector('.right-side');
+  
+  // Start creating petals at intervals
+  petalInterval = setInterval(() => {
+    createPetal(leftSide);
+    createPetal(rightSide);
+  }, 1200);
+  
+  // Add some initial petals
+  setTimeout(() => {
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        createPetal(leftSide);
+        createPetal(rightSide);
+      }, i * 200);
+    }
+  }, 1000);
+  
+  // Add click event to question mark for file manager
+  const questionMark = document.querySelector('.question-mark');
+  if (questionMark) {
+    questionMark.addEventListener('click', toggleFileManager);
+  }
+  
+  // Add hover effects to sides for pausing petals
+  leftSide.addEventListener('mouseenter', pausePetals);
+  leftSide.addEventListener('mouseleave', resumePetals);
+  rightSide.addEventListener('mouseenter', pausePetals);
+  rightSide.addEventListener('mouseleave', resumePetals);
+  
+  // Add click events to sides for navigation
+  leftSide.addEventListener('click', navigateToGarden);
+  rightSide.addEventListener('click', navigateToDoubt);
+});

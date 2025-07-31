@@ -14,14 +14,11 @@
         <div class="rose">🌹</div>
         <div class="text">
           HOPE
-      
         </div>
       </div>
     </div>
-
     <div class="divider"></div>
-    <div class="question-mark">?</div>
-
+    <div class="question-mark" onclick="toggleFileManager()">?</div>
     <div class="side right-side" onclick="navigateToDoubt()" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
       <div class="glow"></div>
       <div class="rose-container">
@@ -31,10 +28,20 @@
         </div>
       </div>
     </div>
-
     <div class="click-hint">Pick my Queen</div>
+    
+    <!-- File Manager Section -->
+    <div id="file-manager-container" style="display: none;">
+      <div class="file-manager-header">
+        <h2>File Manager</h2>
+        <button class="close-btn" onclick="toggleFileManager()">×</button>
+      </div>
+      <div id="file-manager">
+        <div class="loading">Loading files...</div>
+      </div>
+    </div>
   </div>
-
+  
   <script src="js/index.js"></script>
 </body>
 </html>

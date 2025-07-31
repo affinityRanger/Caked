@@ -1,3 +1,6 @@
+// Backend URL configuration
+const BACKEND_URL = 'http://localhost:3000'; // Change this to your backend URL in production
+
 let currentAudio = null;
 let currentPlayingElement = null;
 
@@ -320,11 +323,48 @@ setInterval(() => {
 
 // Initialize audio elements
 document.addEventListener('DOMContentLoaded', function() {
-    // Set volume for all audio elements
+    // Update all audio sources to use backend URL
     const audioElements = document.querySelectorAll('audio');
     audioElements.forEach(audio => {
-        audio.volume = 0.3; // Set to 30% volume
+        // Get the current source
+        const source = audio.querySelector('source');
+        if (source) {
+            const src = source.getAttribute('src');
+            // Update to use backend URL if it's a local asset
+            if (src.startsWith('/assets/') || src.startsWith('assets/')) {
+                const filename = src.split('/').pop();
+                source.setAttribute('src', `${BACKEND_URL}/music/${filename}`);
+            }
+        }
+        
+        // Set volume for all audio elements
+        audio.volume = 0.3;
         audio.loop = false;
+    });
+    
+    // Update all image sources to use backend URL
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        const src = img.getAttribute('src');
+        // Update to use backend URL if it's a local asset
+        if (src.startsWith('/assets/') || src.startsWith('assets/')) {
+            const filename = src.split('/').pop();
+            img.setAttribute('src', `${BACKEND_URL}/images/${filename}`);
+        }
+    });
+    
+    // Update video sources to use backend URL
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+        const source = video.querySelector('source');
+        if (source) {
+            const src = source.getAttribute('src');
+            // Update to use backend URL if it's a local asset
+            if (src.startsWith('/assets/') || src.startsWith('assets/')) {
+                const filename = src.split('/').pop();
+                source.setAttribute('src', `${BACKEND_URL}/videos/${filename}`);
+            }
+        }
     });
 });
 
