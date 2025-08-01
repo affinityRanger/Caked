@@ -1,0 +1,67 @@
+[
+  {
+    "name": "assets",
+    "type": "folder",
+    "path": "assets",
+    "children": [
+      {
+        "name": "audio",
+        "type": "folder",
+        "path": "assets/audio",
+        "children": []
+      },
+      {
+        "name": "images",
+        "type": "folder",
+        "path": "assets/images",
+        "children": []
+      },
+      {
+        "name": "videos",
+        "type": "folder",
+        "path": "assets/videos",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "css",
+    "type": "folder",
+    "path": "css",
+    "children": []
+  },
+  {
+    "name": "js",
+    "type": "folder",
+    "path": "js",
+    "children": []
+  },
+  {
+    "name": "doubt.html",
+    "type": "file",
+    "path": "doubt.html",
+    "extension": "html",
+    "size": 1024
+  },
+  {
+    "name": "hope.html",
+    "type": "file",
+    "path": "hope.html",
+    "extension": "html",
+    "size": 2048
+  },
+  {
+    "name": "index.html",
+    "type": "file",
+    "path": "index.html",
+    "extension": "html",
+    "size": 3072
+  },
+  {
+    "name": "README.md",
+    "type": "file",
+    "path": "README.md",
+    "extension": "md",
+    "size": 512
+  }
+]
