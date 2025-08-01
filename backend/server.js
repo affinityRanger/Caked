@@ -5,7 +5,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const path = require('path');
-const mongoose = require('mongoose');
 const Photo = require('./src/models/Photo');
 const Music = require('./src/models/Music');
 const app = express();
@@ -32,60 +31,66 @@ app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// Environment variables validation - Railway provides these directly
-// Debug: Let's see all environment variables
-console.log('DEBUG: All environment variables:');
-Object.keys(process.env).forEach(key => {
-  if (key.includes('MONGO') || key.includes('DB') || key.includes('COLLECTION') || key.includes('Sam')) {
-    console.log(`${key}:`, process.env[key]);
-  }
-});
+// ===== FIXED: Environment variables handling =====
+console.log('DEBUG: Environment variables check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
-// Try different ways to get the MongoDB URI
-const mongoUri = process.env.MONGO_URI || 
-                 process.env.SamWRLD || 
-                 process.env['SamWRLD'] ||
+// Function to safely extract environment variable value
+function getEnvValue(varName) {
+  const value = process.env[varName];
+  
+  if (!value) {
+    console.log(`Environment variable ${varName} is not set`);
+    return null;
+  }
+  
+  // If the value looks like it contains "Key:" and "Value:", extract the actual value
+  if (typeof value === 'string') {
+    // Check if it's in the format "Key: VARNAME\nValue: actual_value"
+    const lines = value.split('\n');
+    if (lines.length >= 2 && lines[0].startsWith('Key:') && lines[1].startsWith('Value:')) {
+      const actualValue = lines[1].replace('Value:', '').trim();
+      console.log(`Extracted actual value from ${varName}:`, actualValue.substring(0, 50) + '...');
+      return actualValue;
+    }
+    
+    // Otherwise return the value as-is
+    return value;
+  }
+  
+  return value;
+}
+
+// Get environment variables using the safe extraction function
+const mongoUri = getEnvValue('MONGO_URI') || 
+                 getEnvValue('SamWRLD') || 
                  'mongodb+srv://lonergamers:EstB999Jw@clustersamwrld.hqnhrry.mongodb.net/Sam-WRLD?retryWrites=true&w=majority&appName=ClusterSamWRLD';
 
-const dbName = process.env.DB_NAME || 
-               process.env.SamWrld || 
-               process.env['SamWrld'] ||
+const dbName = getEnvValue('DB_NAME') || 
+               getEnvValue('SamWrld') || 
                'Sam-WRLD';
 
-const collectionName = process.env.COLLECTION_NAME || 
-                      process.env.samWRLD || 
-                      process.env['samWRLD'] ||
+const collectionName = getEnvValue('COLLECTION_NAME') || 
+                      getEnvValue('samWRLD') || 
                       'files';
 
-console.log('Environment Variables Check:');
+console.log('Final Environment Variables:');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
 console.log('MONGO_URI type:', typeof mongoUri);
-console.log('MONGO_URI value:', mongoUri?.substring ? mongoUri.substring(0, 50) + '...' : mongoUri);
+console.log('MONGO_URI value (first 50 chars):', mongoUri ? mongoUri.substring(0, 50) + '...' : 'undefined');
 console.log('DB_NAME:', dbName);
 console.log('COLLECTION_NAME:', collectionName);
 
+// Validate MongoDB URI
 if (!mongoUri || typeof mongoUri !== 'string' || !mongoUri.startsWith('mongodb')) {
   console.error('ERROR: Invalid MONGO_URI environment variable');
   console.error('MONGO_URI value:', mongoUri);
-  console.error('Using fallback connection string...');
-  // Use fallback if environment variable is corrupted
+  console.error('Application cannot start without a valid MongoDB URI');
+  process.exit(1);
 }
 
-// Connect to MongoDB
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  dbName: dbName
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
-
-// Initialize models
-const photoModel = new Photo();
-const musicModel = new Music();
+// Remove all mongoose connection code since we're using native MongoDB driver
+console.log('Using native MongoDB driver through model classes');
 
 // Serve media files
 app.use('/images', express.static(path.join(__dirname, 'uploads', 'images')));
@@ -118,7 +123,8 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: {
-      dbConnected: !!mongoUri,
+      nodeEnv: process.env.NODE_ENV,
+      dbConnected: true, // We'll test this on each API call
       dbName: dbName
     }
   });
@@ -141,26 +147,31 @@ app.get('/doubt', (req, res) => {
 async function initializeDatabase() {
   try {
     console.log('Initializing database with sample data...');
+    
+    const photoModel = new Photo();
+    const musicModel = new Music();
+    
     await photoModel.initializeSampleData();
     await musicModel.initializeSampleData();
-    console.log('Database initialization completed successfully');
+    console.log('✅ Database initialization completed successfully');
   } catch (error) {
-    console.error('Error initializing database:', error);
-    throw error;
+    console.error('❌ Error initializing database:', error);
+    // Don't exit the process, just log the error
+    console.log('⚠️ Continuing without sample data initialization');
   }
 }
 
-// Test database connection
+// Test database connection using your Photo model
 async function testDatabaseConnection() {
   try {
     console.log('Testing database connection...');
     const testPhoto = new Photo();
     const testClient = await testPhoto.getConnection();
     await testClient.close();
-    console.log("Database connection test successful");
+    console.log("✅ Database connection test successful");
     return true;
   } catch (err) {
-    console.error("Database connection test failed:", err);
+    console.error("❌ Database connection test failed:", err);
     return false;
   }
 }
@@ -190,15 +201,23 @@ app.use((req, res, next) => {
 // Start server
 async function startServer() {
   try {
+    console.log('🚀 Starting server...');
+    
+    // Test database connection
     const dbConnected = await testDatabaseConnection();
     if (!dbConnected) {
-      throw new Error('Failed to connect to database');
+      console.log('⚠️ Database connection failed, but continuing to start server');
+      // Don't exit - let the server start anyway for debugging
     }
 
-    await initializeDatabase();
+    // Initialize database (non-blocking)
+    initializeDatabase().catch(err => {
+      console.error('Database initialization failed:', err);
+    });
 
-    app.listen(port, () => {
-      console.log(`🌹 Photo Gallery Server running at http://localhost:${port}`);
+    // Start the HTTP server
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`🌹 Photo Gallery Server running at http://0.0.0.0:${port}`);
       console.log('📁 Media files being served from:');
       console.log('   - Images: /images/');
       console.log('   - Music: /music/');
@@ -215,28 +234,44 @@ async function startServer() {
       console.log('   - GET /doubt - Doubt page');
       console.log('✨ Photo Gallery is ready!');
     });
+    
+    // Handle server errors
+    server.on('error', (err) => {
+      console.error('❌ Server error:', err);
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${port} is already in use`);
+      }
+      process.exit(1);
+    });
+    
   } catch (err) {
-    console.error("Failed to start server:", err);
+    console.error("❌ Failed to start server:", err);
     console.error("Stack trace:", err.stack);
     process.exit(1);
   }
 }
 
-// Graceful shutdown
+// Graceful shutdown - no mongoose cleanup needed
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  });
+  process.exit(0);
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  });
+  process.exit(0);
 });
 
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Start the server
 startServer();

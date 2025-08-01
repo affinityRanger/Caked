@@ -1,240 +1,217 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
+
 class Photo {
   constructor() {
-    this.mongoUri = process.env.MONGO_URI;
-    this.dbName = process.env.DB_NAME;
-    this.collectionName = 'photos'; // Changed from 'roses' to 'photos'
+    // Fixed environment variable parsing
+    this.mongoUri = this.getEnvValue('MONGO_URI') || 
+                    this.getEnvValue('SamWRLD') || 
+                    'mongodb+srv://lonergamers:EstB999Jw@clustersamwrld.hqnhrry.mongodb.net/Sam-WRLD?retryWrites=true&w=majority&appName=ClusterSamWRLD';
+    
+    this.dbName = this.getEnvValue('DB_NAME') || 
+                  this.getEnvValue('SamWrld') || 
+                  'Sam-WRLD';
+    
+    this.collectionName = this.getEnvValue('COLLECTION_NAME') || 
+                         this.getEnvValue('samWRLD') || 
+                         'files';
+
+    // Debug logging
+    console.log('Photo Model - MongoDB URI:', this.mongoUri ? this.mongoUri.substring(0, 50) + '...' : 'undefined');
+    console.log('Photo Model - DB Name:', this.dbName);
+    console.log('Photo Model - Collection:', this.collectionName);
+    
+    // Validate URI
+    if (!this.mongoUri || typeof this.mongoUri !== 'string' || !this.mongoUri.startsWith('mongodb')) {
+      console.error('Photo Model - Invalid MongoDB URI:', this.mongoUri);
+      throw new Error('Invalid MongoDB URI in Photo model');
+    }
   }
-  
-  async getConnection() {
-    const client = new MongoClient(this.mongoUri, {
-      tls: true,
-      tlsAllowInvalidCertificates: true,
-      connectTimeoutMS: 30000,
-      socketTimeoutMS: 30000,
-      serverSelectionTimeoutMS: 30000
-    });
-    await client.connect();
-    return client;
-  }
-  
-  // Get all photos
-  async findAll(category = null) {
-    let client;
-    try {
-      client = await this.getConnection();
-      const database = client.db(this.dbName);
-      const collection = database.collection(this.collectionName);
-      
-      let query = {};
-      if (category) {
-        query.category = category;
+
+  // Fixed environment variable parsing method
+  getEnvValue(varName) {
+    const value = process.env[varName];
+    
+    if (!value) {
+      console.log(`Photo Model - Environment variable ${varName} is not set`);
+      return null;
+    }
+    
+    // Handle Railway's special format: "Key: VARNAME\nValue: actual_value"
+    if (typeof value === 'string') {
+      const lines = value.split('\n');
+      if (lines.length >= 2 && lines[0].startsWith('Key:') && lines[1].startsWith('Value:')) {
+        const actualValue = lines[1].replace('Value:', '').trim();
+        console.log(`Photo Model - Extracted value from ${varName}:`, actualValue.substring(0, 50) + '...');
+        return actualValue;
       }
       
-      const photos = await collection.find(query).sort({ order: 1 }).toArray();
-      return photos;
-    } catch (error) {
-      console.error('Error fetching photos:', error);
-      throw error;
-    } finally {
-      if (client) await client.close();
+      // Return as-is if not in special format
+      return value;
     }
+    
+    return value;
   }
-  
-  // Get a specific photo by ID
-  async findById(id) {
-    let client;
+
+  async getConnection() {
     try {
-      client = await this.getConnection();
-      const database = client.db(this.dbName);
-      const collection = database.collection(this.collectionName);
+      console.log('Photo Model - Creating MongoDB connection...');
       
-      const photo = await collection.findOne({ _id: new ObjectId(id) });
-      return photo;
-    } catch (error) {
-      console.error('Error fetching photo by ID:', error);
-      throw error;
-    } finally {
-      if (client) await client.close();
-    }
-  }
-  
-  // Create a new photo
-  async create(photoData) {
-    let client;
-    try {
-      client = await this.getConnection();
-      const database = client.db(this.dbName);
-      const collection = database.collection(this.collectionName);
-      
-      const result = await collection.insertOne({
-        ...photoData,
-        createdAt: new Date(),
-        updatedAt: new Date()
+      const client = new MongoClient(this.mongoUri, {
+        tls: true,
+        tlsAllowInvalidCertificates: true,
+        connectTimeoutMS: 30000,
+        socketTimeoutMS: 30000,
+        serverSelectionTimeoutMS: 30000,
+        retryWrites: true,
+        w: 'majority'
       });
-      return result;
-    } catch (error) {
-      console.error('Error creating photo:', error);
-      throw error;
-    } finally {
-      if (client) await client.close();
-    }
-  }
-  
-  // Update a photo
-  async update(id, updateData) {
-    let client;
-    try {
-      client = await this.getConnection();
-      const database = client.db(this.dbName);
-      const collection = database.collection(this.collectionName);
       
-      const result = await collection.updateOne(
-        { _id: new ObjectId(id) },
-        { 
-          $set: {
-            ...updateData,
-            updatedAt: new Date()
-          }
-        }
-      );
-      return result;
-    } catch (error) {
-      console.error('Error updating photo:', error);
-      throw error;
-    } finally {
-      if (client) await client.close();
-    }
-  }
-  
-  // Delete a photo
-  async delete(id) {
-    let client;
-    try {
-      client = await this.getConnection();
-      const database = client.db(this.dbName);
-      const collection = database.collection(this.collectionName);
+      console.log('Photo Model - Attempting to connect...');
+      await client.connect();
       
-      const result = await collection.deleteOne({ _id: new ObjectId(id) });
-      return result;
+      console.log('Photo Model - Testing connection with ping...');
+      await client.db(this.dbName).admin().ping();
+      
+      console.log('Photo Model - Connection successful!');
+      return client;
+      
     } catch (error) {
-      console.error('Error deleting photo:', error);
+      console.error('Photo Model - Connection failed:', error.message);
+      console.error('Photo Model - Full error:', error);
       throw error;
-    } finally {
-      if (client) await client.close();
     }
   }
-  
-  // Initialize sample data
+
   async initializeSampleData() {
     let client;
     try {
+      console.log('Photo Model - Initializing sample data...');
       client = await this.getConnection();
-      const database = client.db(this.dbName);
-      const collection = database.collection(this.collectionName);
-      
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
+
       // Check if data already exists
       const existingCount = await collection.countDocuments();
       if (existingCount > 0) {
-        console.log('Sample photos already exist in database');
+        console.log(`Photo Model - Sample data already exists (${existingCount} documents)`);
         return;
       }
-      
+
+      // Sample photo data
       const samplePhotos = [
         {
-          title: "Red Rose",
-          label: "Love",
-          message: "You are the love of my life, forever and always. Every moment with you is a treasure.",
-          photos: ["red-rose-1.jpg", "red-rose-2.jpg", "red-rose-3.jpg"],
-          mainImage: "red-rose.jpg", // Renamed from roseImage
-          color: "#ff1744",
-          category: "roses", // Added category field
-          order: 1,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          title: "Pink Rose",
-          label: "Joy",
-          message: "Your smile brings joy to my heart every single day. You light up my world.",
-          photos: ["pink-rose-1.jpg", "pink-rose-2.jpg"],
-          mainImage: "pink-rose.jpg",
-          color: "#ff69b4",
+          title: "Beautiful Red Rose",
+          mainImage: "rose1.jpg",
           category: "roses",
-          order: 2,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          description: "A stunning red rose in full bloom",
+          photos: ["rose1.jpg", "rose2.jpg"],
+          createdAt: new Date()
         },
         {
-          title: "White Rose",
-          label: "Pure",
-          message: "Pure and beautiful, just like our love. You are my everything.",
-          photos: ["white-rose-1.jpg", "white-rose-2.jpg", "white-rose-3.jpg", "white-rose-4.jpg"],
-          mainImage: "white-rose.jpg",
-          color: "#ffffff",
+          title: "White Rose Garden",
+          mainImage: "white_rose.jpg",
           category: "roses",
-          order: 3,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          description: "Elegant white roses in the garden",
+          photos: ["white_rose.jpg"],
+          createdAt: new Date()
         },
         {
-          title: "Yellow Rose",
-          label: "Sunshine",
-          message: "You are my sunshine on cloudy days. Your warmth fills my soul.",
-          photos: ["yellow-rose-1.jpg", "yellow-rose-2.jpg"],
-          mainImage: "yellow-rose.jpg",
-          color: "#ffd700",
-          category: "roses",
-          order: 4,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          title: "Garden Path",
+          mainImage: "garden_path.jpg",
+          category: "garden",
+          description: "A peaceful garden path lined with flowers",
+          photos: ["garden_path.jpg", "flowers1.jpg"],
+          createdAt: new Date()
         },
         {
-          title: "Mountain Landscape",
-          label: "Nature",
-          message: "Beautiful mountain view at sunset",
-          photos: ["mountain-1.jpg", "mountain-2.jpg"],
-          mainImage: "mountain.jpg",
-          color: "#4CAF50",
-          category: "nature",
-          order: 5,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          title: "Ocean Waves",
-          label: "Ocean",
-          message: "Peaceful ocean scene",
-          photos: ["ocean-1.jpg", "ocean-2.jpg"],
-          mainImage: "ocean.jpg",
-          color: "#2196F3",
-          category: "nature",
-          order: 6,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          title: "City Skyline",
-          label: "Urban",
-          message: "Modern city at night",
-          photos: ["city-1.jpg", "city-2.jpg"],
-          mainImage: "city.jpg",
-          color: "#9C27B0",
-          category: "urban",
-          order: 7,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          title: "Hope Collection",
+          mainImage: "hope1.jpg",
+          category: "hope",
+          description: "Images that inspire hope and joy",
+          photos: ["hope1.jpg", "hope2.jpg", "hope3.jpg"],
+          createdAt: new Date()
         }
       ];
-      
-      await collection.insertMany(samplePhotos);
-      console.log('Sample photos inserted successfully');
+
+      const result = await collection.insertMany(samplePhotos);
+      console.log(`Photo Model - Inserted ${result.insertedCount} sample photos`);
+
     } catch (error) {
-      console.error('Error initializing sample data:', error);
+      console.error('Photo Model - Error initializing sample data:', error);
       throw error;
     } finally {
-      if (client) await client.close();
+      if (client) {
+        await client.close();
+      }
+    }
+  }
+
+  async getAllPhotos(category = null) {
+    let client;
+    try {
+      client = await this.getConnection();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
+
+      const filter = category ? { category: category } : {};
+      const photos = await collection.find(filter).toArray();
+      
+      console.log(`Photo Model - Retrieved ${photos.length} photos${category ? ` for category: ${category}` : ''}`);
+      return photos;
+
+    } catch (error) {
+      console.error('Photo Model - Error getting photos:', error);
+      throw error;
+    } finally {
+      if (client) {
+        await client.close();
+      }
+    }
+  }
+
+  async getPhotoById(id) {
+    let client;
+    try {
+      const { ObjectId } = require('mongodb');
+      client = await this.getConnection();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
+
+      const photo = await collection.findOne({ _id: new ObjectId(id) });
+      return photo;
+
+    } catch (error) {
+      console.error('Photo Model - Error getting photo by ID:', error);
+      throw error;
+    } finally {
+      if (client) {
+        await client.close();
+      }
+    }
+  }
+
+  async addPhoto(photoData) {
+    let client;
+    try {
+      client = await this.getConnection();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
+
+      photoData.createdAt = new Date();
+      const result = await collection.insertOne(photoData);
+      
+      console.log('Photo Model - Added new photo:', result.insertedId);
+      return result;
+
+    } catch (error) {
+      console.error('Photo Model - Error adding photo:', error);
+      throw error;
+    } finally {
+      if (client) {
+        await client.close();
+      }
     }
   }
 }
+
 module.exports = Photo;
