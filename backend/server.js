@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -14,6 +15,28 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     port: port
   });
+});
+
+// Test endpoint for static files
+app.get('/test-static', (req, res) => {
+  try {
+    const testPath = path.join(__dirname, '..', 'public');
+    const files = fs.readdirSync(testPath);
+    res.json({
+      message: 'Static file test',
+      path: testPath,
+      files: files,
+      workingDirectory: process.cwd(),
+      __dirname: __dirname
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+      path: path.join(__dirname, '..', 'public'),
+      workingDirectory: process.cwd(),
+      __dirname: __dirname
+    });
+  }
 });
 
 // Middleware
@@ -30,6 +53,50 @@ app.use((req, res, next) => {
   } else {
     next();
   }
+});
+
+// Static file serving with directory checks
+const projectRoot = path.join(__dirname, '..');
+console.log('Project root:', projectRoot);
+console.log('Current working directory:', process.cwd());
+console.log('__dirname:', __dirname);
+
+// Check and serve static directories from public folder
+const publicDir = path.join(projectRoot, 'public');
+console.log('Checking public directory:');
+console.log('Public directory exists:', fs.existsSync(publicDir));
+
+if (fs.existsSync(publicDir)) {
+  // Serve all static files from public directory
+  app.use(express.static(publicDir));
+  console.log('✅ Serving static files from:', publicDir);
+} else {
+  console.error('❌ Public directory not found:', publicDir);
+}
+
+// Serve media files
+const imagesDir = path.join(__dirname, 'uploads', 'images');
+const musicDir = path.join(__dirname, 'uploads', 'music');
+const videosDir = path.join(__dirname, 'uploads', 'videos');
+
+if (fs.existsSync(imagesDir)) {
+  app.use('/images', express.static(imagesDir));
+  console.log('✅ Serving images from:', imagesDir);
+}
+
+if (fs.existsSync(musicDir)) {
+  app.use('/music', express.static(musicDir));
+  console.log('✅ Serving music from:', musicDir);
+}
+
+if (fs.existsSync(videosDir)) {
+  app.use('/videos', express.static(videosDir));
+  console.log('✅ Serving videos from:', videosDir);
+}
+
+// Handle favicon.ico
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
 });
 
 // Start server first, then initialize other components
@@ -120,21 +187,6 @@ async function initializeApp() {
       }
     }
 
-    // Serve frontend static files from root directory (FIXED PATHS)
-    app.use('/css', express.static(path.join(__dirname, '..', 'css')));
-    app.use('/js', express.static(path.join(__dirname, '..', 'js')));
-    app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
-    
-    // Serve media files from backend directory (unchanged)
-    app.use('/images', express.static(path.join(__dirname, 'uploads', 'images')));
-    app.use('/music', express.static(path.join(__dirname, 'uploads', 'music')));
-    app.use('/videos', express.static(path.join(__dirname, 'uploads', 'videos')));
-    
-    // Handle favicon.ico request
-    app.get('/favicon.ico', (req, res) => {
-      res.status(204).end(); // Return no content
-    });
-
     // API Routes
     try {
       app.use('/api/photos', require('./src/routes/photos'));
@@ -173,17 +225,32 @@ async function initializeApp() {
       });
     });
 
-    // Frontend routes (FIXED PATHS)
+    // Frontend routes
     app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '..', 'index.html'));
+      const indexPath = path.join(projectRoot, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send('index.html not found');
+      }
     });
     
     app.get('/hope', (req, res) => {
-      res.sendFile(path.join(__dirname, '..', 'hope.html'));
+      const hopePath = path.join(projectRoot, 'hope.html');
+      if (fs.existsSync(hopePath)) {
+        res.sendFile(hopePath);
+      } else {
+        res.status(404).send('hope.html not found');
+      }
     });
     
     app.get('/doubt', (req, res) => {
-      res.sendFile(path.join(__dirname, '..', 'doubt.html'));
+      const doubtPath = path.join(projectRoot, 'doubt.html');
+      if (fs.existsSync(doubtPath)) {
+        res.sendFile(doubtPath);
+      } else {
+        res.status(404).send('doubt.html not found');
+      }
     });
 
     // Error handling
@@ -195,7 +262,7 @@ async function initializeApp() {
       });
     });
 
-    // 404 handler for API routes (FIXED PATH)
+    // 404 handler for API routes
     app.use((req, res, next) => {
       if (req.path.startsWith('/api/')) {
         res.status(404).json({
@@ -203,11 +270,17 @@ async function initializeApp() {
           message: `The endpoint ${req.originalUrl} does not exist`
         });
       } else {
-        res.sendFile(path.join(__dirname, '..', 'index.html'));
+        const indexPath = path.join(projectRoot, 'index.html');
+        if (fs.existsSync(indexPath)) {
+          res.sendFile(indexPath);
+        } else {
+          res.status(404).send('Page not found');
+        }
       }
     });
 
-    console.log('📁 Media files being served from:');
+    console.log('📁 Static files being served from:');
+    console.log('   - Public: / (all files in public directory)');
     console.log('   - Images: /images/');
     console.log('   - Music: /music/');
     console.log('   - Videos: /videos/');
