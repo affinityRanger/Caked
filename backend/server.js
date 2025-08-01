@@ -1,4 +1,8 @@
-require('dotenv').config();
+// Load environment variables (Railway provides them directly, .env is fallback for local development)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -28,12 +32,16 @@ app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// Environment variables validation
-const mongoUri = process.env.MONGO_URI;
-const dbName = process.env.DB_NAME;
-console.log('Environment Variables Loaded:');
+// Environment variables validation - Railway provides these directly
+const mongoUri = process.env.MONGO_URI || process.env.SamWRLD; // Railway shows MONGO_URI under "SamWRLD" key
+const dbName = process.env.DB_NAME || process.env.SamWrld; // Railway shows DB_NAME under "SamWrld" key
+const collectionName = process.env.COLLECTION_NAME || process.env.samWRLD; // Railway shows under "samWRLD" key
+
+console.log('Environment Variables Check:');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
 console.log('MONGO_URI:', mongoUri ? '[CONNECTED]' : 'NOT SET');
 console.log('DB_NAME:', dbName || 'NOT SET');
+console.log('COLLECTION_NAME:', collectionName || 'NOT SET');
 
 if (!mongoUri) {
   console.error('ERROR: MONGO_URI environment variable is not set');
