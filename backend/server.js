@@ -20,7 +20,7 @@ app.get('/health', (req, res) => {
 // Test endpoint for static files
 app.get('/test-static', (req, res) => {
   try {
-    const testPath = path.join(__dirname, '..', 'public');
+    const testPath = path.join(__dirname, '..', 'css');
     const files = fs.readdirSync(testPath);
     res.json({
       message: 'Static file test',
@@ -32,7 +32,7 @@ app.get('/test-static', (req, res) => {
   } catch (err) {
     res.status(500).json({
       error: err.message,
-      path: path.join(__dirname, '..', 'public'),
+      path: path.join(__dirname, '..', 'css'),
       workingDirectory: process.cwd(),
       __dirname: __dirname
     });
@@ -61,17 +61,35 @@ console.log('Project root:', projectRoot);
 console.log('Current working directory:', process.cwd());
 console.log('__dirname:', __dirname);
 
-// Check and serve static directories from public folder
-const publicDir = path.join(projectRoot, 'public');
-console.log('Checking public directory:');
-console.log('Public directory exists:', fs.existsSync(publicDir));
+// Check and serve static directories from root
+const cssDir = path.join(projectRoot, 'css');
+const jsDir = path.join(projectRoot, 'js');
+const assetsDir = path.join(projectRoot, 'assets');
 
-if (fs.existsSync(publicDir)) {
-  // Serve all static files from public directory
-  app.use(express.static(publicDir));
-  console.log('✅ Serving static files from:', publicDir);
+console.log('Checking static file directories:');
+console.log('CSS directory exists:', fs.existsSync(cssDir));
+console.log('JS directory exists:', fs.existsSync(jsDir));
+console.log('Assets directory exists:', fs.existsSync(assetsDir));
+
+if (fs.existsSync(cssDir)) {
+  app.use('/css', express.static(cssDir));
+  console.log('✅ Serving CSS from:', cssDir);
 } else {
-  console.error('❌ Public directory not found:', publicDir);
+  console.error('❌ CSS directory not found:', cssDir);
+}
+
+if (fs.existsSync(jsDir)) {
+  app.use('/js', express.static(jsDir));
+  console.log('✅ Serving JS from:', jsDir);
+} else {
+  console.error('❌ JS directory not found:', jsDir);
+}
+
+if (fs.existsSync(assetsDir)) {
+  app.use('/assets', express.static(assetsDir));
+  console.log('✅ Serving assets from:', assetsDir);
+} else {
+  console.error('❌ Assets directory not found:', assetsDir);
 }
 
 // Serve media files
@@ -280,7 +298,9 @@ async function initializeApp() {
     });
 
     console.log('📁 Static files being served from:');
-    console.log('   - Public: / (all files in public directory)');
+    console.log('   - CSS: /css/');
+    console.log('   - JS: /js/');
+    console.log('   - Assets: /assets/');
     console.log('   - Images: /images/');
     console.log('   - Music: /music/');
     console.log('   - Videos: /videos/');
