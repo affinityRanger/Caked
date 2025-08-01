@@ -2,7 +2,6 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
-
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -53,14 +52,13 @@ async function initializeApp() {
   try {
     const Photo = require('./src/models/Photo');
     const Music = require('./src/models/Music');
-
+    
     function getEnvValue(varName) {
       const value = process.env[varName];
       if (!value) {
         console.log(`Environment variable ${varName} is not set`);
         return null;
       }
-
       if (typeof value === 'string') {
         const lines = value.split('\n');
         if (lines.length >= 2 && lines[0].startsWith('Key:') && lines[1].startsWith('Value:')) {
@@ -70,18 +68,15 @@ async function initializeApp() {
         }
         return value;
       }
-
       return value;
     }
 
     const mongoUri = getEnvValue('MONGO_URI') || 
                      getEnvValue('SamWRLD') || 
                      'mongodb+srv://lonergamers:EstB999Jw@clustersamwrld.hqnhrry.mongodb.net/Sam-WRLD?retryWrites=true&w=majority&appName=ClusterSamWRLD';
-
     const dbName = getEnvValue('DB_NAME') || 
                    getEnvValue('SamWrld') || 
                    'Sam-WRLD';
-
     const collectionName = getEnvValue('COLLECTION_NAME') || 
                           getEnvValue('samWRLD') || 
                           'files';
@@ -104,11 +99,11 @@ async function initializeApp() {
         const testClient = await testPhoto.getConnection();
         await testClient.close();
         console.log("✅ Database connection test successful");
-
+        
         const photoModel = new Photo();
         const musicModel = new Music();
-
-        // ✅ Defer sample data init
+        
+        // Defer sample data init
         setTimeout(async () => {
           try {
             console.log('⏳ Initializing sample data in background...');
@@ -119,22 +114,26 @@ async function initializeApp() {
             console.error('❌ Error initializing sample data in background:', err);
           }
         }, 0);
-
       } catch (error) {
         console.error('❌ Database error:', error);
         console.log('⚠️ Continuing without database features');
       }
     }
 
-    // Serve frontend static files from root
-    app.use('/css', express.static(path.join(__dirname, 'css')));
-    app.use('/js', express.static(path.join(__dirname, 'js')));
-    app.use('/assets', express.static(path.join(__dirname, 'assets')));
-
-    // Serve media files
+    // Serve frontend static files from root directory (FIXED PATHS)
+    app.use('/css', express.static(path.join(__dirname, '..', 'css')));
+    app.use('/js', express.static(path.join(__dirname, '..', 'js')));
+    app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
+    
+    // Serve media files from backend directory (unchanged)
     app.use('/images', express.static(path.join(__dirname, 'uploads', 'images')));
     app.use('/music', express.static(path.join(__dirname, 'uploads', 'music')));
     app.use('/videos', express.static(path.join(__dirname, 'uploads', 'videos')));
+    
+    // Handle favicon.ico request
+    app.get('/favicon.ico', (req, res) => {
+      res.status(204).end(); // Return no content
+    });
 
     // API Routes
     try {
@@ -174,17 +173,17 @@ async function initializeApp() {
       });
     });
 
-    // Frontend routes
+    // Frontend routes (FIXED PATHS)
     app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, 'index.html'));
+      res.sendFile(path.join(__dirname, '..', 'index.html'));
     });
-
+    
     app.get('/hope', (req, res) => {
-      res.sendFile(path.join(__dirname, 'hope.html'));
+      res.sendFile(path.join(__dirname, '..', 'hope.html'));
     });
-
+    
     app.get('/doubt', (req, res) => {
-      res.sendFile(path.join(__dirname, 'doubt.html'));
+      res.sendFile(path.join(__dirname, '..', 'doubt.html'));
     });
 
     // Error handling
@@ -196,7 +195,7 @@ async function initializeApp() {
       });
     });
 
-    // 404 handler for API routes
+    // 404 handler for API routes (FIXED PATH)
     app.use((req, res, next) => {
       if (req.path.startsWith('/api/')) {
         res.status(404).json({
@@ -204,7 +203,7 @@ async function initializeApp() {
           message: `The endpoint ${req.originalUrl} does not exist`
         });
       } else {
-        res.sendFile(path.join(__dirname, 'index.html'));
+        res.sendFile(path.join(__dirname, '..', 'index.html'));
       }
     });
 
@@ -220,7 +219,6 @@ async function initializeApp() {
     console.log('   - GET /hope');
     console.log('   - GET /doubt');
     console.log('✨ Photo Gallery is ready!');
-
   } catch (error) {
     console.error('❌ Error initializing app:', error);
   }
