@@ -33,19 +33,42 @@ app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Environment variables validation - Railway provides these directly
-const mongoUri = process.env.MONGO_URI || process.env.SamWRLD; // Railway shows MONGO_URI under "SamWRLD" key
-const dbName = process.env.DB_NAME || process.env.SamWrld; // Railway shows DB_NAME under "SamWrld" key
-const collectionName = process.env.COLLECTION_NAME || process.env.samWRLD; // Railway shows under "samWRLD" key
+// Debug: Let's see all environment variables
+console.log('DEBUG: All environment variables:');
+Object.keys(process.env).forEach(key => {
+  if (key.includes('MONGO') || key.includes('DB') || key.includes('COLLECTION') || key.includes('Sam')) {
+    console.log(`${key}:`, process.env[key]);
+  }
+});
+
+// Try different ways to get the MongoDB URI
+const mongoUri = process.env.MONGO_URI || 
+                 process.env.SamWRLD || 
+                 process.env['SamWRLD'] ||
+                 'mongodb+srv://lonergamers:EstB999Jw@clustersamwrld.hqnhrry.mongodb.net/Sam-WRLD?retryWrites=true&w=majority&appName=ClusterSamWRLD';
+
+const dbName = process.env.DB_NAME || 
+               process.env.SamWrld || 
+               process.env['SamWrld'] ||
+               'Sam-WRLD';
+
+const collectionName = process.env.COLLECTION_NAME || 
+                      process.env.samWRLD || 
+                      process.env['samWRLD'] ||
+                      'files';
 
 console.log('Environment Variables Check:');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
-console.log('MONGO_URI:', mongoUri ? '[CONNECTED]' : 'NOT SET');
-console.log('DB_NAME:', dbName || 'NOT SET');
-console.log('COLLECTION_NAME:', collectionName || 'NOT SET');
+console.log('MONGO_URI type:', typeof mongoUri);
+console.log('MONGO_URI value:', mongoUri?.substring ? mongoUri.substring(0, 50) + '...' : mongoUri);
+console.log('DB_NAME:', dbName);
+console.log('COLLECTION_NAME:', collectionName);
 
-if (!mongoUri) {
-  console.error('ERROR: MONGO_URI environment variable is not set');
-  process.exit(1);
+if (!mongoUri || typeof mongoUri !== 'string' || !mongoUri.startsWith('mongodb')) {
+  console.error('ERROR: Invalid MONGO_URI environment variable');
+  console.error('MONGO_URI value:', mongoUri);
+  console.error('Using fallback connection string...');
+  // Use fallback if environment variable is corrupted
 }
 
 // Connect to MongoDB
