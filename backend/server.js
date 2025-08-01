@@ -24,16 +24,25 @@ app.get('/debug', (req, res) => {
     const files = fs.readdirSync(appRoot);
     const backendFiles = fs.readdirSync(path.join(appRoot, 'backend'));
     
+    // Check for public directory in root
+    const publicExists = fs.existsSync(path.join(appRoot, 'public'));
+    let publicFiles = [];
+    if (publicExists) {
+      publicFiles = fs.readdirSync(path.join(appRoot, 'public'));
+    }
+    
     res.json({
       appRoot,
       files,
       backendFiles,
-      cssExists: fs.existsSync(path.join(appRoot, 'css')),
-      jsExists: fs.existsSync(path.join(appRoot, 'js')),
-      assetsExists: fs.existsSync(path.join(appRoot, 'assets')),
-      cssPath: path.join(appRoot, 'css'),
-      jsPath: path.join(appRoot, 'js'),
-      assetsPath: path.join(appRoot, 'assets')
+      publicExists,
+      publicFiles,
+      cssExists: fs.existsSync(path.join(appRoot, 'public', 'css')),
+      jsExists: fs.existsSync(path.join(appRoot, 'public', 'js')),
+      assetsExists: fs.existsSync(path.join(appRoot, 'public', 'assets')),
+      cssPath: path.join(appRoot, 'public', 'css'),
+      jsPath: path.join(appRoot, 'public', 'js'),
+      assetsPath: path.join(appRoot, 'public', 'assets')
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -43,7 +52,7 @@ app.get('/debug', (req, res) => {
 // Test endpoint for static files
 app.get('/test-static', (req, res) => {
   try {
-    const testPath = path.join(process.cwd(), 'css');
+    const testPath = path.join(process.cwd(), 'public', 'css');
     const files = fs.existsSync(testPath) ? fs.readdirSync(testPath) : [];
     res.json({
       message: 'Static file test',
@@ -56,7 +65,7 @@ app.get('/test-static', (req, res) => {
   } catch (err) {
     res.status(500).json({
       error: err.message,
-      path: path.join(process.cwd(), 'css'),
+      path: path.join(process.cwd(), 'public', 'css'),
       workingDirectory: process.cwd(),
       __dirname: __dirname
     });
@@ -82,35 +91,39 @@ app.use((req, res, next) => {
 console.log('Current working directory:', process.cwd());
 console.log('__dirname:', __dirname);
 
-// Static file serving using process.cwd()
-const cssDir = path.join(process.cwd(), 'css');
-const jsDir = path.join(process.cwd(), 'js');
-const assetsDir = path.join(process.cwd(), 'assets');
+// Static file serving - point to public folder in root
+const publicDir = path.join(process.cwd(), 'public');
+const cssDir = path.join(publicDir, 'css');
+const jsDir = path.join(publicDir, 'js');
+const assetsDir = path.join(publicDir, 'assets');
 
-console.log('Checking static file directories:');
+console.log('Checking public directory:', publicDir, 'exists:', fs.existsSync(publicDir));
 console.log('CSS directory:', cssDir, 'exists:', fs.existsSync(cssDir));
 console.log('JS directory:', jsDir, 'exists:', fs.existsSync(jsDir));
 console.log('Assets directory:', assetsDir, 'exists:', fs.existsSync(assetsDir));
 
+if (fs.existsSync(publicDir)) {
+  // Serve all static files from public directory
+  app.use(express.static(publicDir));
+  console.log('✅ Serving static files from:', publicDir);
+} else {
+  console.error('❌ Public directory not found:', publicDir);
+}
+
+// Also serve specific directories if they exist
 if (fs.existsSync(cssDir)) {
   app.use('/css', express.static(cssDir));
   console.log('✅ Serving CSS from:', cssDir);
-} else {
-  console.error('❌ CSS directory not found:', cssDir);
 }
 
 if (fs.existsSync(jsDir)) {
   app.use('/js', express.static(jsDir));
   console.log('✅ Serving JS from:', jsDir);
-} else {
-  console.error('❌ JS directory not found:', jsDir);
 }
 
 if (fs.existsSync(assetsDir)) {
   app.use('/assets', express.static(assetsDir));
   console.log('✅ Serving assets from:', assetsDir);
-} else {
-  console.error('❌ Assets directory not found:', assetsDir);
 }
 
 // Serve media files
@@ -319,6 +332,7 @@ async function initializeApp() {
     });
 
     console.log('📁 Static files being served from:');
+    console.log('   - Public: / (all files in public directory)');
     console.log('   - CSS: /css/');
     console.log('   - JS: /js/');
     console.log('   - Assets: /assets/');
