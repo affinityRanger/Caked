@@ -17,14 +17,38 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Debug endpoint to check directory structure
+app.get('/debug', (req, res) => {
+  try {
+    const appRoot = process.cwd(); // Should be /app
+    const files = fs.readdirSync(appRoot);
+    const backendFiles = fs.readdirSync(path.join(appRoot, 'backend'));
+    
+    res.json({
+      appRoot,
+      files,
+      backendFiles,
+      cssExists: fs.existsSync(path.join(appRoot, 'css')),
+      jsExists: fs.existsSync(path.join(appRoot, 'js')),
+      assetsExists: fs.existsSync(path.join(appRoot, 'assets')),
+      cssPath: path.join(appRoot, 'css'),
+      jsPath: path.join(appRoot, 'js'),
+      assetsPath: path.join(appRoot, 'assets')
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Test endpoint for static files
 app.get('/test-static', (req, res) => {
   try {
-    const testPath = path.join(__dirname, '..', 'css');
-    const files = fs.readdirSync(testPath);
+    const testPath = path.join(process.cwd(), 'css');
+    const files = fs.existsSync(testPath) ? fs.readdirSync(testPath) : [];
     res.json({
       message: 'Static file test',
       path: testPath,
+      exists: fs.existsSync(testPath),
       files: files,
       workingDirectory: process.cwd(),
       __dirname: __dirname
@@ -32,7 +56,7 @@ app.get('/test-static', (req, res) => {
   } catch (err) {
     res.status(500).json({
       error: err.message,
-      path: path.join(__dirname, '..', 'css'),
+      path: path.join(process.cwd(), 'css'),
       workingDirectory: process.cwd(),
       __dirname: __dirname
     });
@@ -55,21 +79,18 @@ app.use((req, res, next) => {
   }
 });
 
-// Static file serving with directory checks
-const projectRoot = path.join(__dirname, '..');
-console.log('Project root:', projectRoot);
 console.log('Current working directory:', process.cwd());
 console.log('__dirname:', __dirname);
 
-// Check and serve static directories from root
-const cssDir = path.join(projectRoot, 'css');
-const jsDir = path.join(projectRoot, 'js');
-const assetsDir = path.join(projectRoot, 'assets');
+// Static file serving using process.cwd()
+const cssDir = path.join(process.cwd(), 'css');
+const jsDir = path.join(process.cwd(), 'js');
+const assetsDir = path.join(process.cwd(), 'assets');
 
 console.log('Checking static file directories:');
-console.log('CSS directory exists:', fs.existsSync(cssDir));
-console.log('JS directory exists:', fs.existsSync(jsDir));
-console.log('Assets directory exists:', fs.existsSync(assetsDir));
+console.log('CSS directory:', cssDir, 'exists:', fs.existsSync(cssDir));
+console.log('JS directory:', jsDir, 'exists:', fs.existsSync(jsDir));
+console.log('Assets directory:', assetsDir, 'exists:', fs.existsSync(assetsDir));
 
 if (fs.existsSync(cssDir)) {
   app.use('/css', express.static(cssDir));
@@ -245,7 +266,7 @@ async function initializeApp() {
 
     // Frontend routes
     app.get('/', (req, res) => {
-      const indexPath = path.join(projectRoot, 'index.html');
+      const indexPath = path.join(process.cwd(), 'index.html');
       if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
       } else {
@@ -254,7 +275,7 @@ async function initializeApp() {
     });
     
     app.get('/hope', (req, res) => {
-      const hopePath = path.join(projectRoot, 'hope.html');
+      const hopePath = path.join(process.cwd(), 'hope.html');
       if (fs.existsSync(hopePath)) {
         res.sendFile(hopePath);
       } else {
@@ -263,7 +284,7 @@ async function initializeApp() {
     });
     
     app.get('/doubt', (req, res) => {
-      const doubtPath = path.join(projectRoot, 'doubt.html');
+      const doubtPath = path.join(process.cwd(), 'doubt.html');
       if (fs.existsSync(doubtPath)) {
         res.sendFile(doubtPath);
       } else {
@@ -288,7 +309,7 @@ async function initializeApp() {
           message: `The endpoint ${req.originalUrl} does not exist`
         });
       } else {
-        const indexPath = path.join(projectRoot, 'index.html');
+        const indexPath = path.join(process.cwd(), 'index.html');
         if (fs.existsSync(indexPath)) {
           res.sendFile(indexPath);
         } else {
