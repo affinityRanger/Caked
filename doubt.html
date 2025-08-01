@@ -4,37 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Missing You - Chaos of Doubt</title>
-    <link rel="stylesheet" href="css/doubt.css">
+    <link rel="stylesheet" href="/css/doubt.css">
 </head>
 <body>
     <!-- Audio elements -->
     <audio id="mainHeartAudio" preload="auto">
         <source src="/assets/audio/PARTYNEXTDOOR - You ve Been Missed [Official Audio].mp3" type="audio/wav">
     </audio>
-
     <audio id="musicAudio1" preload="auto">
         <source src="/assets/audio/PARTYNEXTDOOR - TRAUMA (Official Audio).mp3" type="audio/wav">
     </audio>
-
     <audio id="musicAudio2" preload="auto">
         <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
     </audio>
-
     <audio id="musicAudio3" preload="auto">
         <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
     </audio>
-
     <audio id="musicAudio4" preload="auto">
         <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
     </audio>
-
     <!-- Hidden file inputs for photo uploads -->
     <input type="file" id="fileInput1" class="file-input" accept="image/*" onchange="handleImageUpload(1, this)">
     <input type="file" id="fileInput2" class="file-input" accept="image/*" onchange="handleImageUpload(2, this)">
     <input type="file" id="fileInput3" class="file-input" accept="image/*" onchange="handleImageUpload(3, this)">
     <input type="file" id="fileInput4" class="file-input" accept="image/*" onchange="handleImageUpload(4, this)">
     <input type="file" id="fileInput5" class="file-input" accept="image/*" onchange="handleImageUpload(5, this)">
-
     <div class="chaos-container">
         <button class="back-button" onclick="goBack()">← Back to Choice</button>
         <button class="message-icon" onclick="showMessage()">💌</button>
@@ -73,25 +67,25 @@
         
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <img src="assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
+            <img src="/assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
             <div class="placeholder" style="display: none;">
                 📷<br>Our moment<br>Add photo as:<br>assets/images/memory2.jpg
             </div>
         </div>
         <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <img src="assets/videos/ctnap.mp4" alt="Missing this" onerror="showPlaceholder(3)">
+            <img src="/assets/videos/ctnap.mp4" alt="Missing this" onerror="showPlaceholder(3)">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Missing this<br>Add photo as:<br>assets/images/memory3.jpg
             </div>
         </div>
         <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <img src="assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
+            <img src="/assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
             <div class="placeholder" style="display: none;">
                 📸<br>Your beauty<br>Add photo as:<br>assets/images/memory4.jpg
             </div>
         </div>
         <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <img src="assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
+            <img src="/assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
             <div class="placeholder" style="display: none;">
                 📷<br>Lonely times<br>Add photo as:<br>assets/images/memory5.jpg
             </div>
@@ -105,7 +99,6 @@
         
         <div class="audio-status" id="audioStatus">🎵 Now Playing...</div>
     </div>
-
     <!-- Message Modal -->
     <div class="message-modal" id="messageModal">
         <div class="message-content">
@@ -172,7 +165,6 @@
             </div>
         </div>
     </div>
-
-    <script src="js/doubt.js"></script>
+    <script src="/js/doubt.js"></script>
 </body>
 </html>

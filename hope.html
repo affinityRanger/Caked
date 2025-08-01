@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rose Garden</title>
-  <link rel="stylesheet" href="css/hope.css">
+  <link rel="stylesheet" href="/css/hope.css">
 </head>
-
 <body>
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
@@ -16,27 +15,23 @@
       <small>Usiblash sana</small>
     </div>
   </div>
-
   <!-- Hidden Title Popup -->
   <div class="title-popup" id="titlePopup">
     <p>Remember I used to call you this and you would blash about it.💜😂😌good times at times</p>
     <p>Into yo like I'm a driller.</p>
   </div>
-
   <!-- Background Music (Keep this exactly where it is) -->
   <audio id="globalAudio" class="background-music" preload="auto">
-    <source src="assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
-    <source src="assets/audio/PARTYNEXTDOOR-TRAUMA.mp3" type="audio/mpeg">
-    <source src="assets/audio/KEEP IT-JUICE WRLD.mp3" type="audio/mpeg">
-    <source src="assets/audio/PARTYNEXTDOOR - DEEPER.mp3" type="audio/mpeg">
-    <source src="assets/audio/GRACE/SAM - Juice WRLD.mp3" type="audio/mpeg">
+    <source src="/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
+    <source src="/assets/audio/PARTYNEXTDOOR-TRAUMA.mp3" type="audio/mpeg">
+    <source src="/assets/audio/KEEP IT-JUICE WRLD.mp3" type="audio/mpeg">
+    <source src="/assets/audio/PARTYNEXTDOOR - DEEPER.mp3" type="audio/mpeg">
+    <source src="/assets/audio/GRACE/SAM - Juice WRLD.mp3" type="audio/mpeg">
   </audio>
-
   <!-- Music Button -->
   <div class="music-button" id="musicButton" onclick="toggleMusicPopup()">
     <div class="music-button-icon">🎵</div>
   </div>
-
   <!-- Music Popup -->
   <div class="music-popup" id="musicPopup">
     <div class="music-header">
@@ -62,22 +57,18 @@
     </div>
     <div class="bg-now-playing" id="globalNowPlaying">Ready: Dreamin' - PARTYNEXTDOOR</div>
   </div>
-
   <!-- Stars Background -->
   <div class="stars" id="stars"></div>
-
   <div class="container">
     <h1 class="title" onclick="titleClick()">✨La Sam✨</h1>
-
     <div class="roses-container">
       <!-- Rose 1 -->
       <div class="rose-wrapper" onclick="openModal('modal1')">
         <div class="rose">
-          <img class="rose-image" id="rose1Image" src="assets/images/rose-unsplash.jpg" alt="Rose 1">
+          <img class="rose-image" id="rose1Image" src="/assets/images/rose-unsplash.jpg" alt="Rose 1">
         </div>
         <div class="rose-label">First Bloom</div>
       </div>
-
       <!-- Rose 2 -->
       <div class="rose-wrapper" onclick="openModal('modal2')">
         <div class="rose">
@@ -85,7 +76,6 @@
         </div>
         <div class="rose-label">Heart's Robbed</div>
       </div>
-
       <!-- Rose 3 -->
       <div class="rose-wrapper" onclick="openModal('modal3')">
         <div class="rose">
@@ -95,7 +85,6 @@
       </div>
     </div>
   </div>
-
   <!-- MODALS -->
   <!-- Modal 1 -->
   <div id="modal1" class="modal">
@@ -117,12 +106,11 @@
         <p>Loving you is the Only law I will never brake</p>
       </div>
       <div class="photo-container">
-        <img class="photo" src="assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this)">
-        <img class="photo" src="assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this)">
+        <img class="photo" src="/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this)">
+        <img class="photo" src="/assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this)">
       </div>
     </div>
   </div>
-
   <!-- Modal 2 -->
   <div id="modal2" class="modal">
     <div class="modal-content">
@@ -137,12 +125,11 @@
         <p>We were gonna be on a beach high together. You fr sweared</p>
       </div>
       <div class="photo-container">
-        <img class="photo" src="assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this)">
+        <img class="photo" src="/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this)">
         <img class="photo" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&h=300&fit=crop" alt="Memory 4" onclick="enlargePhoto(this)">
       </div>
     </div>
   </div>
-
   <!-- Modal 3 -->
   <div id="modal3" class="modal">
     <div class="modal-content">
@@ -157,18 +144,16 @@
         <p> Even if you choose the other side, I still cant belive I fumbled and stumbled on this girl😅😔things change</p>
       </div>
       <div class="photo-container">
-        <img class="photo" src="assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this)">
-        <img class="photo" src="assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this)">
-        <img class="photo" src="assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this)">
+        <img class="photo" src="/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this)">
+        <img class="photo" src="/assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this)">
+        <img class="photo" src="/assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this)">
       </div>
     </div>
   </div>
-
   <!-- Exclamation Button (Bottom Right) -->
   <div id="exclamationIcon" class="exclamation-button" onclick="toggleExclamationPopup()">
     <span class="exclamation-icon">!</span>
   </div>
-
   <!-- Exclamation Popup -->
   <div id="exclamationPopup" class="exclamation-popup">
     <div class="exclamation-header">
@@ -183,13 +168,11 @@
       <p>The rest of the songs I have hand picked to explain myself. Some you are familiar with maybe some not.
       </p>
         I dont know whenever I hear DREAMING it just gives me your vibe. Its ingrained in me already. Not the music but the feeling.
-
       </p>
       <p>Hand drawn Roses. Just to show I still got it in me. 
       
     </div>
   </div>
-
   <!-- Photo Enlargement Modal -->
   <div id="photoModal" class="modal">
     <div class="modal-content" style="max-width: 80%; text-align: center;">
@@ -197,7 +180,6 @@
       <img id="enlargedPhoto" style="max-width: 100%; max-height: 70vh; border-radius: 15px; margin-top: 20px;">
     </div>
   </div>
-
   <footer>
     <p>Girl you better fucking read every single letter from a-z🌹</p>
     <p>Made with 💖 by your biggest fan</p>
@@ -230,8 +212,6 @@
       <p> If you wanna hear my Angelic singing voice. PND dont got nothing on me. Kama singeku tech bro ningekua msanii nishakushoo. </p>
     </div>
   </footer>
-
-  <script src="js/hope.js"></script>
-
+  <script src="/js/hope.js"></script>
 </body>
 </html>
