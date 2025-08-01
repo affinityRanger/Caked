@@ -21,7 +21,7 @@ app.get('/health', (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS middleware for frontend requests
+// CORS middleware
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -37,8 +37,6 @@ app.use((req, res, next) => {
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`🌹 Photo Gallery Server running at http://0.0.0.0:${port}`);
   console.log('✅ Server started successfully');
-  
-  // Now initialize the rest of the application
   initializeApp();
 });
 
@@ -53,40 +51,29 @@ server.on('error', (err) => {
 
 async function initializeApp() {
   try {
-    // Import models only after server is running
     const Photo = require('./src/models/Photo');
     const Music = require('./src/models/Music');
 
-    console.log('DEBUG: Environment variables check:');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-
-    // Function to safely extract environment variable value
     function getEnvValue(varName) {
       const value = process.env[varName];
-      
       if (!value) {
         console.log(`Environment variable ${varName} is not set`);
         return null;
       }
-      
-      // If the value looks like it contains "Key:" and "Value:", extract the actual value
+
       if (typeof value === 'string') {
-        // Check if it's in the format "Key: VARNAME\nValue: actual_value"
         const lines = value.split('\n');
         if (lines.length >= 2 && lines[0].startsWith('Key:') && lines[1].startsWith('Value:')) {
           const actualValue = lines[1].replace('Value:', '').trim();
           console.log(`Extracted actual value from ${varName}:`, actualValue.substring(0, 50) + '...');
           return actualValue;
         }
-        
-        // Otherwise return the value as-is
         return value;
       }
-      
+
       return value;
     }
 
-    // Get environment variables using the safe extraction function
     const mongoUri = getEnvValue('MONGO_URI') || 
                      getEnvValue('SamWRLD') || 
                      'mongodb+srv://lonergamers:EstB999Jw@clustersamwrld.hqnhrry.mongodb.net/Sam-WRLD?retryWrites=true&w=majority&appName=ClusterSamWRLD';
@@ -106,28 +93,33 @@ async function initializeApp() {
     console.log('DB_NAME:', dbName);
     console.log('COLLECTION_NAME:', collectionName);
 
-    // Validate MongoDB URI
     if (!mongoUri || typeof mongoUri !== 'string' || !mongoUri.startsWith('mongodb')) {
       console.error('WARNING: Invalid MONGO_URI environment variable');
       console.error('MONGO_URI value:', mongoUri);
       console.error('Database features will be disabled');
     } else {
-      // Test database connection using your Photo model
       try {
         console.log('Testing database connection...');
         const testPhoto = new Photo();
         const testClient = await testPhoto.getConnection();
         await testClient.close();
         console.log("✅ Database connection test successful");
-        
-        // Initialize database with sample data
-        console.log('Initializing database with sample data...');
+
         const photoModel = new Photo();
         const musicModel = new Music();
-        
-        await photoModel.initializeSampleData();
-        await musicModel.initializeSampleData();
-        console.log('✅ Database initialization completed successfully');
+
+        // ✅ Defer sample data init
+        setTimeout(async () => {
+          try {
+            console.log('⏳ Initializing sample data in background...');
+            await photoModel.initializeSampleData();
+            await musicModel.initializeSampleData();
+            console.log('✅ Sample data initialized in background');
+          } catch (err) {
+            console.error('❌ Error initializing sample data in background:', err);
+          }
+        }, 0);
+
       } catch (error) {
         console.error('❌ Database error:', error);
         console.log('⚠️ Continuing without database features');
@@ -144,7 +136,7 @@ async function initializeApp() {
     app.use('/music', express.static(path.join(__dirname, 'uploads', 'music')));
     app.use('/videos', express.static(path.join(__dirname, 'uploads', 'videos')));
 
-    // API Routes - wrap in try-catch
+    // API Routes
     try {
       app.use('/api/photos', require('./src/routes/photos'));
       app.use('/api/music', require('./src/routes/music'));
@@ -169,7 +161,7 @@ async function initializeApp() {
       }
     });
 
-    // Enhanced health check endpoint
+    // Enhanced health check
     app.get('/api/health', (req, res) => {
       res.json({
         status: 'healthy',
@@ -182,35 +174,20 @@ async function initializeApp() {
       });
     });
 
-    // Frontend routes - serve from root directory
+    // Frontend routes
     app.get('/', (req, res) => {
-      try {
-        res.sendFile(path.join(__dirname, 'index.html'));
-      } catch (error) {
-        console.error('Error serving index.html:', error);
-        res.status(500).send('Error loading page');
-      }
+      res.sendFile(path.join(__dirname, 'index.html'));
     });
 
     app.get('/hope', (req, res) => {
-      try {
-        res.sendFile(path.join(__dirname, 'hope.html'));
-      } catch (error) {
-        console.error('Error serving hope.html:', error);
-        res.status(500).send('Error loading page');
-      }
+      res.sendFile(path.join(__dirname, 'hope.html'));
     });
 
     app.get('/doubt', (req, res) => {
-      try {
-        res.sendFile(path.join(__dirname, 'doubt.html'));
-      } catch (error) {
-        console.error('Error serving doubt.html:', error);
-        res.status(500).send('Error loading page');
-      }
+      res.sendFile(path.join(__dirname, 'doubt.html'));
     });
 
-    // Error handling middleware
+    // Error handling
     app.use((err, req, res, next) => {
       console.error('Server error:', err);
       res.status(500).json({
@@ -227,13 +204,7 @@ async function initializeApp() {
           message: `The endpoint ${req.originalUrl} does not exist`
         });
       } else {
-        // Serve index.html from root for all other routes (SPA behavior)
-        try {
-          res.sendFile(path.join(__dirname, 'index.html'));
-        } catch (error) {
-          console.error('Error serving fallback index.html:', error);
-          res.status(500).send('Error loading page');
-        }
+        res.sendFile(path.join(__dirname, 'index.html'));
       }
     });
 
@@ -242,47 +213,35 @@ async function initializeApp() {
     console.log('   - Music: /music/');
     console.log('   - Videos: /videos/');
     console.log('📡 API endpoints:');
-    console.log('   - GET /api/photos - Get all photos');
-    console.log('   - GET /api/photos?category=roses - Get photos by category');
-    console.log('   - GET /api/photos/:id - Get specific photo');
-    console.log('   - GET /api/music - Get all music tracks');
-    console.log('   - GET /api/health - Health check');
+    console.log('   - GET /api/photos');
+    console.log('   - GET /api/music');
     console.log('🌐 Frontend routes:');
-    console.log('   - GET / - Main page');
-    console.log('   - GET /hope - Hope page');
-    console.log('   - GET /doubt - Doubt page');
+    console.log('   - GET /');
+    console.log('   - GET /hope');
+    console.log('   - GET /doubt');
     console.log('✨ Photo Gallery is ready!');
 
   } catch (error) {
     console.error('❌ Error initializing app:', error);
-    // Don't exit - server is already running
   }
 }
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    process.exit(0);
-  });
+  server.close(() => process.exit(0));
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    process.exit(0);
-  });
+  server.close(() => process.exit(0));
 });
 
-// Handle uncaught exceptions - but don't exit immediately
+// Uncaught exceptions and rejections
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  // In production, you might want to gracefully shut down
-  // For now, just log and continue
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // In production, you might want to gracefully shut down
-  // For now, just log and continue
 });
