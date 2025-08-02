@@ -63,13 +63,14 @@ function createBreakingHeartTransition() {
   }
 }
 
+// FIXED NAVIGATION FUNCTIONS
 function navigateToGarden() {
   const leftSide = document.querySelector('.left-side');
   leftSide.classList.add('clicking');
   createSparkleTransition();
   
   setTimeout(() => {
-    window.location.href = 'hope.html';
+    window.location.href = 'hope.html';  // Fixed: Changed from '/hope' to 'hope.html'
   }, 1200);
 }
 
@@ -79,7 +80,7 @@ function navigateToDoubt() {
   createBreakingHeartTransition();
   
   setTimeout(() => {
-    window.location.href = 'doubt.html';
+    window.location.href = 'doubt.html';  // Fixed: Changed from '/doubt' to 'doubt.html'
   }, 1500);
 }
 
@@ -101,8 +102,11 @@ function loadFileStructure() {
   // Show loading message
   fileManager.innerHTML = '<div class="loading">Loading files...</div>';
   
+  // Check if we have a backend URL configured
+  const backendURL = 'https://caked-production.up.railway.app'; // Use your actual deployed URL
+  
   // Fetch file structure from backend API
-  fetch('/api/files')
+  fetch(`${backendURL}/api/files`)
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');

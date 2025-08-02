@@ -7,8 +7,8 @@ let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
 // Exclamation popup functionality
 let exclamationPopupVisible = false;
 
-// Backend URL configuration
-const BACKEND_URL = 'http://localhost:3000'; // Change this to your backend URL in production
+// Backend URL configuration - Updated for production
+const BACKEND_URL = 'https://caked-production.up.railway.app'; // Updated to use your Railway URL
 
 // Initialize audio on page load
 window.addEventListener('load', function() {
@@ -30,8 +30,8 @@ window.addEventListener('load', function() {
 
 // Auto-play function
 function startAutoPlay() {
-  // Set the initial song source
-  globalAudio.src = `assets/audio/${currentSong}`;
+  // Set the initial song source using backend URL
+  globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
   
   // Try to play automatically
   globalAudio.play().then(() => {
@@ -92,8 +92,8 @@ function playNextSong() {
   
   console.log('Next song:', nextSong, 'New index:', currentSongIndex);
   
-  // Set the new source
-  globalAudio.src = `assets/audio/${nextSong}`;
+  // Set the new source using backend URL
+  globalAudio.src = `${BACKEND_URL}/assets/audio/${nextSong}`;
   globalAudio.volume = 0.4;
   
   // Update display immediately
@@ -134,7 +134,7 @@ function playPreviousSong() {
   
   console.log('Previous song:', prevSong, 'New index:', currentSongIndex);
   
-  globalAudio.src = `assets/audio/${prevSong}`;
+  globalAudio.src = `${BACKEND_URL}/assets/audio/${prevSong}`;
   globalAudio.volume = 0.4;
   
   document.getElementById('globalNowPlaying').textContent = `Loading: ${getSongDisplayName(prevSong)}`;
@@ -217,7 +217,7 @@ function selectGlobalSong(songFile) {
     
     console.log('Selected song index:', currentSongIndex);
     
-    globalAudio.src = `assets/audio/${songFile}`;
+    globalAudio.src = `${BACKEND_URL}/assets/audio/${songFile}`;
     globalAudio.volume = 0.4;
     
     if (wasPlaying) {
@@ -243,7 +243,7 @@ function toggleGlobalMusic() {
   if (globalAudio.paused) {
     // Make sure we have a source set
     if (!globalAudio.src || globalAudio.src === '') {
-      globalAudio.src = `assets/audio/${currentSong}`;
+      globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
     }
     
     // Try to play
@@ -616,7 +616,7 @@ function createPhotoElement(photo) {
   
   const img = document.createElement('img');
   // Use the full backend URL for images
-  img.src = `${BACKEND_URL}/images/${photo.mainImage}`;
+  img.src = `${BACKEND_URL}/assets/images/${photo.mainImage}`;
   img.alt = photo.title;
   img.className = 'photo';
   
@@ -675,6 +675,50 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log('Initial song:', currentSong, 'Index:', currentSongIndex);
   console.log('Full playlist:', playlist);
+  
+  // Update all audio sources to use backend URL
+  const audioElements = document.querySelectorAll('audio');
+  audioElements.forEach(audio => {
+    // Get the current source
+    const source = audio.querySelector('source');
+    if (source) {
+      const src = source.getAttribute('src');
+      // Update to use backend URL if it's a local asset
+      if (src.startsWith('/assets/') || src.startsWith('assets/')) {
+        const filename = src.split('/').pop();
+        source.setAttribute('src', `${BACKEND_URL}/assets/audio/${filename}`);
+      }
+    }
+    
+    // Set volume for all audio elements
+    audio.volume = 0.3;
+    audio.loop = false;
+  });
+  
+  // Update all image sources to use backend URL
+  const images = document.querySelectorAll('img');
+  images.forEach(img => {
+    const src = img.getAttribute('src');
+    // Update to use backend URL if it's a local asset
+    if (src.startsWith('/assets/') || src.startsWith('assets/')) {
+      const filename = src.split('/').pop();
+      img.setAttribute('src', `${BACKEND_URL}/assets/images/${filename}`);
+    }
+  });
+  
+  // Update video sources to use backend URL
+  const videos = document.querySelectorAll('video');
+  videos.forEach(video => {
+    const source = video.querySelector('source');
+    if (source) {
+      const src = source.getAttribute('src');
+      // Update to use backend URL if it's a local asset
+      if (src.startsWith('/assets/') || src.startsWith('assets/')) {
+        const filename = src.split('/').pop();
+        source.setAttribute('src', `${BACKEND_URL}/assets/videos/${filename}`);
+      }
+    }
+  });
   
   // Add enhanced touch and click support for photos
   const photos = document.querySelectorAll('.photo');

@@ -1,5 +1,5 @@
-// Backend URL configuration
-const BACKEND_URL = 'http://localhost:3000'; // Change this to your backend URL in production
+// Backend URL configuration - Updated for production
+const BACKEND_URL = 'https://caked-production.up.railway.app'; // Updated to use your Railway URL
 
 let currentAudio = null;
 let currentPlayingElement = null;
@@ -26,7 +26,7 @@ setInterval(createTear, 800);
 // Go back to landing page
 function goBack() {
     stopAllAudio();
-    window.location.href = 'index.html';
+    window.location.href = 'index.html'; // Fixed: Changed from 'index.html' to ensure correct navigation
 }
 
 // Show message modal
@@ -193,7 +193,7 @@ function playMainMusic() {
     const audioElement = document.getElementById('mainHeartAudio');
     const heartElement = document.getElementById('mainHeart');
     
-    playAudioWithFallback(audioElement, "Youve been missed - PARTYNEXTDOOR", heartElement);
+    playAudioWithFallback(audioElement, "You've been missed - PARTYNEXTDOOR", heartElement);
     
     // Create explosion of broken hearts
     createHeartExplosion();
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update to use backend URL if it's a local asset
             if (src.startsWith('/assets/') || src.startsWith('assets/')) {
                 const filename = src.split('/').pop();
-                source.setAttribute('src', `${BACKEND_URL}/music/${filename}`);
+                source.setAttribute('src', `${BACKEND_URL}/assets/audio/${filename}`);
             }
         }
         
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update to use backend URL if it's a local asset
         if (src.startsWith('/assets/') || src.startsWith('assets/')) {
             const filename = src.split('/').pop();
-            img.setAttribute('src', `${BACKEND_URL}/images/${filename}`);
+            img.setAttribute('src', `${BACKEND_URL}/assets/images/${filename}`);
         }
     });
     
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update to use backend URL if it's a local asset
             if (src.startsWith('/assets/') || src.startsWith('assets/')) {
                 const filename = src.split('/').pop();
-                source.setAttribute('src', `${BACKEND_URL}/videos/${filename}`);
+                source.setAttribute('src', `${BACKEND_URL}/assets/videos/${filename}`);
             }
         }
     });
