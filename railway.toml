@@ -9,4 +9,8 @@ restartPolicyType = "on_failure"
 
 [env]
 NODE_ENV = "production"
-PORT = "8080"
+# Don't set PORT - Railway will provide it dynamically
+MONGO_URI = "mongodb+srv://lonergamers:EstB999Jw@clustersamwrld.hqnhrry.mongodb.net/Sam-WRLD?retryWrites=true&w=majority&appName=ClusterSamWRLD"
+DB_NAME = "Sam-WRLD"
+COLLECTION_NAME = "files"
+INIT_SAMPLE_DATA = "true"

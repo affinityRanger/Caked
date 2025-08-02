@@ -1,13 +1,14 @@
 {
   "name": "sn999",
   "version": "1.0.0",
-  "description": "",
+  "description": "Full-stack photo gallery application",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
+    "dev": "node backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["photo-gallery", "express", "mongodb", "nodejs"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

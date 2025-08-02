@@ -20,29 +20,35 @@ app.get('/health', (req, res) => {
 // Debug endpoint to check directory structure
 app.get('/debug', (req, res) => {
   try {
-    const appRoot = process.cwd(); // Should be /app
-    const files = fs.readdirSync(appRoot);
-    const backendFiles = fs.readdirSync(path.join(appRoot, 'backend'));
+    const appRoot = path.join(__dirname, '..'); // Go up to project root
+    const backendRoot = __dirname; // Current backend directory
     
-    // Check for public directory in root
-    const publicExists = fs.existsSync(path.join(appRoot, 'public'));
+    const rootFiles = fs.readdirSync(appRoot);
+    const backendFiles = fs.readdirSync(backendRoot);
+    
+    // Check for public directory in project root
+    const publicDir = path.join(appRoot, 'public');
+    const publicExists = fs.existsSync(publicDir);
     let publicFiles = [];
     if (publicExists) {
-      publicFiles = fs.readdirSync(path.join(appRoot, 'public'));
+      publicFiles = fs.readdirSync(publicDir);
     }
     
     res.json({
       appRoot,
-      files,
+      backendRoot,
+      rootFiles,
       backendFiles,
       publicExists,
       publicFiles,
-      cssExists: fs.existsSync(path.join(appRoot, 'public', 'css')),
-      jsExists: fs.existsSync(path.join(appRoot, 'public', 'js')),
-      assetsExists: fs.existsSync(path.join(appRoot, 'public', 'assets')),
-      cssPath: path.join(appRoot, 'public', 'css'),
-      jsPath: path.join(appRoot, 'public', 'js'),
-      assetsPath: path.join(appRoot, 'public', 'assets')
+      cssExists: fs.existsSync(path.join(publicDir, 'css')),
+      jsExists: fs.existsSync(path.join(publicDir, 'js')),
+      assetsExists: fs.existsSync(path.join(publicDir, 'assets')),
+      paths: {
+        cssPath: path.join(publicDir, 'css'),
+        jsPath: path.join(publicDir, 'js'),
+        assetsPath: path.join(publicDir, 'assets')
+      }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -52,22 +58,22 @@ app.get('/debug', (req, res) => {
 // Test endpoint for static files
 app.get('/test-static', (req, res) => {
   try {
-    const testPath = path.join(process.cwd(), 'public', 'css');
+    const projectRoot = path.join(__dirname, '..');
+    const testPath = path.join(projectRoot, 'public', 'css');
     const files = fs.existsSync(testPath) ? fs.readdirSync(testPath) : [];
     res.json({
       message: 'Static file test',
       path: testPath,
       exists: fs.existsSync(testPath),
       files: files,
-      workingDirectory: process.cwd(),
-      __dirname: __dirname
+      backendDir: __dirname,
+      projectRoot: projectRoot
     });
   } catch (err) {
     res.status(500).json({
       error: err.message,
-      path: path.join(process.cwd(), 'public', 'css'),
-      workingDirectory: process.cwd(),
-      __dirname: __dirname
+      backendDir: __dirname,
+      projectRoot: path.join(__dirname, '..')
     });
   }
 });
@@ -88,11 +94,12 @@ app.use((req, res, next) => {
   }
 });
 
-console.log('Current working directory:', process.cwd());
-console.log('__dirname:', __dirname);
+console.log('Backend directory (__dirname):', __dirname);
+console.log('Project root directory:', path.join(__dirname, '..'));
 
-// Static file serving - point to public folder in root
-const publicDir = path.join(process.cwd(), 'public');
+// Static file serving - point to public folder in project root
+const projectRoot = path.join(__dirname, '..'); // Go up one level to project root
+const publicDir = path.join(projectRoot, 'public');
 const cssDir = path.join(publicDir, 'css');
 const jsDir = path.join(publicDir, 'js');
 const assetsDir = path.join(publicDir, 'assets');
@@ -126,7 +133,7 @@ if (fs.existsSync(assetsDir)) {
   console.log('✅ Serving assets from:', assetsDir);
 }
 
-// Serve media files
+// Serve media files from backend uploads directory
 const imagesDir = path.join(__dirname, 'uploads', 'images');
 const musicDir = path.join(__dirname, 'uploads', 'music');
 const videosDir = path.join(__dirname, 'uploads', 'videos');
@@ -277,31 +284,31 @@ async function initializeApp() {
       });
     });
 
-    // Frontend routes
+    // Frontend routes - serve HTML files from project root
     app.get('/', (req, res) => {
-      const indexPath = path.join(process.cwd(), 'index.html');
+      const indexPath = path.join(projectRoot, 'index.html');
       if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
       } else {
-        res.status(404).send('index.html not found');
+        res.status(404).send('index.html not found at: ' + indexPath);
       }
     });
     
     app.get('/hope', (req, res) => {
-      const hopePath = path.join(process.cwd(), 'hope.html');
+      const hopePath = path.join(projectRoot, 'hope.html');
       if (fs.existsSync(hopePath)) {
         res.sendFile(hopePath);
       } else {
-        res.status(404).send('hope.html not found');
+        res.status(404).send('hope.html not found at: ' + hopePath);
       }
     });
     
     app.get('/doubt', (req, res) => {
-      const doubtPath = path.join(process.cwd(), 'doubt.html');
+      const doubtPath = path.join(projectRoot, 'doubt.html');
       if (fs.existsSync(doubtPath)) {
         res.sendFile(doubtPath);
       } else {
-        res.status(404).send('doubt.html not found');
+        res.status(404).send('doubt.html not found at: ' + doubtPath);
       }
     });
 
@@ -322,7 +329,7 @@ async function initializeApp() {
           message: `The endpoint ${req.originalUrl} does not exist`
         });
       } else {
-        const indexPath = path.join(process.cwd(), 'index.html');
+        const indexPath = path.join(projectRoot, 'index.html');
         if (fs.existsSync(indexPath)) {
           res.sendFile(indexPath);
         } else {
@@ -336,9 +343,9 @@ async function initializeApp() {
     console.log('   - CSS: /css/');
     console.log('   - JS: /js/');
     console.log('   - Assets: /assets/');
-    console.log('   - Images: /images/');
-    console.log('   - Music: /music/');
-    console.log('   - Videos: /videos/');
+    console.log('   - Images: /images/ (from backend/uploads)');
+    console.log('   - Music: /music/ (from backend/uploads)');
+    console.log('   - Videos: /videos/ (from backend/uploads)');
     console.log('📡 API endpoints:');
     console.log('   - GET /api/photos');
     console.log('   - GET /api/music');
