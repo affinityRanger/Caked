@@ -378,3 +378,7 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
+
+console.log('All environment variables:');
+console.log('PORT from env:', process.env.PORT);
+console.log('All PORT-related vars:', Object.keys(process.env).filter(key => key.includes('PORT')));
