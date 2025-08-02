@@ -3,39 +3,19 @@
 node_modules/
 backend/node_modules/
 frontend/node_modules/
-
 # Environment files
 .env
 backend/.env
 .env.local
 .env.development
-
-# Uploads folder
+# Uploads folder (user-generated content, not source assets)
 backend/uploads/
 uploads/
-
 # Git folder
 .git/
-
 # Build folders
 dist/
 build/
 .next/
-
-# Media files
-*.mp3
-*.mp4
-*.mov
-*.avi
-*.jpg
-*.jpeg
-*.png
-*.gif
-
-# Other large files  
-*.zip
-*.tar.gz
-*.pdf
 "@ | Out-File -FilePath ".railwayignore" -Encoding UTF8
-
-Write-Host "Created .railwayignore file"
+Write-Host "Fixed .railwayignore - assets will now deploy"
