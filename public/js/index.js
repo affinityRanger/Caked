@@ -1,6 +1,9 @@
 let petalInterval;
 let isPaused = false;
 
+// Backend URL configuration
+const BACKEND_URL = 'https://caked-production.up.railway.app';
+
 function createPetal(side) {
   if (isPaused) return;
   
@@ -70,7 +73,8 @@ function navigateToGarden() {
   createSparkleTransition();
   
   setTimeout(() => {
-    window.location.href = 'hope.html';  // Fixed: Changed from '/hope' to 'hope.html'
+    // Fixed navigation path
+    window.location.href = 'hope.html';
   }, 1200);
 }
 
@@ -80,7 +84,8 @@ function navigateToDoubt() {
   createBreakingHeartTransition();
   
   setTimeout(() => {
-    window.location.href = 'doubt.html';  // Fixed: Changed from '/doubt' to 'doubt.html'
+    // Fixed navigation path
+    window.location.href = 'doubt.html';
   }, 1500);
 }
 
@@ -102,11 +107,8 @@ function loadFileStructure() {
   // Show loading message
   fileManager.innerHTML = '<div class="loading">Loading files...</div>';
   
-  // Check if we have a backend URL configured
-  const backendURL = 'https://caked-production.up.railway.app'; // Use your actual deployed URL
-  
   // Fetch file structure from backend API
-  fetch(`${backendURL}/api/files`)
+  fetch(`${BACKEND_URL}/api/files`)
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -161,7 +163,7 @@ function displayFileStructure(items, container) {
     // Add click event for files
     if (item.type === 'file') {
       li.addEventListener('click', function() {
-        window.open(`/${item.path}`, '_blank');
+        window.open(`${BACKEND_URL}/${item.path}`, '_blank');
       });
     }
     
@@ -230,18 +232,28 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Initialize petal animation
+// Initialize petal animation and performance optimizations
 document.addEventListener('DOMContentLoaded', function() {
   const leftSide = document.querySelector('.left-side');
   const rightSide = document.querySelector('.right-side');
   
-  // Start creating petals at intervals
-  petalInterval = setInterval(() => {
-    createPetal(leftSide);
-    createPetal(rightSide);
-  }, 1200);
+  // Performance: Use requestAnimationFrame for smoother animations
+  let lastPetalTime = 0;
+  const petalInterval = 1200; // ms between petals
   
-  // Add some initial petals
+  function createPetalsLoop(timestamp) {
+    if (timestamp - lastPetalTime >= petalInterval) {
+      createPetal(leftSide);
+      createPetal(rightSide);
+      lastPetalTime = timestamp;
+    }
+    requestAnimationFrame(createPetalsLoop);
+  }
+  
+  // Start the petal animation loop
+  requestAnimationFrame(createPetalsLoop);
+  
+  // Add some initial petals with staggered timing
   setTimeout(() => {
     for (let i = 0; i < 5; i++) {
       setTimeout(() => {
@@ -257,13 +269,24 @@ document.addEventListener('DOMContentLoaded', function() {
     questionMark.addEventListener('click', toggleFileManager);
   }
   
-  // Add hover effects to sides for pausing petals
-  leftSide.addEventListener('mouseenter', pausePetals);
-  leftSide.addEventListener('mouseleave', resumePetals);
-  rightSide.addEventListener('mouseenter', pausePetals);
-  rightSide.addEventListener('mouseleave', resumePetals);
+  // Performance: Use passive event listeners for better scroll performance
+  leftSide.addEventListener('mouseenter', pausePetals, { passive: true });
+  leftSide.addEventListener('mouseleave', resumePetals, { passive: true });
+  rightSide.addEventListener('mouseenter', pausePetals, { passive: true });
+  rightSide.addEventListener('mouseleave', resumePetals, { passive: true });
   
   // Add click events to sides for navigation
   leftSide.addEventListener('click', navigateToGarden);
   rightSide.addEventListener('click', navigateToDoubt);
+  
+  // Performance: Preload next pages
+  const linkPreloads = document.createElement('link');
+  linkPreloads.rel = 'prefetch';
+  linkPreloads.href = 'hope.html';
+  document.head.appendChild(linkPreloads);
+  
+  const linkPreloads2 = document.createElement('link');
+  linkPreloads2.rel = 'prefetch';
+  linkPreloads2.href = 'doubt.html';
+  document.head.appendChild(linkPreloads2);
 });
