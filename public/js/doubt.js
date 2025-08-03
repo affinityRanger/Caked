@@ -159,6 +159,9 @@ function playAudioWithFallback(audioElement, title, visualElement) {
 
 // Music functionality
 function playMusic(num) {
+    // Preload audio on demand
+    preloadAudioOnDemand(`musicAudio${num}`);
+    
     const audioElement = document.getElementById(`musicAudio${num}`);
     const buttonElement = document.getElementById(`musicBtn${num}`);
     const titles = [
@@ -358,4 +361,34 @@ document.addEventListener('touchstart', function() {
 // Initialize audio context on page load
 window.addEventListener('load', function() {
     initAudioContext();
+    
+    // Optimize audio loading - only preload the main heart audio
+    const mainAudio = document.getElementById('mainHeartAudio');
+    if (mainAudio) {
+        mainAudio.preload = 'auto';
+    }
+    
+    // Set other audio files to load only when needed
+    for (let i = 1; i <= 4; i++) {
+        const audio = document.getElementById(`musicAudio${i}`);
+        if (audio) {
+            audio.preload = 'none'; // Don't preload these
+            audio.volume = 0.3;
+        }
+    }
+    
+    // Show loading indicator
+    showAudioStatus('🎵 Loading audio files...');
+    setTimeout(() => {
+        hideAudioStatus();
+    }, 3000);
 });
+
+// Preload audio on first interaction
+function preloadAudioOnDemand(audioId) {
+    const audio = document.getElementById(audioId);
+    if (audio && audio.preload === 'none') {
+        audio.preload = 'auto';
+        audio.load(); // Force load
+    }
+}
