@@ -1,9 +1,12 @@
-// Audio context for Web Audio API (keeping for potential future use)
+// Backend URL configuration
+const BACKEND_URL = 'https://caked-production.up.railway.app';
+
+// Audio context for Web Audio API
 let audioContext = null;
 let currentAudio = null;
 let currentPlayingElement = null;
 
-// Initialize audio context (keeping for compatibility)
+// Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
         try {
@@ -41,7 +44,8 @@ function goBackToMain() {
     if (window.history.length > 1) {
         window.history.back();
     } else {
-        alert('Navigate back to your main page');
+        // Fallback navigation
+        window.location.href = 'index.html';
     }
 }
 
@@ -53,31 +57,6 @@ function showMessage() {
 // Hide message modal
 function hideMessage() {
     document.getElementById('messageModal').style.display = 'none';
-}
-
-// Handle image upload
-function handleImageUpload(frameNum, input) {
-    const file = input.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const frame = document.getElementById(`imageFrame${frameNum}`);
-            const placeholder = frame.querySelector('.placeholder');
-            
-            // Create img element if it doesn't exist
-            let img = frame.querySelector('img');
-            if (!img) {
-                img = document.createElement('img');
-                img.alt = 'Uploaded memory';
-                frame.appendChild(img);
-            }
-            
-            img.src = e.target.result;
-            img.style.display = 'block';
-            placeholder.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
 }
 
 // Show placeholder if image fails to load
@@ -330,25 +309,15 @@ setInterval(() => {
     }
 }, 3000);
 
-// Add click handlers for image frames to trigger file input
-document.addEventListener('DOMContentLoaded', function() {
-    // Add click handlers for image upload
-    for (let i = 1; i <= 5; i++) {
-        const frame = document.getElementById(`imageFrame${i}`);
-        const fileInput = document.getElementById(`fileInput${i}`);
-        
-        if (frame && fileInput) {
-            frame.addEventListener('click', () => {
-                fileInput.click();
-            });
-        }
-    }
-});
-
 // Close message modal when clicking outside
-document.getElementById('messageModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        hideMessage();
+document.addEventListener('DOMContentLoaded', function() {
+    const messageModal = document.getElementById('messageModal');
+    if (messageModal) {
+        messageModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideMessage();
+            }
+        });
     }
 });
 

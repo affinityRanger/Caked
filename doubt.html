@@ -7,13 +7,6 @@
     <link rel="stylesheet" href="doubt.css">
 </head>
 <body>
-    <!-- Hidden file inputs for photo uploads -->
-    <input type="file" id="fileInput1" class="file-input" accept="image/*" onchange="handleImageUpload(1, this)">
-    <input type="file" id="fileInput2" class="file-input" accept="image/*" onchange="handleImageUpload(2, this)">
-    <input type="file" id="fileInput3" class="file-input" accept="image/*" onchange="handleImageUpload(3, this)">
-    <input type="file" id="fileInput4" class="file-input" accept="image/*" onchange="handleImageUpload(4, this)">
-    <input type="file" id="fileInput5" class="file-input" accept="image/*" onchange="handleImageUpload(5, this)">
-    
     <!-- Audio elements -->
     <audio id="mainHeartAudio" preload="auto">
         <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - You ve Been Missed.mp3" type="audio/mpeg">
@@ -65,30 +58,35 @@
             "Dreaming of your smile"
         </div>
         
-        <!-- Image frames with placeholders -->
+        <!-- Image frames with your pre-uploaded photos -->
         <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
-            <div class="placeholder">
-                🖼️<br>Our memories<br>Click to add photo
+            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories" onerror="showPlaceholder(1)">
+            <div class="placeholder" style="display: none;">
+                🖼️<br>Our memories
             </div>
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <div class="placeholder">
-                📷<br>Our moment<br>Click to add photo
+            <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
+            <div class="placeholder" style="display: none;">
+                📷<br>Our moment
             </div>
         </div>
         <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <div class="placeholder">
-                🖼️<br>Missing this<br>Click to add photo
+            <img src="https://caked-production.up.railway.app/assets/images/memory3.jpg" alt="Missing this" onerror="showPlaceholder(3)">
+            <div class="placeholder" style="display: none;">
+                🖼️<br>Missing this
             </div>
         </div>
         <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <div class="placeholder">
-                📸<br>Your beauty<br>Click to add photo
+            <img src="https://caked-production.up.railway.app/assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
+            <div class="placeholder" style="display: none;">
+                📸<br>Your beauty
             </div>
         </div>
         <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <div class="placeholder">
-                📷<br>Lonely times<br>Click to add photo
+            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
+            <div class="placeholder" style="display: none;">
+                📷<br>Lonely times
             </div>
         </div>
         
