@@ -10,10 +10,10 @@ let isNavigating = false;
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
-// CORRECTED Song playlist array - matching actual files in assets folder
+// CORRECTED Song playlist array - matching EXACT files in assets folder
 const playlist = [
   'PARTYNEXTDOOR - Dreamin.mp3',
-  'PARTYNEXTDOOR - DEEPER.mp3',
+  'PARTYNEXTDOOR - DEEPER.mp3', 
   'PARTYNEXTDOOR - TRAUMA .mp3',
   'KEEP IT-Juice WRLD.mp3',
   'Juice WRLD - GRACE.mp3',
