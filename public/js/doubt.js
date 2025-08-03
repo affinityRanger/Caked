@@ -1,8 +1,19 @@
-// Backend URL configuration - Updated for production
-const BACKEND_URL = 'https://caked-production.up.railway.app'; // Updated to use your Railway URL
-
+// Audio context for Web Audio API (keeping for potential future use)
+let audioContext = null;
 let currentAudio = null;
 let currentPlayingElement = null;
+
+// Initialize audio context (keeping for compatibility)
+function initAudioContext() {
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (error) {
+            console.log('Web Audio API not supported');
+        }
+    }
+    return audioContext;
+}
 
 // Create falling tears
 function createTear() {
@@ -24,9 +35,14 @@ function createTear() {
 setInterval(createTear, 800);
 
 // Go back to landing page
-function goBack() {
+function goBackToMain() {
     stopAllAudio();
-    window.location.href = 'index.html'; // Fixed: Changed from 'index.html' to ensure correct navigation
+    // You can customize this to navigate to your main page
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        alert('Navigate back to your main page');
+    }
 }
 
 // Show message modal
@@ -37,6 +53,31 @@ function showMessage() {
 // Hide message modal
 function hideMessage() {
     document.getElementById('messageModal').style.display = 'none';
+}
+
+// Handle image upload
+function handleImageUpload(frameNum, input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const frame = document.getElementById(`imageFrame${frameNum}`);
+            const placeholder = frame.querySelector('.placeholder');
+            
+            // Create img element if it doesn't exist
+            let img = frame.querySelector('img');
+            if (!img) {
+                img = document.createElement('img');
+                img.alt = 'Uploaded memory';
+                frame.appendChild(img);
+            }
+            
+            img.src = e.target.result;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
 }
 
 // Show placeholder if image fails to load
@@ -51,9 +92,11 @@ function showPlaceholder(num) {
 
 // Stop all audio
 function stopAllAudio() {
+    // Stop HTML5 audio
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
+        currentAudio = null;
     }
     
     // Reset all visual states
@@ -62,10 +105,11 @@ function stopAllAudio() {
     });
     
     const mainHeart = document.getElementById('mainHeart');
-    mainHeart.classList.remove('playing');
+    if (mainHeart) {
+        mainHeart.classList.remove('playing');
+    }
     
     hideAudioStatus();
-    currentAudio = null;
     currentPlayingElement = null;
 }
 
@@ -96,6 +140,9 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     
     showAudioStatus(`🎵 ${title}`);
     
+    // Set volume
+    audioElement.volume = 0.3;
+    
     // Try to play the audio
     const playPromise = audioElement.play();
     
@@ -104,8 +151,8 @@ function playAudioWithFallback(audioElement, title, visualElement) {
             // Audio started successfully
             console.log('Audio playing:', title);
         }).catch(error => {
-            console.log('Audio play failed, using Web Audio API fallback');
-            playToneSequence(title, visualElement);
+            console.log('Audio play failed:', error);
+            showAudioStatus(`🎵 ${title} (Loading...)`);
         });
     }
     
@@ -118,57 +165,17 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         currentAudio = null;
         currentPlayingElement = null;
     };
-}
-
-// Fallback: Create audio tones using Web Audio API
-function playToneSequence(title, visualElement) {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        // Create a melancholic tone sequence
-        const frequencies = [220, 196, 174, 155, 138]; // A3 to C#3 - sad descending
-        let currentFreq = 0;
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(frequencies[0], audioContext.currentTime);
-        
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
-        
-        // Change frequency every 0.5 seconds
-        const interval = setInterval(() => {
-            currentFreq++;
-            if (currentFreq < frequencies.length) {
-                oscillator.frequency.setValueAtTime(frequencies[currentFreq], audioContext.currentTime);
-            } else {
-                clearInterval(interval);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-                setTimeout(() => {
-                    oscillator.stop();
-                    if (visualElement) {
-                        visualElement.classList.remove('playing');
-                    }
-                    hideAudioStatus();
-                }, 500);
-            }
-        }, 500);
-        
-        oscillator.start();
-        
-    } catch (error) {
-        console.log('Web Audio API failed, showing message only');
+    
+    // Handle audio error
+    audioElement.onerror = () => {
+        showAudioStatus(`🎵 ${title} (Error loading)`);
         setTimeout(() => {
             if (visualElement) {
                 visualElement.classList.remove('playing');
             }
             hideAudioStatus();
         }, 2000);
-    }
+    };
 }
 
 // Music functionality
@@ -177,9 +184,9 @@ function playMusic(num) {
     const buttonElement = document.getElementById(`musicBtn${num}`);
     const titles = [
         "TRAUMA - PARTYNEXTDOOR",
-        "Fix You - Coldplay", 
-        "The Night We Met - Lord Huron",
-        "Say Something - A Great Big World"
+        "DEEPER - PARTYNEXTDOOR", 
+        "Dreamin - PARTYNEXTDOOR",
+        "Some Of Your Love - PARTYNEXTDOOR"
     ];
     
     playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
@@ -193,7 +200,7 @@ function playMainMusic() {
     const audioElement = document.getElementById('mainHeartAudio');
     const heartElement = document.getElementById('mainHeart');
     
-    playAudioWithFallback(audioElement, "You've been missed - PARTYNEXTDOOR", heartElement);
+    playAudioWithFallback(audioElement, "You've Been Missed - PARTYNEXTDOOR", heartElement);
     
     // Create explosion of broken hearts
     createHeartExplosion();
@@ -314,58 +321,28 @@ function createMusicExplosion(element) {
 setInterval(() => {
     const elements = document.querySelectorAll('.chaos-text, .image-frame');
     const randomElement = elements[Math.floor(Math.random() * elements.length)];
-    randomElement.classList.add('glitch');
-    
-    setTimeout(() => {
-        randomElement.classList.remove('glitch');
-    }, 1000);
+    if (randomElement) {
+        randomElement.classList.add('glitch');
+        
+        setTimeout(() => {
+            randomElement.classList.remove('glitch');
+        }, 1000);
+    }
 }, 3000);
 
-// Initialize audio elements
+// Add click handlers for image frames to trigger file input
 document.addEventListener('DOMContentLoaded', function() {
-    // Update all audio sources to use backend URL
-    const audioElements = document.querySelectorAll('audio');
-    audioElements.forEach(audio => {
-        // Get the current source
-        const source = audio.querySelector('source');
-        if (source) {
-            const src = source.getAttribute('src');
-            // Update to use backend URL if it's a local asset
-            if (src.startsWith('/assets/') || src.startsWith('assets/')) {
-                const filename = src.split('/').pop();
-                source.setAttribute('src', `${BACKEND_URL}/assets/audio/${filename}`);
-            }
-        }
+    // Add click handlers for image upload
+    for (let i = 1; i <= 5; i++) {
+        const frame = document.getElementById(`imageFrame${i}`);
+        const fileInput = document.getElementById(`fileInput${i}`);
         
-        // Set volume for all audio elements
-        audio.volume = 0.3;
-        audio.loop = false;
-    });
-    
-    // Update all image sources to use backend URL
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-        const src = img.getAttribute('src');
-        // Update to use backend URL if it's a local asset
-        if (src.startsWith('/assets/') || src.startsWith('assets/')) {
-            const filename = src.split('/').pop();
-            img.setAttribute('src', `${BACKEND_URL}/assets/images/${filename}`);
+        if (frame && fileInput) {
+            frame.addEventListener('click', () => {
+                fileInput.click();
+            });
         }
-    });
-    
-    // Update video sources to use backend URL
-    const videos = document.querySelectorAll('video');
-    videos.forEach(video => {
-        const source = video.querySelector('source');
-        if (source) {
-            const src = source.getAttribute('src');
-            // Update to use backend URL if it's a local asset
-            if (src.startsWith('/assets/') || src.startsWith('assets/')) {
-                const filename = src.split('/').pop();
-                source.setAttribute('src', `${BACKEND_URL}/assets/videos/${filename}`);
-            }
-        }
-    });
+    }
 });
 
 // Close message modal when clicking outside
@@ -379,8 +356,37 @@ document.getElementById('messageModal').addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideMessage();
+        stopAllAudio();
     }
     if (e.key === 'm' || e.key === 'M') {
         showMessage();
     }
+    if (e.key === ' ') { // Spacebar to stop audio
+        e.preventDefault();
+        stopAllAudio();
+    }
+});
+
+// Handle user interaction to enable audio context
+document.addEventListener('click', function() {
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });
+
+// Prevent right-click context menu for a more immersive experience
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// Add touch support for mobile devices
+document.addEventListener('touchstart', function() {
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });
+
+// Initialize audio context on page load
+window.addEventListener('load', function() {
+    initAudioContext();
 });

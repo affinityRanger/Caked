@@ -4,26 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Missing You - Chaos of Doubt</title>
-    <link rel="stylesheet" href="https://caked-production.up.railway.app/css/doubt.css">
+    <link rel="stylesheet" href="doubt.css">
 </head>
 <body>
-    <!-- Audio elements -->
-    <audio id="mainHeartAudio" preload="auto">
-        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - You ve Been Missed [Official Audio].mp3" type="audio/wav">
-    </audio>
-    <audio id="musicAudio1" preload="auto">
-        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - TRAUMA (Official Audio).mp3" type="audio/wav">
-    </audio>
-    <audio id="musicAudio2" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
-    </audio>
-    <audio id="musicAudio3" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
-    </audio>
-    <audio id="musicAudio4" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
-    </audio>
-    
     <!-- Hidden file inputs for photo uploads -->
     <input type="file" id="fileInput1" class="file-input" accept="image/*" onchange="handleImageUpload(1, this)">
     <input type="file" id="fileInput2" class="file-input" accept="image/*" onchange="handleImageUpload(2, this)">
@@ -31,6 +14,23 @@
     <input type="file" id="fileInput4" class="file-input" accept="image/*" onchange="handleImageUpload(4, this)">
     <input type="file" id="fileInput5" class="file-input" accept="image/*" onchange="handleImageUpload(5, this)">
     
+    <!-- Audio elements -->
+    <audio id="mainHeartAudio" preload="auto">
+        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - You ve Been Missed.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="musicAudio1" preload="auto">
+        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - TRAUMA.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="musicAudio2" preload="auto">
+        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - DEEPER.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="musicAudio3" preload="auto">
+        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="musicAudio4" preload="auto">
+        <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Some Of Your Love.mp3" type="audio/mpeg">
+    </audio>
+
     <div class="chaos-container">
         <button class="back-button" onclick="goBackToMain()">← Back to Choice</button>
         <button class="message-icon" onclick="showMessage()">💌</button>
@@ -65,35 +65,30 @@
             "Dreaming of your smile"
         </div>
         
-        <!-- Image frames with your pre-uploaded photos -->
+        <!-- Image frames with placeholders -->
         <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
-            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories" onerror="showPlaceholder(1)">
-            <div class="placeholder" style="display: none;">
-                🖼️<br>Our memories<br>Add photo as:<br>assets/images/memory1.jpg
+            <div class="placeholder">
+                🖼️<br>Our memories<br>Click to add photo
             </div>
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
-            <div class="placeholder" style="display: none;">
-                📷<br>Our moment<br>Add photo as:<br>assets/images/memory2.jpg
+            <div class="placeholder">
+                📷<br>Our moment<br>Click to add photo
             </div>
         </div>
         <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <img src="https://caked-production.up.railway.app/assets/videos/ctnap.mp4" alt="Missing this" onerror="showPlaceholder(3)">
-            <div class="placeholder" style="display: none;">
-                🖼️<br>Missing this<br>Add photo as:<br>assets/images/memory3.jpg
+            <div class="placeholder">
+                🖼️<br>Missing this<br>Click to add photo
             </div>
         </div>
         <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <img src="https://caked-production.up.railway.app/assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
-            <div class="placeholder" style="display: none;">
-                📸<br>Your beauty<br>Add photo as:<br>assets/images/memory4.jpg
+            <div class="placeholder">
+                📸<br>Your beauty<br>Click to add photo
             </div>
         </div>
         <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
-            <div class="placeholder" style="display: none;">
-                📷<br>Lonely times<br>Add photo as:<br>assets/images/memory5.jpg
+            <div class="placeholder">
+                📷<br>Lonely times<br>Click to add photo
             </div>
         </div>
         
@@ -114,51 +109,27 @@
                 <h2>💔 From My Heart to Yours 💔</h2>
             </div>
             <div class="message-body">
-                <p>
-                    I wonder if you think 'what if it could have worked out like I do'
-                </p>
-                <p>
-                    Do you miss what we had? Do you miss us?
-                </p>
-                <p>
-                    I know I messed up. Cool who doesn't at times but trust me I know why. Nita admit vizuri One day trust. But trust I've always been into you
-                </p>
-                <p>
-                    Nothing is a coincidence. From the start us meeting to... it was all there I hear you say I ain't ur type
-                </p>
-                <p>
-                    Cool and all but know this If its nothing you see I cant change or be its e8it for you to act the way you do
-                </p>
-                <p>
-                    Not a quitter though. I'll wait. I gotta million reasons why we are the perfect match. I saw that when I saw you helping those kids
-                </p>
-                <p>
-                    I'm already dead over you for that uniqueness. I'll collapse each day in my thoughts if I lose you. Just know that.
-                </p>
-                <p>
-                    I promise you I will give it my all. I take mine every seriously and I know you do too. I can see that
-                </p>
-                <p>
-                    And I can't stop hoping that maybe, just maybe, there's still a chance for us.
-                </p>
-                <p>
-                    <strong>I need you</strong>
-                </p>
-                
-                <p>
-                    I'm not asking for an answer right now. I'm just asking you to know. Although you know I'm cracked might collapse anytime take your time but you know👾
-                </p>
-                <p>
-                    Also we all got a free mind you know. But rarely does anything we think of happens. We hope. I heard you the first time "not with me". I'm usually a good listener😅But just what if? we can be friends I really dont mind. Not distant. 47 aint the same without you.
-                </p>
-                <strong>I still got a million thimgs I wanna tell and experience with you.</strong>
-                <p>But its really your choice if we wanna date. It was never mines
-                </p>
-                <p>
-                    This might be the dumbest things I might have done😂 Go easy on me ok.
-                    I was learning from you. I've been striding for to long I thought you might be into this life.
-                </p>
-                <p>
-                Jus know If this dont work I got 30 more😅 I did my 10 early. Gotta still that heart again no matter what.
-                </p>
-                <p>I wish we mwt last yr mapema anaku kitu ungekua unasema
+                <p>I wonder if you think 'what if it could have worked out like I do'</p>
+                <p>Do you miss what we had? Do you miss us?</p>
+                <p>I know I messed up. Cool who doesn't at times but trust me I know why. Nita admit vizuri One day trust. But trust I've always been into you</p>
+                <p>Nothing is a coincidence. From the start us meeting to... it was all there I hear you say I ain't ur type</p>
+                <p>Cool and all but know this If its nothing you see I cant change or be its e8it for you to act the way you do</p>
+                <p>Not a quitter though. I'll wait. I gotta million reasons why we are the perfect match. I saw that when I saw you helping those kids</p>
+                <p>I'm already dead over you for that uniqueness. I'll collapse each day in my thoughts if I lose you. Just know that.</p>
+                <p>I promise you I will give it my all. I take mine every seriously and I know you do too. I can see that</p>
+                <p>And I can't stop hoping that maybe, just maybe, there's still a chance for us.</p>
+                <p><strong>I need you</strong></p>
+                <p>I'm not asking for an answer right now. I'm just asking you to know. Although you know I'm cracked might collapse anytime take your time but you know👾</p>
+                <p>Also we all got a free mind you know. But rarely does anything we think of happens. We hope. I heard you the first time "not with me". I'm usually a good listener😅But just what if? we can be friends I really dont mind. Not distant. 47 aint the same without you.</p>
+                <p><strong>I still got a million things I wanna tell and experience with you.</strong></p>
+                <p>But its really your choice if we wanna date. It was never mines</p>
+                <p>This might be the dumbest things I might have done😂 Go easy on me ok. I was learning from you. I've been striding for to long I thought you might be into this life.</p>
+                <p>Jus know If this dont work I got 30 more😅 I did my 10 early. Gotta still that heart again no matter what.</p>
+                <p>I wish we met last yr mapema anaku kitu ungekua unasema</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="doubt.js"></script>
+</body>
+</html>
