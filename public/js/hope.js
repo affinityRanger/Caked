@@ -10,28 +10,30 @@ let isNavigating = false;
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
-// FIXED Song playlist array
+// CORRECTED Song playlist array - matching actual files in assets folder
 const playlist = [
   'PARTYNEXTDOOR - Dreamin.mp3',
-  'PARTYNEXTDOOR-TRAUMA.mp3',
-  'KEEP IT-JUICE WRLD.mp3',
   'PARTYNEXTDOOR - DEEPER.mp3',
-  'GRACE SAM - Juice WRLD.mp3',
-  'song6.mp3',
-  'song7.mp3'
+  'PARTYNEXTDOOR - TRAUMA .mp3',
+  'KEEP IT-Juice WRLD.mp3',
+  'Juice WRLD - GRACE.mp3',
+  'PARTYNEXTDOOR - Some Of Your Love.mp3',
+  'PARTYNEXTDOOR - You ve Been Missed.mp3',
+  'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
 let currentSongIndex = 0;
 
-// Simple display names
+// Updated display names to match actual files
 function getSongDisplayName(songFile) {
   const songNames = {
     'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
-    'PARTYNEXTDOOR-TRAUMA.mp3': 'TRAUMA - PARTYNEXTDOOR',
-    'KEEP IT-JUICE WRLD.mp3': 'KEEP IT - Juice WRLD',
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
-    'GRACE SAM - Juice WRLD.mp3': 'GRACE/SAM - Juice WRLD',
-    'song6.mp3': 'Stay Ready - Jhené Aiko',
-    'song7.mp3': 'Love Galore - SZA'
+    'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
+    'KEEP IT-Juice WRLD.mp3': 'KEEP IT - Juice WRLD',
+    'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',
+    'PARTYNEXTDOOR - Some Of Your Love.mp3': 'Some Of Your Love - PARTYNEXTDOOR',
+    'PARTYNEXTDOOR - You ve Been Missed.mp3': 'You\'ve Been Missed - PARTYNEXTDOOR',
+    'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3': 'BELIEVE IT - PARTYNEXTDOOR & Rihanna'
   };
   return songNames[songFile] || songFile.replace('.mp3', '');
 }
