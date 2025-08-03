@@ -38,28 +38,33 @@ function getSongDisplayName(songFile) {
   return songNames[songFile] || songFile.replace('.mp3', '');
 }
 
-// Initialize audio on page load - OPTIMIZED
+// Initialize audio on page load - WITH AUTO-PLAY RESTORED
 window.addEventListener('load', function() {
   globalAudio.volume = 0.4;
   globalAudio.loop = false;
   
-  // Faster loading - reduced delays
+  // Faster loading - reduced delays but AUTO-PLAY RESTORED
   setTimeout(() => {
     document.getElementById('loadingScreen').classList.add('fade-out');
     setTimeout(() => {
       document.getElementById('loadingScreen').style.display = 'none';
       initializeBackground();
-      // Don't auto-start music to reduce initial load time
-      // User can click play when ready
+      startAutoPlay(); // AUTO-PLAY RESTORED
     }, 500); // Reduced from 1000ms
   }, 1000); // Reduced from 2000ms
 });
 
-// Optimized auto-play function - only loads when user clicks play
+// AUTO-PLAY function RESTORED
 function startAutoPlay() {
-  // Don't auto-load audio to reduce initial page load time
-  document.getElementById('globalNowPlaying').textContent = 'Click play to start music';
-  document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+  globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
+  globalAudio.play().then(() => {
+    musicButton.classList.add('playing');
+    document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+    document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    updateSelectDropdown();
+  }).catch(() => {
+    document.getElementById('globalNowPlaying').textContent = 'Click play to start music';
+  });
 }
 
 // Update select dropdown
