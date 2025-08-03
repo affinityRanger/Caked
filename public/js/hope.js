@@ -1,4 +1,4 @@
-// JavaScript code for the Roses Gallery
+// JavaScript code for the Roses Gallery - COMPLETE FIXED VERSION
 const globalAudio = document.getElementById("globalAudio");
 const musicButton = document.getElementById("musicButton");
 const musicPopup = document.getElementById("musicPopup");
@@ -48,26 +48,26 @@ function startAutoPlay() {
   });
 }
 
-// Song playlist array - Make sure these files exist in your assets/audio folder
+// FIXED Song playlist array - Updated with correct file names that match your HTML
 const playlist = [
-  'PARTYNEXTDOOR - Dreamin.mp3',
-  'PARTYNEXTDOOR - TRAUMA .mp3',
-  'KEEP IT-JUICE WRLD.mp3',
-  'PARTYNEXTDOOR - DEEPER.mp3',
-  'Juice WRLD - Grace.mp3',
-  'song6.mp3',
-  'song7.mp3'
+  'PARTYNEXTDOOR - Dreamin.mp3',           // This one works
+  'PARTYNEXTDOOR-TRAUMA.mp3',              // Fixed: removed space before .mp3
+  'KEEP IT-JUICE WRLD.mp3',                // This should work
+  'PARTYNEXTDOOR - DEEPER.mp3',            // This should work
+  'GRACE SAM - Juice WRLD.mp3',            // Fixed: matches your HTML audio source
+  'song6.mp3',                             // Placeholder - update with actual filename
+  'song7.mp3'                              // Placeholder - update with actual filename
 ];
 let currentSongIndex = 0;
 
-// Get display name for song - Fixed mapping to match playlist
+// FIXED Get display name for song - Updated to match corrected playlist
 function getSongDisplayName(songFile) {
   const songNames = {
     'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
-    'PARTYNEXTDOOR - TRAUMA .mp3': 'PARTYNEXTDOOR - TRAUMA',
+    'PARTYNEXTDOOR-TRAUMA.mp3': 'TRAUMA - PARTYNEXTDOOR',        // Fixed key
     'KEEP IT-JUICE WRLD.mp3': 'KEEP IT - Juice WRLD',
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
-    'Juice WRLD - Grace.mp3': 'Juice WRLD - Grace/Sam',
+    'GRACE SAM - Juice WRLD.mp3': 'GRACE/SAM - Juice WRLD',     // Fixed key
     'song6.mp3': 'Stay Ready - Jhené Aiko',
     'song7.mp3': 'Love Galore - SZA'
   };
@@ -82,9 +82,10 @@ function updateSelectDropdown() {
   }
 }
 
-// Enhanced play next song function with better error handling
+// ENHANCED play next song function with better error handling and debugging
 function playNextSong() {
   console.log('Playing next song. Current index:', currentSongIndex);
+  console.log('Current playlist:', playlist);
   
   currentSongIndex = (currentSongIndex + 1) % playlist.length;
   const nextSong = playlist[currentSongIndex];
@@ -92,8 +93,12 @@ function playNextSong() {
   
   console.log('Next song:', nextSong, 'New index:', currentSongIndex);
   
+  // Construct the full URL
+  const songUrl = `${BACKEND_URL}/assets/audio/${nextSong}`;
+  console.log('Trying to load:', songUrl);
+  
   // Set the new source using backend URL
-  globalAudio.src = `${BACKEND_URL}/assets/audio/${nextSong}`;
+  globalAudio.src = songUrl;
   globalAudio.volume = 0.4;
   
   // Update display immediately
@@ -101,6 +106,34 @@ function playNextSong() {
   
   // Update the select dropdown
   updateSelectDropdown();
+  
+  // Add load event listener for this specific song
+  const handleLoad = () => {
+    console.log('Song loaded successfully:', nextSong);
+    globalAudio.removeEventListener('canplaythrough', handleLoad);
+  };
+  
+  const handleError = (error) => {
+    console.error('Failed to load song:', nextSong, error);
+    console.log('Audio error details:', globalAudio.error);
+    globalAudio.removeEventListener('error', handleError);
+    
+    // If this song fails, try the next one (but prevent infinite loop)
+    if (currentSongIndex < playlist.length - 1) {
+      console.log('Trying next song due to load error...');
+      setTimeout(() => playNextSong(), 1000);
+    } else {
+      // If we've reached the end and still failing, reset to first song
+      currentSongIndex = 0;
+      currentSong = playlist[0];
+      musicButton.classList.remove('playing');
+      document.getElementById('globalPlayBtn').textContent = '▶️ Play';
+      document.getElementById('globalNowPlaying').textContent = `Playlist ended - Click play to restart`;
+    }
+  };
+  
+  globalAudio.addEventListener('canplaythrough', handleLoad, { once: true });
+  globalAudio.addEventListener('error', handleError, { once: true });
   
   // Try to play the next song
   globalAudio.play().then(() => {
@@ -110,17 +143,17 @@ function playNextSong() {
     document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
   }).catch(error => {
     console.log('Failed to play next song:', error);
-    console.log('Trying to skip to next song...');
+    console.log('Audio readyState:', globalAudio.readyState);
+    console.log('Audio networkState:', globalAudio.networkState);
     
-    // If this song fails, try the next one (but prevent infinite loop)
-    if (currentSongIndex < playlist.length - 1) {
-      playNextSong();
-    } else {
-      // If we've reached the end and still failing, stop
-      musicButton.classList.remove('playing');
-      document.getElementById('globalPlayBtn').textContent = '▶️ Play';
-      document.getElementById('globalNowPlaying').textContent = `Failed to load: ${getSongDisplayName(nextSong)}`;
-    }
+    // Try to load the audio first
+    globalAudio.load();
+    setTimeout(() => {
+      globalAudio.play().catch(playError => {
+        console.log('Second attempt failed:', playError);
+        handleError(playError);
+      });
+    }, 500);
   });
 }
 
@@ -134,7 +167,10 @@ function playPreviousSong() {
   
   console.log('Previous song:', prevSong, 'New index:', currentSongIndex);
   
-  globalAudio.src = `${BACKEND_URL}/assets/audio/${prevSong}`;
+  const songUrl = `${BACKEND_URL}/assets/audio/${prevSong}`;
+  console.log('Trying to load:', songUrl);
+  
+  globalAudio.src = songUrl;
   globalAudio.volume = 0.4;
   
   document.getElementById('globalNowPlaying').textContent = `Loading: ${getSongDisplayName(prevSong)}`;
@@ -217,7 +253,10 @@ function selectGlobalSong(songFile) {
     
     console.log('Selected song index:', currentSongIndex);
     
-    globalAudio.src = `${BACKEND_URL}/assets/audio/${songFile}`;
+    const songUrl = `${BACKEND_URL}/assets/audio/${songFile}`;
+    console.log('Loading selected song:', songUrl);
+    
+    globalAudio.src = songUrl;
     globalAudio.volume = 0.4;
     
     if (wasPlaying) {
@@ -318,9 +357,32 @@ globalAudio.addEventListener('pause', () => {
   console.log('Audio paused');
 });
 
+// Test function to check if files exist
+async function testAudioFiles() {
+  console.log('Testing audio files...');
+  
+  for (let i = 0; i < playlist.length; i++) {
+    const song = playlist[i];
+    const url = `${BACKEND_URL}/assets/audio/${song}`;
+    
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        console.log(`✅ ${song} - EXISTS`);
+      } else {
+        console.log(`❌ ${song} - NOT FOUND (${response.status})`);
+      }
+    } catch (error) {
+      console.log(`❌ ${song} - ERROR:`, error.message);
+    }
+  }
+}
+
 // Initialize background elements
 function initializeBackground() {
   createStars();
+  // Call test function to check audio files
+  testAudioFiles();
 }
 
 // Create twinkling stars
