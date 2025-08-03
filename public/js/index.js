@@ -364,12 +364,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Performance: Preload next pages
   const linkPreloads = document.createElement('link');
   linkPreloads.rel = 'prefetch';
-  linkPreloads.href = 'hope.html';
+  linkPreloads.href = 'hope';
   document.head.appendChild(linkPreloads);
   
   const linkPreloads2 = document.createElement('link');
   linkPreloads2.rel = 'prefetch';
-  linkPreloads2.href = 'doubt.html';
+  linkPreloads2.href = 'doubt';
   document.head.appendChild(linkPreloads2);
   
   // Mobile optimization: Prevent zoom on double tap
