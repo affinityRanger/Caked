@@ -38,32 +38,28 @@ function getSongDisplayName(songFile) {
   return songNames[songFile] || songFile.replace('.mp3', '');
 }
 
-// Initialize audio on page load
+// Initialize audio on page load - OPTIMIZED
 window.addEventListener('load', function() {
   globalAudio.volume = 0.4;
   globalAudio.loop = false;
   
+  // Faster loading - reduced delays
   setTimeout(() => {
     document.getElementById('loadingScreen').classList.add('fade-out');
     setTimeout(() => {
       document.getElementById('loadingScreen').style.display = 'none';
       initializeBackground();
-      startAutoPlay();
-    }, 1000);
-  }, 2000);
+      // Don't auto-start music to reduce initial load time
+      // User can click play when ready
+    }, 500); // Reduced from 1000ms
+  }, 1000); // Reduced from 2000ms
 });
 
-// Simple auto-play function
+// Optimized auto-play function - only loads when user clicks play
 function startAutoPlay() {
-  globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
-  globalAudio.play().then(() => {
-    musicButton.classList.add('playing');
-    document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
-    document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
-    updateSelectDropdown();
-  }).catch(() => {
-    document.getElementById('globalNowPlaying').textContent = 'Click play to start music';
-  });
+  // Don't auto-load audio to reduce initial page load time
+  document.getElementById('globalNowPlaying').textContent = 'Click play to start music';
+  document.getElementById('globalPlayBtn').textContent = '▶️ Play';
 }
 
 // Update select dropdown
@@ -268,18 +264,19 @@ function initializeBackground() {
   createStars();
 }
 
-// Create stars (simplified)
+// Create stars (optimized for faster loading)
 function createStars() {
   const starsContainer = document.getElementById('stars');
   if (!starsContainer) return;
   
-  for (let i = 0; i < 50; i++) { // Reduced from 100 to 50 for better performance
+  // Reduced from 50 to 25 stars for faster rendering
+  for (let i = 0; i < 25; i++) {
     const star = document.createElement('div');
     star.className = 'star';
     star.style.left = Math.random() * 100 + '%';
     star.style.top = Math.random() * 100 + '%';
-    star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
-    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.width = star.style.height = Math.random() * 2 + 1 + 'px'; // Smaller stars
+    star.style.animationDelay = Math.random() * 2 + 's'; // Shorter delay
     starsContainer.appendChild(star);
   }
 }
