@@ -67,28 +67,28 @@ function createBreakingHeartTransition() {
   }
 }
 
-// FIXED NAVIGATION FUNCTIONS with fallback and error handling
+// FIXED NAVIGATION FUNCTIONS for Railway deployment
 function navigateToGarden() {
   if (isNavigating) return;
   isNavigating = true;
-  
+     
   const leftSide = document.querySelector('.left-side');
   leftSide.classList.add('clicking');
   createSparkleTransition();
-  
+     
   setTimeout(() => {
     try {
-      // First try: Direct navigation
-      window.location.href = './hope.html';
+      // For Railway deployment - use absolute path from root
+      window.location.href = '/hope';
     } catch (error) {
       console.error('Navigation failed:', error);
-      // Fallback: Try different path
+      // Fallback: Try with .html extension
       try {
-        window.location.href = 'hope.html';
+        window.location.href = '/hope.html';
       } catch (fallbackError) {
         console.error('Fallback navigation failed:', fallbackError);
-        // Last resort: Use location.assign
-        window.location.assign('hope.html');
+        // Last resort: Use location.assign with full URL
+        window.location.assign(`${window.location.origin}/hope`);
       }
     }
   }, 1200);
@@ -97,33 +97,80 @@ function navigateToGarden() {
 function navigateToDoubt() {
   if (isNavigating) return;
   isNavigating = true;
-  
+     
   const rightSide = document.querySelector('.right-side');
   rightSide.classList.add('clicking');
   createBreakingHeartTransition();
-  
+     
   setTimeout(() => {
     try {
-      // First try: Direct navigation
-      window.location.href = './doubt.html';
+      // For Railway deployment - use absolute path from root
+      window.location.href = '/doubt';
     } catch (error) {
       console.error('Navigation failed:', error);
-      // Fallback: Try different path
+      // Fallback: Try with .html extension
       try {
-        window.location.href = 'doubt.html';
+        window.location.href = '/doubt.html';
       } catch (fallbackError) {
         console.error('Fallback navigation failed:', fallbackError);
-        // Last resort: Use location.assign
-        window.location.assign('doubt.html');
+        // Last resort: Use location.assign with full URL
+        window.location.assign(`${window.location.origin}/doubt`);
       }
     }
   }, 1500);
 }
 
-// File Manager Functions
+// Alternative version if you need to be more explicit about the full URL
+function navigateToGardenAlt() {
+  if (isNavigating) return;
+  isNavigating = true;
+     
+  const leftSide = document.querySelector('.left-side');
+  leftSide.classList.add('clicking');
+  createSparkleTransition();
+     
+  setTimeout(() => {
+    const baseUrl = 'https://caked-production.up.railway.app';
+    try {
+      window.location.href = `${baseUrl}/hope`;
+    } catch (error) {
+      console.error('Navigation failed:', error);
+      try {
+        window.location.href = `${baseUrl}/hope.html`;
+      } catch (fallbackError) {
+        window.location.assign(`${baseUrl}/hope`);
+      }
+    }
+  }, 1200);
+}
+
+function navigateToDoubtAlt() {
+  if (isNavigating) return;
+  isNavigating = true;
+     
+  const rightSide = document.querySelector('.right-side');
+  rightSide.classList.add('clicking');
+  createBreakingHeartTransition();
+     
+  setTimeout(() => {
+    const baseUrl = 'https://caked-production.up.railway.app';
+    try {
+      window.location.href = `${baseUrl}/doubt`;
+    } catch (error) {
+      console.error('Navigation failed:', error);
+      try {
+        window.location.href = `${baseUrl}/doubt.html`;
+      } catch (fallbackError) {
+        window.location.assign(`${baseUrl}/doubt`);
+      }
+    }
+  }, 1500);
+}
+
+// File Manager Functions (unchanged)
 function toggleFileManager() {
   const fileManager = document.getElementById('file-manager-container');
-  
+     
   if (fileManager.style.display === 'flex') {
     fileManager.style.display = 'none';
   } else {
@@ -131,7 +178,6 @@ function toggleFileManager() {
     loadFileStructure();
   }
 }
-
 function loadFileStructure() {
   const fileManager = document.getElementById('file-manager');
   
@@ -364,12 +410,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Performance: Preload next pages
   const linkPreloads = document.createElement('link');
   linkPreloads.rel = 'prefetch';
-  linkPreloads.href = 'hope';
+  linkPreloads.href = 'hope.html';
   document.head.appendChild(linkPreloads);
   
   const linkPreloads2 = document.createElement('link');
   linkPreloads2.rel = 'prefetch';
-  linkPreloads2.href = 'doubt';
+  linkPreloads2.href = 'doubt.html';
   document.head.appendChild(linkPreloads2);
   
   // Mobile optimization: Prevent zoom on double tap
