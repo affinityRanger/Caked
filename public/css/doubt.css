@@ -25,6 +25,11 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    pointer-events: none; /* Disable pointer events on container */
+}
+
+.chaos-container > * {
+    pointer-events: auto; /* Re-enable for direct children */
 }
 
 .back-button {
@@ -82,6 +87,8 @@ body {
     animation: heartbeat 2s ease-in-out infinite;
     z-index: 10;
     transition: all 0.3s ease;
+    pointer-events: auto; /* Ensure clickable */
+    user-select: none; /* Prevent text selection */
 }
 
 .main-heart:hover {
@@ -110,6 +117,8 @@ body {
     animation: float 6s ease-in-out infinite;
     filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
     z-index: 5;
+    pointer-events: none; /* Floating hearts shouldn't be clickable */
+    user-select: none;
 }
 
 @keyframes float {
@@ -124,12 +133,13 @@ body {
     font-weight: bold;
     text-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
     animation: textFloat 8s ease-in-out infinite;
-    z-index: 8;
+    z-index: 6; /* Lower z-index so it doesn't block clicks */
     padding: 10px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 23, 68, 0.3);
+    pointer-events: none; /* Text shouldn't be clickable */
 }
 
 @keyframes textFloat {
@@ -159,9 +169,10 @@ body {
     overflow: hidden;
     animation: frameFloat 6s ease-in-out infinite;
     filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.5));
-    z-index: 7;
+    z-index: 12; /* Higher z-index */
     cursor: pointer;
     transition: all 0.3s ease;
+    pointer-events: auto; /* Ensure clickable */
 }
 
 .image-frame:hover, .video-frame:hover {
@@ -200,8 +211,10 @@ body {
     cursor: pointer;
     animation: musicFloat 4s ease-in-out infinite;
     filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
-    z-index: 9;
+    z-index: 11; /* Higher than main heart */
     transition: all 0.3s ease;
+    pointer-events: auto; /* Ensure clickable */
+    user-select: none; /* Prevent text selection */
 }
 
 .music-chaos:hover {
