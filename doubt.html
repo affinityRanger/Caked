@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Missing You - Chaos of Doubt</title>
     <link rel="stylesheet" href="https://caked-production.up.railway.app/css/doubt.css">
 </head>
@@ -23,14 +23,16 @@
     <audio id="musicAudio4" preload="auto">
         <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
     </audio>
+    
     <!-- Hidden file inputs for photo uploads -->
     <input type="file" id="fileInput1" class="file-input" accept="image/*" onchange="handleImageUpload(1, this)">
     <input type="file" id="fileInput2" class="file-input" accept="image/*" onchange="handleImageUpload(2, this)">
     <input type="file" id="fileInput3" class="file-input" accept="image/*" onchange="handleImageUpload(3, this)">
     <input type="file" id="fileInput4" class="file-input" accept="image/*" onchange="handleImageUpload(4, this)">
     <input type="file" id="fileInput5" class="file-input" accept="image/*" onchange="handleImageUpload(5, this)">
+    
     <div class="chaos-container">
-        <button class="back-button" onclick="goBack()">← Back to Choice</button>
+        <button class="back-button" onclick="goBackToMain()">← Back to Choice</button>
         <button class="message-icon" onclick="showMessage()">💌</button>
         
         <!-- Main broken heart -->
@@ -64,7 +66,11 @@
         </div>
         
         <!-- Image frames with your pre-uploaded photos -->
-        
+        <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
+            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories" onerror="showPlaceholder(1)">
+            <div class="placeholder" style="display: none;">
+                🖼️<br>Our memories<br>Add photo as:<br>assets/images/memory1.jpg
+            </div>
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
             <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
@@ -99,6 +105,7 @@
         
         <div class="audio-status" id="audioStatus">🎵 Now Playing...</div>
     </div>
+    
     <!-- Message Modal -->
     <div class="message-modal" id="messageModal">
         <div class="message-content">
@@ -154,17 +161,4 @@
                 <p>
                 Jus know If this dont work I got 30 more😅 I did my 10 early. Gotta still that heart again no matter what.
                 </p>
-                <p>I wish we mwt last yr mapema anaku kitu ungekua unasema sahii.
-                </p>
-                <p>Kua patient. Usithani umenisoma na 5 months. Haiya huezi jua😅
-                </p>
-                <strong>But I know you are the one</strong>
-                <p>
-                    Na tafathali hii si group project.
-                </p>
-            </div>
-        </div>
-    </div>
-    <script src="https://caked-production.up.railway.app/js/doubt.js"></script>
-</body>
-</html>
+                <p>I wish we mwt last yr mapema anaku kitu ungekua unasema

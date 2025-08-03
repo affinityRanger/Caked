@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Two Roses - Choose Your Path</title>
   <link rel="stylesheet" href="https://caked-production.up.railway.app/css/index.css">
+  <link rel="preload" href="hope.html" as="document">
+  <link rel="preload" href="doubt.html" as="document">
 </head>
 <body>
   <div class="container">
-    <div class="side left-side" onclick="navigateToGarden()" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
+    <div class="side left-side" id="hopeSection" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
       <div class="glow"></div>
       <div class="rose-container">
         <div class="rose">🌹</div>
@@ -19,7 +21,7 @@
     </div>
     <div class="divider"></div>
     <div class="question-mark" onclick="toggleFileManager()">?</div>
-    <div class="side right-side" onclick="navigateToDoubt()" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
+    <div class="side right-side" id="doubtSection" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
       <div class="glow"></div>
       <div class="rose-container">
         <div class="rose">🥀</div>

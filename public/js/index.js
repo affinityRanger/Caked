@@ -1,11 +1,12 @@
 let petalInterval;
 let isPaused = false;
+let isNavigating = false;
 
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
 function createPetal(side) {
-  if (isPaused) return;
+  if (isPaused || isNavigating) return;
   
   const petal = document.createElement('div');
   petal.classList.add('petal');
@@ -66,26 +67,56 @@ function createBreakingHeartTransition() {
   }
 }
 
-// FIXED NAVIGATION FUNCTIONS
+// FIXED NAVIGATION FUNCTIONS with fallback and error handling
 function navigateToGarden() {
+  if (isNavigating) return;
+  isNavigating = true;
+  
   const leftSide = document.querySelector('.left-side');
   leftSide.classList.add('clicking');
   createSparkleTransition();
   
   setTimeout(() => {
-    // Fixed navigation path
-    window.location.href = 'hope.html';
+    try {
+      // First try: Direct navigation
+      window.location.href = './hope.html';
+    } catch (error) {
+      console.error('Navigation failed:', error);
+      // Fallback: Try different path
+      try {
+        window.location.href = 'hope.html';
+      } catch (fallbackError) {
+        console.error('Fallback navigation failed:', fallbackError);
+        // Last resort: Use location.assign
+        window.location.assign('hope.html');
+      }
+    }
   }, 1200);
 }
 
 function navigateToDoubt() {
+  if (isNavigating) return;
+  isNavigating = true;
+  
   const rightSide = document.querySelector('.right-side');
   rightSide.classList.add('clicking');
   createBreakingHeartTransition();
   
   setTimeout(() => {
-    // Fixed navigation path
-    window.location.href = 'doubt.html';
+    try {
+      // First try: Direct navigation
+      window.location.href = './doubt.html';
+    } catch (error) {
+      console.error('Navigation failed:', error);
+      // Fallback: Try different path
+      try {
+        window.location.href = 'doubt.html';
+      } catch (fallbackError) {
+        console.error('Fallback navigation failed:', fallbackError);
+        // Last resort: Use location.assign
+        window.location.assign('doubt.html');
+      }
+    }
   }, 1500);
 }
 
@@ -232,22 +263,68 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+// Enhanced mobile and desktop support
+function addTouchSupport() {
+  const leftSide = document.getElementById('hopeSection');
+  const rightSide = document.getElementById('doubtSection');
+  
+  // Touch support for mobile devices
+  if (leftSide) {
+    leftSide.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      this.classList.add('touching');
+    }, { passive: false });
+    
+    leftSide.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      this.classList.remove('touching');
+      navigateToGarden();
+    }, { passive: false });
+    
+    leftSide.addEventListener('touchcancel', function(e) {
+      this.classList.remove('touching');
+    });
+  }
+  
+  if (rightSide) {
+    rightSide.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      this.classList.add('touching');
+    }, { passive: false });
+    
+    rightSide.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      this.classList.remove('touching');
+      navigateToDoubt();
+    }, { passive: false });
+    
+    rightSide.addEventListener('touchcancel', function(e) {
+      this.classList.remove('touching');
+    });
+  }
+}
+
 // Initialize petal animation and performance optimizations
 document.addEventListener('DOMContentLoaded', function() {
   const leftSide = document.querySelector('.left-side');
   const rightSide = document.querySelector('.right-side');
+  
+  // Add touch support for mobile
+  addTouchSupport();
   
   // Performance: Use requestAnimationFrame for smoother animations
   let lastPetalTime = 0;
   const petalInterval = 1200; // ms between petals
   
   function createPetalsLoop(timestamp) {
-    if (timestamp - lastPetalTime >= petalInterval) {
+    if (timestamp - lastPetalTime >= petalInterval && !isNavigating) {
       createPetal(leftSide);
       createPetal(rightSide);
       lastPetalTime = timestamp;
     }
-    requestAnimationFrame(createPetalsLoop);
+    if (!isNavigating) {
+      requestAnimationFrame(createPetalsLoop);
+    }
   }
   
   // Start the petal animation loop
@@ -270,14 +347,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // Performance: Use passive event listeners for better scroll performance
-  leftSide.addEventListener('mouseenter', pausePetals, { passive: true });
-  leftSide.addEventListener('mouseleave', resumePetals, { passive: true });
-  rightSide.addEventListener('mouseenter', pausePetals, { passive: true });
-  rightSide.addEventListener('mouseleave', resumePetals, { passive: true });
+  if (leftSide) {
+    leftSide.addEventListener('mouseenter', pausePetals, { passive: true });
+    leftSide.addEventListener('mouseleave', resumePetals, { passive: true });
+    // Click event for desktop
+    leftSide.addEventListener('click', navigateToGarden);
+  }
   
-  // Add click events to sides for navigation
-  leftSide.addEventListener('click', navigateToGarden);
-  rightSide.addEventListener('click', navigateToDoubt);
+  if (rightSide) {
+    rightSide.addEventListener('mouseenter', pausePetals, { passive: true });
+    rightSide.addEventListener('mouseleave', resumePetals, { passive: true });
+    // Click event for desktop
+    rightSide.addEventListener('click', navigateToDoubt);
+  }
   
   // Performance: Preload next pages
   const linkPreloads = document.createElement('link');
@@ -289,4 +371,29 @@ document.addEventListener('DOMContentLoaded', function() {
   linkPreloads2.rel = 'prefetch';
   linkPreloads2.href = 'doubt.html';
   document.head.appendChild(linkPreloads2);
+  
+  // Mobile optimization: Prevent zoom on double tap
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+  
+  // Enhanced error handling for network issues
+  window.addEventListener('online', function() {
+    console.log('Connection restored');
+  });
+  
+  window.addEventListener('offline', function() {
+    console.log('Connection lost');
+  });
 });

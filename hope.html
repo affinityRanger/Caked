@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Rose Garden</title>
   <link rel="stylesheet" href="https://caked-production.up.railway.app/css/hope.css">
 </head>
 <body>
+  <!-- Back Button -->
+  <button class="back-button" onclick="goBackToMain()">← Back to Choice</button>
+  
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-rose">🌹</div>
@@ -15,11 +18,13 @@
       <small>Usiblash sana</small>
     </div>
   </div>
+  
   <!-- Hidden Title Popup -->
   <div class="title-popup" id="titlePopup">
     <p>Remember I used to call you this and you would blash about it.💜😂😌good times at times</p>
     <p>Into yo like I'm a driller.</p>
   </div>
+  
   <!-- Background Music (Keep this exactly where it is) -->
   <audio id="globalAudio" class="background-music" preload="auto">
     <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
@@ -28,10 +33,12 @@
     <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - DEEPER.mp3" type="audio/mpeg">
     <source src="https://caked-production.up.railway.app/assets/audio/GRACE/SAM - Juice WRLD.mp3" type="audio/mpeg">
   </audio>
+  
   <!-- Music Button -->
   <div class="music-button" id="musicButton" onclick="toggleMusicPopup()">
     <div class="music-button-icon">🎵</div>
   </div>
+  
   <!-- Music Popup -->
   <div class="music-popup" id="musicPopup">
     <div class="music-header">
@@ -57,6 +64,7 @@
     </div>
     <div class="bg-now-playing" id="globalNowPlaying">Ready: Dreamin' - PARTYNEXTDOOR</div>
   </div>
+  
   <!-- Stars Background -->
   <div class="stars" id="stars"></div>
   <div class="container">
@@ -85,6 +93,7 @@
       </div>
     </div>
   </div>
+  
   <!-- MODALS -->
   <!-- Modal 1 -->
   <div id="modal1" class="modal">
@@ -111,6 +120,7 @@
       </div>
     </div>
   </div>
+  
   <!-- Modal 2 -->
   <div id="modal2" class="modal">
     <div class="modal-content">
@@ -130,6 +140,7 @@
       </div>
     </div>
   </div>
+  
   <!-- Modal 3 -->
   <div id="modal3" class="modal">
     <div class="modal-content">
@@ -150,10 +161,12 @@
       </div>
     </div>
   </div>
+  
   <!-- Exclamation Button (Bottom Right) -->
   <div id="exclamationIcon" class="exclamation-button" onclick="toggleExclamationPopup()">
     <span class="exclamation-icon">!</span>
   </div>
+  
   <!-- Exclamation Popup -->
   <div id="exclamationPopup" class="exclamation-popup">
     <div class="exclamation-header">
@@ -173,6 +186,7 @@
       
     </div>
   </div>
+  
   <!-- Photo Enlargement Modal -->
   <div id="photoModal" class="modal">
     <div class="modal-content" style="max-width: 80%; text-align: center;">
@@ -180,6 +194,7 @@
       <img id="enlargedPhoto" style="max-width: 100%; max-height: 70vh; border-radius: 15px; margin-top: 20px;">
     </div>
   </div>
+  
   <footer>
     <p>Girl you better fucking read every single letter from a-z🌹</p>
     <p>Made with 💖 by your biggest fan</p>

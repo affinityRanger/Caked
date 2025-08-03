@@ -1,55 +1,21 @@
-# === MOST IMPORTANT: Exclude Git history (42MB pack file) ===
-.git/
-.gitignore
-
-# === Backend-specific ignores ===
-backend/node_modules/
-backend/.env
-backend/uploads/
-
-# === Frontend ignores ===
+@"
+# Node modules
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# === Environment files ===
+backend/node_modules/
+# Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# === Build outputs ===
+backend/.env
+# Uploads folder (user-generated content)
+backend/uploads/
+# Git folder
+.git/
+# Build folders
 dist/
 build/
-.next/
-out/
-
-# === General file ignores ===
+# Additional exclusions if needed
 *.log
 .DS_Store
 Thumbs.db
-*.tmp
-*.temp
-
-# === Editor/IDE junk ===
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# === Media files (if too large) ===
-# Uncomment these if you have very large media files:
-# *.mp4
-# *.mov
-# *.avi
-# *.mp3
-# *.wav
-# *.flac
-
-# === Cache directories ===
 .cache/
 .parcel-cache/
-.npm/
-.yarn/
+"@ | Out-File -FilePath ".railwayignore" -Encoding UTF8
