@@ -4,6 +4,7 @@ const BACKEND_URL = 'https://caked-production.up.railway.app';
 let audioContext = null;
 let currentAudio = null;
 let currentPlayingElement = null;
+
 // Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
@@ -15,6 +16,7 @@ function initAudioContext() {
     }
     return audioContext;
 }
+
 // Create falling tears
 function createTear() {
     const tear = document.createElement('div');
@@ -30,8 +32,10 @@ function createTear() {
         }
     }, 4000);
 }
+
 // Create tears periodically
 setInterval(createTear, 800);
+
 // Go back to landing page
 function goBackToMain() {
     stopAllAudio();
@@ -43,6 +47,7 @@ function goBackToMain() {
         window.location.href = 'index.html';
     }
 }
+
 // Show message modal
 function showMessage() {
     const modal = document.getElementById('messageModal');
@@ -50,6 +55,7 @@ function showMessage() {
         modal.style.display = 'flex';
     }
 }
+
 // Hide message modal
 function hideMessage() {
     const modal = document.getElementById('messageModal');
@@ -57,6 +63,7 @@ function hideMessage() {
         modal.style.display = 'none';
     }
 }
+
 // Show placeholder if image fails to load
 function showPlaceholder(num) {
     const frame = document.getElementById(`imageFrame${num}`);
@@ -68,6 +75,7 @@ function showPlaceholder(num) {
         if (placeholder) placeholder.style.display = 'flex';
     }
 }
+
 // Stop all audio
 function stopAllAudio() {
     // Stop HTML5 audio
@@ -90,6 +98,7 @@ function stopAllAudio() {
     hideAudioStatus();
     currentPlayingElement = null;
 }
+
 // Show audio status
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
@@ -98,6 +107,7 @@ function showAudioStatus(message) {
         status.classList.add('show');
     }
 }
+
 // Hide audio status
 function hideAudioStatus() {
     const status = document.getElementById('audioStatus');
@@ -105,6 +115,7 @@ function hideAudioStatus() {
         status.classList.remove('show');
     }
 }
+
 // Play audio with fallback
 function playAudioWithFallback(audioElement, title, visualElement) {
     if (!audioElement) {
@@ -161,6 +172,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         }, 2000);
     };
 }
+
 // Music functionality
 function playMusic(num) {
     // Preload audio on demand
@@ -180,6 +192,7 @@ function playMusic(num) {
     // Create explosion effect
     createMusicExplosion(buttonElement);
 }
+
 // Main heart music
 function playMainMusic() {
     const audioElement = document.getElementById('mainHeartAudio');
@@ -190,6 +203,7 @@ function playMainMusic() {
     // Create explosion of broken hearts
     createHeartExplosion();
 }
+
 // Create heart explosion effect
 function createHeartExplosion() {
     for (let i = 0; i < 10; i++) {
@@ -243,6 +257,7 @@ function createHeartExplosion() {
         }, i * 100);
     }
 }
+
 // Create music explosion effect
 function createMusicExplosion(element) {
     if (!element) return;
@@ -301,6 +316,7 @@ function createMusicExplosion(element) {
         }, i * 150);
     }
 }
+
 // Random glitch effects
 setInterval(() => {
     const elements = document.querySelectorAll('.chaos-text, .image-frame');
@@ -313,6 +329,7 @@ setInterval(() => {
         }, 1000);
     }
 }, 3000);
+
 // Preload audio on first interaction
 function preloadAudioOnDemand(audioId) {
     const audio = document.getElementById(audioId);
@@ -321,18 +338,59 @@ function preloadAudioOnDemand(audioId) {
         audio.load(); // Force load
     }
 }
+
+// Debug function to check if element is clickable
+function debugElementClick(element, name) {
+    if (!element) {
+        console.error(`${name} element not found`);
+        return;
+    }
+    
+    // Check if element has pointer-events set to none
+    const computedStyle = window.getComputedStyle(element);
+    if (computedStyle.pointerEvents === 'none') {
+        console.warn(`${name} has pointer-events: none`);
+    }
+    
+    // Check z-index
+    const zIndex = computedStyle.zIndex;
+    console.log(`${name} z-index: ${zIndex}`);
+    
+    // Check if element is visible
+    const isVisible = element.offsetWidth > 0 && element.offsetHeight > 0;
+    console.log(`${name} is visible: ${isVisible}`);
+    
+    // Check if element is covered by another element
+    const rect = element.getBoundingClientRect();
+    const topElement = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+    console.log(`${name} top element at center:`, topElement);
+    
+    // Add visual indicator
+    element.style.outline = '2px dashed yellow';
+    setTimeout(() => {
+        element.style.outline = '';
+    }, 2000);
+}
+
 // Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
+    
+    // Add global click listener for debugging
+    document.addEventListener('click', function(e) {
+        console.log('Clicked element:', e.target);
+    }, true);
     
     // Set up event listeners using JavaScript instead of inline onclick
     const backButton = document.querySelector('.back-button');
     if (backButton) {
         backButton.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Back button clicked');
             goBackToMain();
         });
         console.log('Back button listener added');
+        debugElementClick(backButton, 'Back button');
     } else {
         console.error('Back button not found');
     }
@@ -341,9 +399,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (messageIcon) {
         messageIcon.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Message icon clicked');
             showMessage();
         });
         console.log('Message icon listener added');
+        debugElementClick(messageIcon, 'Message icon');
     } else {
         console.error('Message icon not found');
     }
@@ -352,9 +412,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mainHeart) {
         mainHeart.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Main heart clicked');
             playMainMusic();
         });
         console.log('Main heart listener added');
+        debugElementClick(mainHeart, 'Main heart');
     } else {
         console.error('Main heart not found');
     }
@@ -369,6 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 playMusic(i);
             });
             console.log(`Music button ${i} listener added`);
+            debugElementClick(musicBtn, `Music button ${i}`);
         } else {
             console.error(`Music button ${i} not found`);
         }
@@ -416,6 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Initialization complete');
 });
+
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -430,16 +494,19 @@ document.addEventListener('keydown', function(e) {
         stopAllAudio();
     }
 });
+
 // Handle user interaction to enable audio context
 document.addEventListener('click', function() {
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
     }
 }, { once: true });
+
 // Prevent right-click context menu for a more immersive experience
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
+
 // Add touch support for mobile devices
 document.addEventListener('touchstart', function() {
     if (audioContext && audioContext.state === 'suspended') {
