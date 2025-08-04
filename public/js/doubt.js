@@ -339,58 +339,18 @@ function preloadAudioOnDemand(audioId) {
     }
 }
 
-// Debug function to check if element is clickable
-function debugElementClick(element, name) {
-    if (!element) {
-        console.error(`${name} element not found`);
-        return;
-    }
-    
-    // Check if element has pointer-events set to none
-    const computedStyle = window.getComputedStyle(element);
-    if (computedStyle.pointerEvents === 'none') {
-        console.warn(`${name} has pointer-events: none`);
-    }
-    
-    // Check z-index
-    const zIndex = computedStyle.zIndex;
-    console.log(`${name} z-index: ${zIndex}`);
-    
-    // Check if element is visible
-    const isVisible = element.offsetWidth > 0 && element.offsetHeight > 0;
-    console.log(`${name} is visible: ${isVisible}`);
-    
-    // Check if element is covered by another element
-    const rect = element.getBoundingClientRect();
-    const topElement = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
-    console.log(`${name} top element at center:`, topElement);
-    
-    // Add visual indicator
-    element.style.outline = '2px dashed yellow';
-    setTimeout(() => {
-        element.style.outline = '';
-    }, 2000);
-}
-
 // Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
-    
-    // Add global click listener for debugging
-    document.addEventListener('click', function(e) {
-        console.log('Clicked element:', e.target);
-    }, true);
     
     // Set up event listeners using JavaScript instead of inline onclick
     const backButton = document.querySelector('.back-button');
     if (backButton) {
         backButton.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Back button clicked');
             goBackToMain();
         });
         console.log('Back button listener added');
-        debugElementClick(backButton, 'Back button');
     } else {
         console.error('Back button not found');
     }
@@ -399,11 +359,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (messageIcon) {
         messageIcon.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Message icon clicked');
             showMessage();
         });
         console.log('Message icon listener added');
-        debugElementClick(messageIcon, 'Message icon');
     } else {
         console.error('Message icon not found');
     }
@@ -412,11 +370,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mainHeart) {
         mainHeart.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Main heart clicked');
             playMainMusic();
         });
         console.log('Main heart listener added');
-        debugElementClick(mainHeart, 'Main heart');
     } else {
         console.error('Main heart not found');
     }
@@ -427,11 +383,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (musicBtn) {
             musicBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log(`Music button ${i} clicked`);
                 playMusic(i);
             });
             console.log(`Music button ${i} listener added`);
-            debugElementClick(musicBtn, `Music button ${i}`);
         } else {
             console.error(`Music button ${i} not found`);
         }
