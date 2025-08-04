@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Missing You - Chaos of Doubt</title>
-    <link rel="stylesheet" href="https://caked-production.up.railway.app/css/doubt.css">
+    <link rel="stylesheet" href="doubt.css">
 </head>
 <body>
     <!-- Audio elements -->
@@ -23,6 +23,7 @@
     <audio id="musicAudio4" preload="none">
         <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Some Of Your Love.mp3" type="audio/mpeg">
     </audio>
+
     <div class="chaos-container">
         <button class="back-button">← Back to Choice</button>
         <button class="message-icon">💌</button>
@@ -59,31 +60,31 @@
         
         <!-- Image frames with your pre-uploaded photos -->
         <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
-            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories">
+            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories" onerror="showPlaceholder(1)">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Our memories
             </div>
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment">
+            <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
             <div class="placeholder" style="display: none;">
                 📷<br>Our moment
             </div>
         </div>
         <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <img src="https://caked-production.up.railway.app/assets/images/memory3.jpg" alt="Missing this">
+            <img src="https://caked-production.up.railway.app/assets/images/memory3.jpg" alt="Missing this" onerror="showPlaceholder(3)">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Missing this
             </div>
         </div>
         <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <img src="https://caked-production.up.railway.app/assets/images/memory4.jpg" alt="Your beauty">
+            <img src="https://caked-production.up.railway.app/assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
             <div class="placeholder" style="display: none;">
                 📸<br>Your beauty
             </div>
         </div>
         <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times">
+            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
             <div class="placeholder" style="display: none;">
                 📷<br>Lonely times
             </div>
@@ -126,6 +127,7 @@
             </div>
         </div>
     </div>
+
     <script src="doubt.js"></script>
 </body>
 </html>
