@@ -1,4 +1,4 @@
-// JavaScript code for the Roses Gallery - OPTIMIZED FOR SPEED
+// JavaScript code for the Roses Gallery - OPTIMIZED WITH IMAGE MODAL FIX
 const globalAudio = document.getElementById("globalAudio");
 const musicButton = document.getElementById("musicButton");
 const musicPopup = document.getElementById("musicPopup");
@@ -10,7 +10,7 @@ let isNavigating = false;
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
-// CORRECTED Song playlist array - matching EXACT files in assets folder
+// Song playlist array - matching EXACT files in assets folder
 const playlist = [
   'PARTYNEXTDOOR - Dreamin.mp3',
   'PARTYNEXTDOOR - DEEPER.mp3', 
@@ -22,6 +22,15 @@ const playlist = [
   'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
 let currentSongIndex = 0;
+
+// Performance optimization: Cache DOM elements
+const cachedElements = {};
+function getElement(id) {
+  if (!cachedElements[id]) {
+    cachedElements[id] = document.getElementById(id);
+  }
+  return cachedElements[id];
+}
 
 // Updated display names to match actual files
 function getSongDisplayName(songFile) {
@@ -45,13 +54,16 @@ window.addEventListener('load', function() {
   
   // Faster loading - reduced delays but AUTO-PLAY RESTORED
   setTimeout(() => {
-    document.getElementById('loadingScreen').classList.add('fade-out');
-    setTimeout(() => {
-      document.getElementById('loadingScreen').style.display = 'none';
-      initializeBackground();
-      startAutoPlay(); // AUTO-PLAY RESTORED
-    }, 500); // Reduced from 1000ms
-  }, 1000); // Reduced from 2000ms
+    const loadingScreen = getElement('loadingScreen');
+    if (loadingScreen) {
+      loadingScreen.classList.add('fade-out');
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        initializeBackground();
+        startAutoPlay(); // AUTO-PLAY RESTORED
+      }, 500);
+    }
+  }, 1000);
 });
 
 // AUTO-PLAY function RESTORED
@@ -59,17 +71,20 @@ function startAutoPlay() {
   globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
   globalAudio.play().then(() => {
     musicButton.classList.add('playing');
-    document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
-    document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    const playBtn = getElement('globalPlayBtn');
+    const nowPlaying = getElement('globalNowPlaying');
+    if (playBtn) playBtn.textContent = '⏸️ Pause';
+    if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
     updateSelectDropdown();
   }).catch(() => {
-    document.getElementById('globalNowPlaying').textContent = 'Click play to start music';
+    const nowPlaying = getElement('globalNowPlaying');
+    if (nowPlaying) nowPlaying.textContent = 'Click play to start music';
   });
 }
 
 // Update select dropdown
 function updateSelectDropdown() {
-  const select = document.getElementById('globalMusicSelect');
+  const select = getElement('globalMusicSelect');
   if (select && playlist.includes(currentSong)) {
     select.value = currentSong;
   }
@@ -86,9 +101,11 @@ function playNextSong() {
   updateSelectDropdown();
   
   globalAudio.play().then(() => {
-    document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    const nowPlaying = getElement('globalNowPlaying');
+    if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
     musicButton.classList.add('playing');
-    document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+    const playBtn = getElement('globalPlayBtn');
+    if (playBtn) playBtn.textContent = '⏸️ Pause';
   }).catch(() => {
     // If this song fails, try next one
     if (currentSongIndex < playlist.length - 1) {
@@ -108,11 +125,14 @@ function playPreviousSong() {
   updateSelectDropdown();
   
   globalAudio.play().then(() => {
-    document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    const nowPlaying = getElement('globalNowPlaying');
+    if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
     musicButton.classList.add('playing');
-    document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+    const playBtn = getElement('globalPlayBtn');
+    if (playBtn) playBtn.textContent = '⏸️ Pause';
   }).catch(() => {
-    document.getElementById('globalNowPlaying').textContent = `Failed: ${getSongDisplayName(currentSong)}`;
+    const nowPlaying = getElement('globalNowPlaying');
+    if (nowPlaying) nowPlaying.textContent = `Failed: ${getSongDisplayName(currentSong)}`;
   });
 }
 
@@ -128,24 +148,32 @@ function toggleMusicPopup() {
 
 // Exclamation popup toggle
 function toggleExclamationPopup() {
-  const popup = document.getElementById('exclamationPopup');
-  const icon = document.getElementById('exclamationIcon');
+  const popup = getElement('exclamationPopup');
+  const icon = getElement('exclamationIcon');
   
   exclamationPopupVisible = !exclamationPopupVisible;
   
   if (exclamationPopupVisible) {
-    popup.classList.add('show');
-    icon.classList.add('active');
+    if (popup) popup.classList.add('show');
+    if (icon) icon.classList.add('active');
   } else {
-    popup.classList.remove('show');
-    icon.classList.remove('active');
+    if (popup) popup.classList.remove('show');
+    if (icon) icon.classList.remove('active');
   }
 }
 
-// Click outside handler
+// IMPROVED: Click outside handler with better event targeting
 document.addEventListener('click', function(event) {
-  const popup = document.getElementById('exclamationPopup');
-  const icon = document.getElementById('exclamationIcon');
+  // Check if click is on photo modal background (not content)
+  const photoModal = getElement('photoModal');
+  if (photoModal && event.target === photoModal) {
+    closePhotoModal();
+    return;
+  }
+
+  // Handle exclamation popup
+  const popup = getElement('exclamationPopup');
+  const icon = getElement('exclamationIcon');
   
   if (popup && icon && 
       !popup.contains(event.target) && 
@@ -156,6 +184,7 @@ document.addEventListener('click', function(event) {
     exclamationPopupVisible = false;
   }
   
+  // Handle music popup
   if (musicButton && musicPopup && 
       !musicButton.contains(event.target) && 
       !musicPopup.contains(event.target)) {
@@ -175,22 +204,28 @@ function selectGlobalSong(songFile) {
     globalAudio.src = `${BACKEND_URL}/assets/audio/${songFile}`;
     globalAudio.volume = 0.4;
     
+    const nowPlaying = getElement('globalNowPlaying');
+    const playBtn = getElement('globalPlayBtn');
+    
     if (wasPlaying) {
       globalAudio.play().then(() => {
-        document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(songFile)}`;
+        if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(songFile)}`;
         musicButton.classList.add('playing');
-        document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
+        if (playBtn) playBtn.textContent = '⏸️ Pause';
       }).catch(() => {
-        document.getElementById('globalNowPlaying').textContent = `Failed: ${getSongDisplayName(songFile)}`;
+        if (nowPlaying) nowPlaying.textContent = `Failed: ${getSongDisplayName(songFile)}`;
       });
     } else {
-      document.getElementById('globalNowPlaying').textContent = `Ready: ${getSongDisplayName(songFile)}`;
+      if (nowPlaying) nowPlaying.textContent = `Ready: ${getSongDisplayName(songFile)}`;
     }
   }
 }
 
 // Toggle music play/pause
 function toggleGlobalMusic() {
+  const playBtn = getElement('globalPlayBtn');
+  const nowPlaying = getElement('globalNowPlaying');
+  
   if (globalAudio.paused) {
     if (!globalAudio.src) {
       globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
@@ -198,26 +233,29 @@ function toggleGlobalMusic() {
     
     globalAudio.play().then(() => {
       musicButton.classList.add('playing');
-      document.getElementById('globalPlayBtn').textContent = '⏸️ Pause';
-      document.getElementById('globalNowPlaying').textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+      if (playBtn) playBtn.textContent = '⏸️ Pause';
+      if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
     }).catch(() => {
-      document.getElementById('globalNowPlaying').textContent = `Error: ${getSongDisplayName(currentSong)}`;
+      if (nowPlaying) nowPlaying.textContent = `Error: ${getSongDisplayName(currentSong)}`;
     });
   } else {
     globalAudio.pause();
     musicButton.classList.remove('playing');
-    document.getElementById('globalPlayBtn').textContent = '▶️ Play';
-    document.getElementById('globalNowPlaying').textContent = `Paused: ${getSongDisplayName(currentSong)}`;
+    if (playBtn) playBtn.textContent = '▶️ Play';
+    if (nowPlaying) nowPlaying.textContent = `Paused: ${getSongDisplayName(currentSong)}`;
   }
 }
 
 // Stop music
 function stopGlobalMusic() {
+  const playBtn = getElement('globalPlayBtn');
+  const nowPlaying = getElement('globalNowPlaying');
+  
   globalAudio.pause();
   globalAudio.currentTime = 0;
   musicButton.classList.remove('playing');
-  document.getElementById('globalPlayBtn').textContent = '▶️ Play';
-  document.getElementById('globalNowPlaying').textContent = `Stopped: ${getSongDisplayName(currentSong)}`;
+  if (playBtn) playBtn.textContent = '▶️ Play';
+  if (nowPlaying) nowPlaying.textContent = `Stopped: ${getSongDisplayName(currentSong)}`;
 }
 
 // Essential audio event listeners only
@@ -254,13 +292,15 @@ function navigateToDoubt() {
 
 // File Manager Functions
 function toggleFileManager() {
-  const fileManager = document.getElementById('file-manager-container');
+  const fileManager = getElement('file-manager-container');
      
-  if (fileManager.style.display === 'flex') {
-    fileManager.style.display = 'none';
-  } else {
-    fileManager.style.display = 'flex';
-    if (typeof loadFileStructure === 'function') loadFileStructure();
+  if (fileManager) {
+    if (fileManager.style.display === 'flex') {
+      fileManager.style.display = 'none';
+    } else {
+      fileManager.style.display = 'flex';
+      if (typeof loadFileStructure === 'function') loadFileStructure();
+    }
   }
 }
 
@@ -271,25 +311,36 @@ function initializeBackground() {
 
 // Create stars (optimized for faster loading)
 function createStars() {
-  const starsContainer = document.getElementById('stars');
+  const starsContainer = getElement('stars');
   if (!starsContainer) return;
   
-  // Reduced from 50 to 25 stars for faster rendering
-  for (let i = 0; i < 25; i++) {
+  // Use document fragment for better performance
+  const fragment = document.createDocumentFragment();
+  
+  // Reduced from 50 to 20 stars for even faster rendering
+  for (let i = 0; i < 20; i++) {
     const star = document.createElement('div');
     star.className = 'star';
     star.style.left = Math.random() * 100 + '%';
     star.style.top = Math.random() * 100 + '%';
-    star.style.width = star.style.height = Math.random() * 2 + 1 + 'px'; // Smaller stars
-    star.style.animationDelay = Math.random() * 2 + 's'; // Shorter delay
-    starsContainer.appendChild(star);
+    star.style.width = star.style.height = Math.random() * 2 + 1 + 'px';
+    star.style.animationDelay = Math.random() * 2 + 's';
+    fragment.appendChild(star);
   }
+  
+  starsContainer.appendChild(fragment);
 }
 
-// Photo enlargement
-function enlargePhoto(img) {
-  const modal = document.getElementById('photoModal');
-  const enlargedPhoto = document.getElementById('enlargedPhoto');
+// FIXED: Photo enlargement with proper event handling
+function enlargePhoto(img, event) {
+  // Prevent event bubbling that was causing immediate closure
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  
+  const modal = getElement('photoModal');
+  const enlargedPhoto = getElement('enlargedPhoto');
   
   if (!modal || !enlargedPhoto) return;
   
@@ -297,67 +348,91 @@ function enlargePhoto(img) {
   enlargedPhoto.alt = img.alt || 'Enlarged photo';
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  
+  // Add a small delay to prevent immediate closure
+  setTimeout(() => {
+    modal.classList.add('photo-modal-open');
+  }, 10);
 }
 
-// Close photo modal
+// FIXED: Close photo modal
 function closePhotoModal() {
-  const modal = document.getElementById('photoModal');
-  const enlargedPhoto = document.getElementById('enlargedPhoto');
+  const modal = getElement('photoModal');
+  const enlargedPhoto = getElement('enlargedPhoto');
   
   if (!modal) return;
   
+  modal.classList.remove('photo-modal-open');
   modal.style.display = 'none';
   document.body.style.overflow = '';
   if (enlargedPhoto) enlargedPhoto.src = '';
 }
 
-// Modal functions
-function openModal(id) {
-  const modal = document.getElementById(id);
+// IMPROVED: Modal functions with better event handling
+function openModal(id, event) {
+  // Prevent event bubbling
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  
+  const modal = getElement(id);
   if (modal) {
     modal.style.display = "block";
     document.body.style.overflow = 'hidden';
+    
+    // Add a small delay to prevent immediate closure
+    setTimeout(() => {
+      modal.classList.add('modal-open');
+    }, 10);
   }
 }
 
 function closeModal(id) {
-  const modal = document.getElementById(id);
+  const modal = getElement(id);
   if (modal) {
+    modal.classList.remove('modal-open');
     modal.style.display = "none";
     document.body.style.overflow = '';
   }
 }
 
-// Window click handler
+// IMPROVED: Window click handler with better targeting
 window.onclick = function (event) {
-  const photoModal = document.getElementById('photoModal');
+  // Only handle clicks on modal backgrounds, not their content
+  const target = event.target;
   
-  if (event.target === photoModal) {
+  // Handle photo modal
+  const photoModal = getElement('photoModal');
+  if (photoModal && target === photoModal && photoModal.classList.contains('photo-modal-open')) {
     closePhotoModal();
     return;
   }
   
+  // Handle regular modals
   const modals = ["modal1", "modal2", "modal3"];
   for (let id of modals) {
-    const modal = document.getElementById(id);
-    if (modal && event.target === modal) {
+    const modal = getElement(id);
+    if (modal && target === modal && modal.classList.contains('modal-open')) {
       closeModal(id);
       return;
     }
   }
 };
 
-// Keyboard support
+// Keyboard support with performance improvements
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
-    const photoModal = document.getElementById('photoModal');
+    // Handle photo modal first
+    const photoModal = getElement('photoModal');
     if (photoModal && photoModal.style.display === 'flex') {
       closePhotoModal();
       return;
     }
     
-    const popup = document.getElementById('exclamationPopup');
-    const icon = document.getElementById('exclamationIcon');
+    // Handle exclamation popup
+    const popup = getElement('exclamationPopup');
+    const icon = getElement('exclamationIcon');
     if (popup && exclamationPopupVisible) {
       popup.classList.remove('show');
       if (icon) icon.classList.remove('active');
@@ -365,15 +440,17 @@ document.addEventListener('keydown', function(event) {
       return;
     }
     
-    if (musicPopupVisible) {
+    // Handle music popup
+    if (musicPopupVisible && musicPopup) {
       musicPopup.classList.remove('show');
       musicPopupVisible = false;
       return;
     }
     
+    // Handle regular modals
     const modals = ["modal1", "modal2", "modal3"];
     for (let id of modals) {
-      const modal = document.getElementById(id);
+      const modal = getElement(id);
       if (modal && modal.style.display === 'block') {
         closeModal(id);
         return;
@@ -382,31 +459,34 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-// Message functions
+// IMPROVED: Message functions with performance optimization
 function showSavedMessage(messageId) {
-  const msg = document.getElementById(messageId);
+  const msg = getElement(messageId);
   if (msg) {
     if (msg.style.display === 'block') {
       msg.style.display = 'none';
     } else {
       msg.style.display = 'block';
-      setTimeout(() => {
-        msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 100);
+      // Use requestAnimationFrame for smoother scrolling
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      });
     }
   }
 }
 
 function hideSavedMessage(messageId) {
-  const msg = document.getElementById(messageId);
+  const msg = getElement(messageId);
   if (msg) {
     msg.style.display = 'none';
   }
 }
 
-// Title click
+// IMPROVED: Title click with performance optimization
 function titleClick() {
-  const popup = document.getElementById('titlePopup');
+  const popup = getElement('titlePopup');
   
   if (popup && popup.classList.contains('show')) {
     popup.classList.remove('show');
@@ -419,18 +499,28 @@ function titleClick() {
   
   const title = document.querySelector('.title');
   if (title) {
-    title.style.transform = 'scale(1.1)';
-    title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
-    
-    setTimeout(() => {
-      title.style.transform = 'scale(1)';
-      title.style.textShadow = '2px 2px 10px rgba(0,0,0,0.3)';
-    }, 300);
+    // Use requestAnimationFrame for smoother animation
+    requestAnimationFrame(() => {
+      title.style.transform = 'scale(1.1)';
+      title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
+      
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          title.style.transform = 'scale(1)';
+          title.style.textShadow = '2px 2px 10px rgba(0,0,0,0.3)';
+        });
+      }, 300);
+    });
   }
 }
 
-// DOM ready initialization (simplified)
+// DOM ready initialization (optimized)
 document.addEventListener('DOMContentLoaded', function() {
+  // Cache frequently used elements
+  cachedElements.globalAudio = globalAudio;
+  cachedElements.musicButton = musicButton;
+  cachedElements.musicPopup = musicPopup;
+  
   globalAudio.volume = 0.4;
   globalAudio.loop = false;
   
