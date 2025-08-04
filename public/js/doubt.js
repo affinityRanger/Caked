@@ -1,11 +1,9 @@
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
-
 // Audio context for Web Audio API
 let audioContext = null;
 let currentAudio = null;
 let currentPlayingElement = null;
-
 // Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
@@ -312,8 +310,44 @@ setInterval(() => {
     }
 }, 3000);
 
-// Close message modal when clicking outside
+// Preload audio on first interaction
+function preloadAudioOnDemand(audioId) {
+    const audio = document.getElementById(audioId);
+    if (audio && audio.preload === 'none') {
+        audio.preload = 'auto';
+        audio.load(); // Force load
+    }
+}
+
+// Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Set up event listeners using JavaScript instead of inline onclick
+    const backButton = document.querySelector('.back-button');
+    if (backButton) {
+        backButton.addEventListener('click', goBackToMain);
+    }
+    
+    const messageIcon = document.querySelector('.message-icon');
+    if (messageIcon) {
+        messageIcon.addEventListener('click', showMessage);
+    }
+    
+    const mainHeart = document.getElementById('mainHeart');
+    if (mainHeart) {
+        mainHeart.addEventListener('click', playMainMusic);
+    }
+    
+    // Set up music buttons
+    for (let i = 1; i <= 4; i++) {
+        const musicBtn = document.getElementById(`musicBtn${i}`);
+        if (musicBtn) {
+            musicBtn.addEventListener('click', function() {
+                playMusic(i);
+            });
+        }
+    }
+    
+    // Close message modal when clicking outside
     const messageModal = document.getElementById('messageModal');
     if (messageModal) {
         messageModal.addEventListener('click', function(e) {
@@ -321,7 +355,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideMessage();
             }
         });
+        
+        // Close button for modal
+        const closeMessage = document.querySelector('.close-message');
+        if (closeMessage) {
+            closeMessage.addEventListener('click', hideMessage);
+        }
     }
+    
+    // Initialize audio context
+    initAudioContext();
+    
+    // Optimize audio loading - only preload the main heart audio
+    const mainAudio = document.getElementById('mainHeartAudio');
+    if (mainAudio) {
+        mainAudio.preload = 'auto';
+    }
+    
+    // Set other audio files to load only when needed
+    for (let i = 1; i <= 4; i++) {
+        const audio = document.getElementById(`musicAudio${i}`);
+        if (audio) {
+            audio.preload = 'none'; // Don't preload these
+            audio.volume = 0.3;
+        }
+    }
+    
+    // Show loading indicator
+    showAudioStatus('🎵 Loading audio files...');
+    setTimeout(() => {
+        hideAudioStatus();
+    }, 3000);
 });
 
 // Keyboard shortcuts
@@ -357,38 +421,3 @@ document.addEventListener('touchstart', function() {
         audioContext.resume();
     }
 }, { once: true });
-
-// Initialize audio context on page load
-window.addEventListener('load', function() {
-    initAudioContext();
-    
-    // Optimize audio loading - only preload the main heart audio
-    const mainAudio = document.getElementById('mainHeartAudio');
-    if (mainAudio) {
-        mainAudio.preload = 'auto';
-    }
-    
-    // Set other audio files to load only when needed
-    for (let i = 1; i <= 4; i++) {
-        const audio = document.getElementById(`musicAudio${i}`);
-        if (audio) {
-            audio.preload = 'none'; // Don't preload these
-            audio.volume = 0.3;
-        }
-    }
-    
-    // Show loading indicator
-    showAudioStatus('🎵 Loading audio files...');
-    setTimeout(() => {
-        hideAudioStatus();
-    }, 3000);
-});
-
-// Preload audio on first interaction
-function preloadAudioOnDemand(audioId) {
-    const audio = document.getElementById(audioId);
-    if (audio && audio.preload === 'none') {
-        audio.preload = 'auto';
-        audio.load(); // Force load
-    }
-}
