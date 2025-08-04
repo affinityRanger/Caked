@@ -39,11 +39,9 @@ setInterval(createTear, 800);
 // Go back to landing page
 function goBackToMain() {
     stopAllAudio();
-    // You can customize this to navigate to your main page
     if (window.history.length > 1) {
         window.history.back();
     } else {
-        // Fallback navigation
         window.location.href = 'index.html';
     }
 }
@@ -78,14 +76,12 @@ function showPlaceholder(num) {
 
 // Stop all audio
 function stopAllAudio() {
-    // Stop HTML5 audio
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
         currentAudio = null;
     }
     
-    // Reset all visual states
     document.querySelectorAll('.music-chaos').forEach(btn => {
         btn.classList.remove('playing');
     });
@@ -128,22 +124,18 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     currentAudio = audioElement;
     currentPlayingElement = visualElement;
     
-    // Add visual feedback
     if (visualElement) {
         visualElement.classList.add('playing');
     }
     
     showAudioStatus(`🎵 ${title}`);
     
-    // Set volume
     audioElement.volume = 0.3;
     
-    // Try to play the audio
     const playPromise = audioElement.play();
     
     if (playPromise !== undefined) {
         playPromise.then(() => {
-            // Audio started successfully
             console.log('Audio playing:', title);
         }).catch(error => {
             console.log('Audio play failed:', error);
@@ -151,7 +143,6 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         });
     }
     
-    // Handle audio end
     audioElement.onended = () => {
         if (visualElement) {
             visualElement.classList.remove('playing');
@@ -161,7 +152,6 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         currentPlayingElement = null;
     };
     
-    // Handle audio error
     audioElement.onerror = () => {
         showAudioStatus(`🎵 ${title} (Error loading)`);
         setTimeout(() => {
@@ -175,7 +165,6 @@ function playAudioWithFallback(audioElement, title, visualElement) {
 
 // Music functionality
 function playMusic(num) {
-    // Preload audio on demand
     preloadAudioOnDemand(`musicAudio${num}`);
     
     const audioElement = document.getElementById(`musicAudio${num}`);
@@ -188,8 +177,6 @@ function playMusic(num) {
     ];
     
     playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
-    
-    // Create explosion effect
     createMusicExplosion(buttonElement);
 }
 
@@ -199,8 +186,6 @@ function playMainMusic() {
     const heartElement = document.getElementById('mainHeart');
     
     playAudioWithFallback(audioElement, "You've Been Missed - PARTYNEXTDOOR", heartElement);
-    
-    // Create explosion of broken hearts
     createHeartExplosion();
 }
 
@@ -225,7 +210,6 @@ function createHeartExplosion() {
             
             heart.style.animation = `explodeHeart${i} 2s ease-out forwards`;
             
-            // Create unique explosion animation
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes explodeHeart${i} {
@@ -335,7 +319,7 @@ function preloadAudioOnDemand(audioId) {
     const audio = document.getElementById(audioId);
     if (audio && audio.preload === 'none') {
         audio.preload = 'auto';
-        audio.load(); // Force load
+        audio.load();
     }
 }
 
@@ -343,7 +327,6 @@ function preloadAudioOnDemand(audioId) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
     
-    // Set up event listeners using JavaScript instead of inline onclick
     const backButton = document.querySelector('.back-button');
     if (backButton) {
         backButton.addEventListener('click', function(e) {
@@ -400,7 +383,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Close button for modal
         const closeMessage = document.querySelector('.close-message');
         if (closeMessage) {
             closeMessage.addEventListener('click', hideMessage);
@@ -410,22 +392,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize audio context
     initAudioContext();
     
-    // Optimize audio loading - only preload the main heart audio
+    // Optimize audio loading
     const mainAudio = document.getElementById('mainHeartAudio');
     if (mainAudio) {
         mainAudio.preload = 'auto';
     }
     
-    // Set other audio files to load only when needed
     for (let i = 1; i <= 4; i++) {
         const audio = document.getElementById(`musicAudio${i}`);
         if (audio) {
-            audio.preload = 'none'; // Don't preload these
+            audio.preload = 'none';
             audio.volume = 0.3;
         }
     }
     
-    // Show loading indicator
     showAudioStatus('🎵 Loading audio files...');
     setTimeout(() => {
         hideAudioStatus();
@@ -443,7 +423,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'm' || e.key === 'M') {
         showMessage();
     }
-    if (e.key === ' ') { // Spacebar to stop audio
+    if (e.key === ' ') {
         e.preventDefault();
         stopAllAudio();
     }
@@ -456,7 +436,7 @@ document.addEventListener('click', function() {
     }
 }, { once: true });
 
-// Prevent right-click context menu for a more immersive experience
+// Prevent right-click context menu
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
