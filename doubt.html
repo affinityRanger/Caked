@@ -23,13 +23,12 @@
     <audio id="musicAudio4" preload="none">
         <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Some Of Your Love.mp3" type="audio/mpeg">
     </audio>
-
     <div class="chaos-container">
-        <button class="back-button" onclick="goBackToMain()">← Back to Choice</button>
-        <button class="message-icon" onclick="showMessage()">💌</button>
+        <button class="back-button">← Back to Choice</button>
+        <button class="message-icon">💌</button>
         
         <!-- Main broken heart -->
-        <div class="broken-heart main-heart" onclick="playMainMusic()" id="mainHeart">💔</div>
+        <div class="broken-heart main-heart" id="mainHeart">💔</div>
         
         <!-- Floating broken hearts -->
         <div class="floating-heart" style="top: 10%; left: 20%; animation-delay: -1s;">🖤</div>
@@ -60,41 +59,41 @@
         
         <!-- Image frames with your pre-uploaded photos -->
         <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
-            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories" onerror="showPlaceholder(1)">
+            <img src="https://caked-production.up.railway.app/assets/images/missing0.jpg" alt="Our memories">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Our memories
             </div>
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment" onerror="showPlaceholder(2)">
+            <img src="https://caked-production.up.railway.app/assets/images/missing1.jpg" alt="Our special moment">
             <div class="placeholder" style="display: none;">
                 📷<br>Our moment
             </div>
         </div>
         <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <img src="https://caked-production.up.railway.app/assets/images/memory3.jpg" alt="Missing this" onerror="showPlaceholder(3)">
+            <img src="https://caked-production.up.railway.app/assets/images/memory3.jpg" alt="Missing this">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Missing this
             </div>
         </div>
         <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <img src="https://caked-production.up.railway.app/assets/images/memory4.jpg" alt="Your beauty" onerror="showPlaceholder(4)">
+            <img src="https://caked-production.up.railway.app/assets/images/memory4.jpg" alt="Your beauty">
             <div class="placeholder" style="display: none;">
                 📸<br>Your beauty
             </div>
         </div>
         <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
+            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times">
             <div class="placeholder" style="display: none;">
                 📷<br>Lonely times
             </div>
         </div>
         
         <!-- Music chaos buttons -->
-        <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" onclick="playMusic(1)" id="musicBtn1">🎵</div>
-        <div class="music-chaos" style="bottom: 25%; left: 15%; animation-delay: -2s;" onclick="playMusic(2)" id="musicBtn2">🎶</div>
-        <div class="music-chaos" style="top: 65%; left: 60%; animation-delay: -3s;" onclick="playMusic(3)" id="musicBtn3">🎼</div>
-        <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" onclick="playMusic(4)" id="musicBtn4">🎧</div>
+        <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" id="musicBtn1">🎵</div>
+        <div class="music-chaos" style="bottom: 25%; left: 15%; animation-delay: -2s;" id="musicBtn2">🎶</div>
+        <div class="music-chaos" style="top: 65%; left: 60%; animation-delay: -3s;" id="musicBtn3">🎼</div>
+        <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" id="musicBtn4">🎧</div>
         
         <div class="audio-status" id="audioStatus">🎵 Now Playing...</div>
     </div>
@@ -102,7 +101,7 @@
     <!-- Message Modal -->
     <div class="message-modal" id="messageModal">
         <div class="message-content">
-            <button class="close-message" onclick="hideMessage()">&times;</button>
+            <button class="close-message">&times;</button>
             <div class="message-header">
                 <h2>💔 From My Heart to Yours 💔</h2>
             </div>
@@ -127,7 +126,6 @@
             </div>
         </div>
     </div>
-
     <script src="doubt.js"></script>
 </body>
 </html>

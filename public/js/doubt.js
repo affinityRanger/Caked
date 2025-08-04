@@ -15,7 +15,6 @@ function initAudioContext() {
     }
     return audioContext;
 }
-
 // Create falling tears
 function createTear() {
     const tear = document.createElement('div');
@@ -31,10 +30,8 @@ function createTear() {
         }
     }, 4000);
 }
-
 // Create tears periodically
 setInterval(createTear, 800);
-
 // Go back to landing page
 function goBackToMain() {
     stopAllAudio();
@@ -46,27 +43,31 @@ function goBackToMain() {
         window.location.href = 'index.html';
     }
 }
-
 // Show message modal
 function showMessage() {
-    document.getElementById('messageModal').style.display = 'flex';
+    const modal = document.getElementById('messageModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
 }
-
 // Hide message modal
 function hideMessage() {
-    document.getElementById('messageModal').style.display = 'none';
+    const modal = document.getElementById('messageModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
-
 // Show placeholder if image fails to load
 function showPlaceholder(num) {
     const frame = document.getElementById(`imageFrame${num}`);
-    const img = frame.querySelector('img');
-    const placeholder = frame.querySelector('.placeholder');
-    
-    if (img) img.style.display = 'none';
-    if (placeholder) placeholder.style.display = 'flex';
+    if (frame) {
+        const img = frame.querySelector('img');
+        const placeholder = frame.querySelector('.placeholder');
+        
+        if (img) img.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+    }
 }
-
 // Stop all audio
 function stopAllAudio() {
     // Stop HTML5 audio
@@ -89,22 +90,28 @@ function stopAllAudio() {
     hideAudioStatus();
     currentPlayingElement = null;
 }
-
 // Show audio status
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
-    status.textContent = message;
-    status.classList.add('show');
+    if (status) {
+        status.textContent = message;
+        status.classList.add('show');
+    }
 }
-
 // Hide audio status
 function hideAudioStatus() {
     const status = document.getElementById('audioStatus');
-    status.classList.remove('show');
+    if (status) {
+        status.classList.remove('show');
+    }
 }
-
 // Play audio with fallback
 function playAudioWithFallback(audioElement, title, visualElement) {
+    if (!audioElement) {
+        console.log('Audio element not found');
+        return;
+    }
+    
     stopAllAudio();
     
     currentAudio = audioElement;
@@ -154,7 +161,6 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         }, 2000);
     };
 }
-
 // Music functionality
 function playMusic(num) {
     // Preload audio on demand
@@ -174,7 +180,6 @@ function playMusic(num) {
     // Create explosion effect
     createMusicExplosion(buttonElement);
 }
-
 // Main heart music
 function playMainMusic() {
     const audioElement = document.getElementById('mainHeartAudio');
@@ -185,7 +190,6 @@ function playMainMusic() {
     // Create explosion of broken hearts
     createHeartExplosion();
 }
-
 // Create heart explosion effect
 function createHeartExplosion() {
     for (let i = 0; i < 10; i++) {
@@ -239,9 +243,10 @@ function createHeartExplosion() {
         }, i * 100);
     }
 }
-
 // Create music explosion effect
 function createMusicExplosion(element) {
+    if (!element) return;
+    
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -296,7 +301,6 @@ function createMusicExplosion(element) {
         }, i * 150);
     }
 }
-
 // Random glitch effects
 setInterval(() => {
     const elements = document.querySelectorAll('.chaos-text, .image-frame');
@@ -309,7 +313,6 @@ setInterval(() => {
         }, 1000);
     }
 }, 3000);
-
 // Preload audio on first interaction
 function preloadAudioOnDemand(audioId) {
     const audio = document.getElementById(audioId);
@@ -318,32 +321,56 @@ function preloadAudioOnDemand(audioId) {
         audio.load(); // Force load
     }
 }
-
 // Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing...');
+    
     // Set up event listeners using JavaScript instead of inline onclick
     const backButton = document.querySelector('.back-button');
     if (backButton) {
-        backButton.addEventListener('click', goBackToMain);
+        backButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            goBackToMain();
+        });
+        console.log('Back button listener added');
+    } else {
+        console.error('Back button not found');
     }
     
     const messageIcon = document.querySelector('.message-icon');
     if (messageIcon) {
-        messageIcon.addEventListener('click', showMessage);
+        messageIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage();
+        });
+        console.log('Message icon listener added');
+    } else {
+        console.error('Message icon not found');
     }
     
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart) {
-        mainHeart.addEventListener('click', playMainMusic);
+        mainHeart.addEventListener('click', function(e) {
+            e.preventDefault();
+            playMainMusic();
+        });
+        console.log('Main heart listener added');
+    } else {
+        console.error('Main heart not found');
     }
     
     // Set up music buttons
     for (let i = 1; i <= 4; i++) {
         const musicBtn = document.getElementById(`musicBtn${i}`);
         if (musicBtn) {
-            musicBtn.addEventListener('click', function() {
+            musicBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log(`Music button ${i} clicked`);
                 playMusic(i);
             });
+            console.log(`Music button ${i} listener added`);
+        } else {
+            console.error(`Music button ${i} not found`);
         }
     }
     
@@ -386,8 +413,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         hideAudioStatus();
     }, 3000);
+    
+    console.log('Initialization complete');
 });
-
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -402,19 +430,16 @@ document.addEventListener('keydown', function(e) {
         stopAllAudio();
     }
 });
-
 // Handle user interaction to enable audio context
 document.addEventListener('click', function() {
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
     }
 }, { once: true });
-
 // Prevent right-click context menu for a more immersive experience
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
-
 // Add touch support for mobile devices
 document.addEventListener('touchstart', function() {
     if (audioContext && audioContext.state === 'suspended') {
