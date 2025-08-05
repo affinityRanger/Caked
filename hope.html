@@ -11,7 +11,6 @@
   <link rel="dns-prefetch" href="https://images.unsplash.com">
 </head>
 <body>
-
   
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
@@ -28,16 +27,9 @@
     <p>Into yo like I'm a driller.</p>
   </div>
   
-  <!-- Background Music (auto-preload restored for auto-play) -->
-  <audio id="globalAudio" class="background-music" preload="auto">
+  <!-- Background Music -->
+  <audio id="globalAudio" class="background-music" preload="none">
     <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - DEEPER.mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - TRAUMA .mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/KEEP IT-Juice WRLD.mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/Juice WRLD - GRACE.mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Some Of Your Love.mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - You ve Been Missed.mp3" type="audio/mpeg">
-    <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3" type="audio/mpeg">
   </audio>
   
   <!-- Music Button -->
@@ -52,7 +44,6 @@
       <button class="close-popup" onclick="toggleMusicPopup()">×</button>
     </div>
     <div class="background-music-selector">
-      <!-- CORRECTED SELECT OPTIONS TO MATCH ACTUAL AUDIO FILES -->
       <select id="globalMusicSelect" onchange="selectGlobalSong(this.value)">
         <option value="PARTYNEXTDOOR - Dreamin.mp3">Dreamin' - PARTYNEXTDOOR</option>
         <option value="PARTYNEXTDOOR - DEEPER.mp3">DEEPER - PARTYNEXTDOOR</option>
@@ -111,21 +102,21 @@
       <div class="message">"I think I'm a crack addict. frfr"</div>
       <button class="add-message-btn" onclick="showSavedMessage('msg1')">💌 Read Message</button>
       <div id="msg1" class="user-message">
-        I saw you and I fell—suddenly, endlessly. Hit me too like a truck. Funny you still hit me like a truck no matter what the outcome. That smile on your face makes it easy to trust you. I swear na si mstari I literally skip a beat when I see a photo of you. Anyway nione mbleina tu nikisema izi vitu😂
-        <p>I was so scared of being attached you wouldnt believe after what I'm doing. Iwish I went in with your mindset😞</p>
-        <p> But I also dont😅  I kinda know the outcome. I told you.</p>
-        <p> You havent changed much in this photos. Still got it in you even though you were like 11 here😂
-        </p>
-        <p> Izi ndo time natoka shule boarding narudi nikiski kunamtu anasema lazima nimvalishe pete😂😂 usijali. Ama unasema ilikua utoto mingi tu?</p>
-        <p> Mi sikuona ikiwa utoto saaanaa ivo. </p>
-        <p>Kuna wtu siezi sahau experiences no matter what. </p>
-        <p> Anyway, kuongea na ww ilifanya nijue kuna vitu poa hujasahau. </p>
-        <p>Loving you is the Only law I will never brake</p>
-        <p> But usichukulie nikama na force. Ata mm sijui hii ni nn nafeel. Might be attachment or somethin I need too to process. </p>
-        <p> But I also know I cant do it alone. </p>
-        <p> I gotta see this face drunk again . And high in the moment.</p>
-        <p> Just dont treat me like them niggaz I aint those.  </p>
-
+        <div class="message-text">
+          I saw you and I fell—suddenly, endlessly. Hit me too like a truck. Funny you still hit me like a truck no matter what the outcome. That smile on your face makes it easy to trust you. I swear na si mstari I literally skip a beat when I see a photo of you. Anyway nione mbleina tu nikisema izi vitu😂
+          <br><br>I was so scared of being attached you wouldnt believe after what I'm doing. Iwish I went in with your mindset😞
+          <br><br>But I also dont😅 I kinda know the outcome. I told you.
+          <br><br>You havent changed much in this photos. Still got it in you even though you were like 11 here😂
+          <br><br>Izi ndo time natoka shule boarding narudi nikiski kunamtu anasema lazima nimvalishe pete😂😂 usijali. Ama unasema ilikua utoto mingi tu?
+          <br><br>Mi sikuona ikiwa utoto saaanaa ivo.
+          <br><br>Kuna wtu siezi sahau experiences no matter what.
+          <br><br>Anyway, kuongea na ww ilifanya nijue kuna vitu poa hujasahau.
+          <br><br>Loving you is the Only law I will never brake
+          <br><br>But usichukulie nikama na force. Ata mm sijui hii ni nn nafeel. Might be attachment or somethin I need too to process.
+          <br><br>But I also know I cant do it alone.
+          <br><br>I gotta see this face drunk again . And high in the moment.
+          <br><br>Just dont treat me like them niggaz I aint those.
+        </div>
       </div>
       <div class="photo-container">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this, event)" loading="lazy">
@@ -142,10 +133,12 @@
       <div class="message">"And I don't want it back you can keep it Make it dirty but keep it safe for me."</div>
       <button class="add-message-btn" onclick="showSavedMessage('msg2')">💌 Read Message</button>
       <div id="msg2" class="user-message">
-        Can I tell you somethin' Crazy I never thought you'd be my type too since we met at the beginning. Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real experience with somebody was with you. No lie
-        <p>I guess its why I'm still here. Unless I wasnt your first then I am right in everything</p>
-        <p>The song TRAUMA is word for word what I'm trying to say</p>
-        <p>We were gonna be on a beach high together. You fr sweared</p>
+        <div class="message-text">
+          Can I tell you somethin' Crazy I never thought you'd be my type too since we met at the beginning. Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real experience with somebody was with you. No lie
+          <br><br>I guess its why I'm still here. Unless I wasnt your first then I am right in everything
+          <br><br>The song TRAUMA is word for word what I'm trying to say
+          <br><br>We were gonna be on a beach high together. You fr sweared
+        </div>
       </div>
       <div class="photo-container">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this, event)" loading="lazy">
@@ -162,11 +155,12 @@
       <div class="message">"Come to me. I will make you believe we're forever. We dont got to be a couple for me to show you."</div>
       <button class="add-message-btn" onclick="showSavedMessage('msg3')">💌 Read Message</button>
       <div id="msg3" class="user-message">
-        I never wanted you to feel some type of way if I did. I don't even know if this makes you comfortable. I figured you'd like some of the things I'm good at even though not talking. Forget how you know me. Let me show you some of the other me.
-        <p> Lakini nilikua nimekudedi bado ukiwa semi-kienyo😂😂 sahii bruuh!! acha tu  </p>
-        <p>Suburban fyn shyt💜</p>
-        <p> Even if you choose the other side, I still cant belive I fumbled and stumbled on this girl😅😔things change</p>
-
+        <div class="message-text">
+          I never wanted you to feel some type of way if I did. I don't even know if this makes you comfortable. I figured you'd like some of the things I'm good at even though not talking. Forget how you know me. Let me show you some of the other me.
+          <br><br>Lakini nilikua nimekudedi bado ukiwa semi-kienyo😂😂 sahii bruuh!! acha tu
+          <br><br>Suburban fyn shyt💜
+          <br><br>Even if you choose the other side, I still cant belive I fumbled and stumbled on this girl😅😔things change
+        </div>
       </div>
       <div class="photo-container">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this, event)" loading="lazy">
@@ -176,7 +170,7 @@
     </div>
   </div>
   
-  <!-- Exclamation Button (Bottom Right) -->
+  <!-- Exclamation Button -->
   <div id="exclamationIcon" class="exclamation-button" onclick="toggleExclamationPopup()">
     <span class="exclamation-icon">!</span>
   </div>
@@ -188,24 +182,19 @@
       <button class="exclamation-close" onclick="toggleExclamationPopup()">×</button>
     </div>
     <div class="exclamation-content">
-      <p>Start by clicking the name</p>
-      <p>
-      The music you here when you open this page is a song you told me you love. 
-      </p>
-      <p>The rest of the songs I have hand picked to explain myself. Some you are familiar with maybe some not.
-      </p>
-        I dont know whenever I hear DREAMING it just gives me your vibe. Its ingrained in me already. Not the music but the feeling.
-      </p>
-      <p>I also just Discovered my hypocricy. I have never really done anything for you. Consider this my first sentiment to what I I'm to say.</p>
-      <p>  CALL ME but dont call me Crazy. YET!! </p>
-      
-
-      
+      <div class="message-text">
+        Start by clicking the name
+        <br><br>The music you here when you open this page is a song you told me you love.
+        <br><br>The rest of the songs I have hand picked to explain myself. Some you are familiar with maybe some not.
+        <br><br>I dont know whenever I hear DREAMING it just gives me your vibe. Its ingrained in me already. Not the music but the feeling.
+        <br><br>I also just Discovered my hypocricy. I have never really done anything for you. Consider this my first sentiment attempt to what I'm to say.
+        <br><br>CALL ME but dont call me Crazy. YET!!
+      </div>
     </div>
   </div>
   
-  <!-- FIXED: Photo Enlargement Modal -->
-  <div id="photoModal">
+  <!-- Photo Enlargement Modal -->
+  <div id="photoModal" class="photo-modal">
     <span class="close" onclick="closePhotoModal()">&times;</span>
     <img id="enlargedPhoto" alt="Enlarged photo">
   </div>
@@ -219,35 +208,33 @@
     </div>
     
     <div id="msg4" class="user-message">
-      I need you so much. I want you to get that bad. I'm no Drake nor PND but my name still Bryson still a rocker. Give me the location. I learnt a thing or two since we met.😎
-      I don't even know if I'm doing corny things here or if you'll even like it. Honestly if you like I don't mind looking like a geek.
-      But I also feel this would have been sugar melon sweet if it was in better terms😅
-      <p> <big>I just pressed the big red button😂</big></p>
-      <p> Damn that big read button😖memories😌 Damn that big red button Started all dat. Couldnt resist I'm sorry. But who wouldnt, remember I asked what the fuk why does it taste like strawberrry pinapple punch😔Damn that
-      big red button.</p>
-      <p> Was gonna put it in a diamond pendant or somthin' I aint rich though, a yellow diamond dagger will get if you choose this side.
-      </p>
-      <p>Its true I cant get over you. I'm past this bitches,I think. Discovered a Woman. </p>
-      <p>The first 2 weeks afer whatever we broke happened I was joking around. Till later then I knew I aint going back. </p>
-      <p>. </p>
-      <p>If you knew how safe I played not to fumble into you 😔. I have a problem with girls that treat me good. Especially after they touch my hair. </p>
-        <p>Call it whatever you want. You can phrase it how you like. I did mean everyword I said.
-      </p>
-      <p>This is instinct I guess.
-      </p>
-      <p>All Love💜  no matter your desicion just know I aint giving up</p>
-      <p>If you live me again I dont think I'm ever recovering again. </p>
-      <p>Ndo maana nakuuliza, wanaeza kupigania?</p>
-      <p>Ata ww chukulia venye utachukulia </p>
-      <p>Its been off from that day😞 mostly coz you confused me so hard. Although my crushout was faking I swear the feeling was real</p>
-      <p>Yo boy not like dat, not like them other guys</p>
-      <p>Wish I saw how lucky I was from the start</p>
-      <p>At least I deserve an unblock😖 </p>
-      <p>Plizz teach me. I already learnt a few from you </p>
-      <p> <big>PS I GOTTA PART II and III one of it got me singing😅</big> </p>
-      <p> If you wanna hear my Angelic singing voice. PND dont got nothing on me. Kama singeku tech bro ningekua msanii nishakushoo. </p>
+      <div class="message-text">
+        I need you so much. I want you to get that bad. I'm no Drake nor PND but my name still Bryson still a rocker. Give me the location. I learnt a thing or two since we met.😎
+        <br><br>I don't even know if I'm doing corny things here or if you'll even like it. Honestly if you like I don't mind looking like a geek.
+        <br><br>But I also feel this would have been sugar melon sweet if it was in better terms😅
+        <br><br><strong>I just pressed the big red button😂</strong>
+        <br><br>Damn that big read button😖memories😌 Damn that big red button Started all dat. Couldnt resist I'm sorry. But who wouldnt, remember I asked what the fuk why does it taste like strawberrry pinapple punch😔Damn that big red button.
+        <br><br>Was gonna put it in a diamond pendant or somthin' I aint rich though, a yellow diamond dagger will get if you choose this side.
+        <br><br>Its true I cant get over you. I'm past this bitches,I think. Discovered a Woman.
+        <br><br>The first 2 weeks afer whatever we broke happened I was joking around. Till later then I knew I aint going back.
+        <br><br>If you knew how safe I played not to fumble into you 😔. I have a problem with girls that treat me good. Especially after they touch my hair.
+        <br><br>Call it whatever you want. You can phrase it how you like. I did mean everyword I said.
+        <br><br>This is instinct I guess.
+        <br><br>All Love💜 no matter your desicion just know I aint giving up
+        <br><br>If you live me again I dont think I'm ever recovering again.
+        <br><br>Ndo maana nakuuliza, wanaeza kupigania?
+        <br><br>Ata ww chukulia venye utachukulia
+        <br><br>Its been off from that day😞 mostly coz you confused me so hard. Although my crushout was faking I swear the feeling was real
+        <br><br>Yo boy not like dat, not like them other guys
+        <br><br>Wish I saw how lucky I was from the start
+        <br><br>At least I deserve an unblock😖
+        <br><br>Plizz teach me. I already learnt a few from you
+        <br><br><strong>PS I GOTTA PART II and III one of it got me singing😅</strong>
+        <br><br>If you wanna hear my Angelic singing voice. PND dont got nothing on me. Kama singeku tech bro ningekua msanii nishakushoo.
+      </div>
     </div>
   </footer>
-  <script src="https://caked-production.up.railway.app/js/hope.js"></script>
+  
+  <script src="https://caked-production.up.railway.app/js/hope.js" defer></script>
 </body>
 </html>
