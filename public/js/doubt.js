@@ -184,7 +184,9 @@ function playMusic(num) {
         "TRAUMA - PARTYNEXTDOOR",
         "DEEPER - PARTYNEXTDOOR", 
         "Dreamin - PARTYNEXTDOOR",
-        "Some Of Your Love - PARTYNEXTDOOR"
+        "Some Of Your Love - PARTYNEXTDOOR",
+        "Kiss - I Was Made For Loving You.mp3"
+        
     ];
     
     playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
