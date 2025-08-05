@@ -3,17 +3,26 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 body {
   height: 100vh;
   overflow: hidden;
   font-family: 'Georgia', serif;
   background: #000;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
+
 .container {
   display: flex;
   height: 100vh;
   position: relative;
 }
+
 .side {
   flex: 1;
   display: flex;
@@ -24,45 +33,63 @@ body {
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   overflow: hidden;
+  touch-action: manipulation;
 }
+
 .left-side {
   background: linear-gradient(135deg, #4a0e4e 0%, #6a0dad 30%, #9370db 70%, #dda0dd 100%);
   box-shadow: inset 0 0 100px rgba(138, 43, 226, 0.3);
 }
+
 .right-side {
   background: linear-gradient(135deg, #2f0000 0%, #8b0000 30%, #dc143c 70%, #4a0000 100%);
   box-shadow: inset 0 0 100px rgba(139, 0, 0, 0.3);
 }
+
 .side:hover {
   flex: 1.3;
   filter: brightness(1.2) saturate(1.2);
 }
+
 .side:not(:hover) {
   filter: brightness(0.8) saturate(0.8);
 }
+
+.side.clicking,
+.side.touching {
+  transform: scale(1.05);
+  filter: brightness(1.5) saturate(1.5);
+}
+
 .rose-container {
   z-index: 2;
   transform: translateY(0);
   transition: all 0.5s ease;
+  pointer-events: none;
 }
+
 .side:hover .rose-container {
   transform: translateY(-20px);
 }
+
 .rose {
   font-size: 8rem;
   filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.5));
   transition: all 0.5s ease;
   text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
 }
+
 .side:hover .rose {
   transform: scale(1.2) rotate(8deg);
   filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.6));
   animation: rosePulse 2s infinite ease-in-out;
 }
+
 @keyframes rosePulse {
   0%, 100% { text-shadow: 0 0 40px rgba(255, 255, 255, 0.3); }
   50% { text-shadow: 0 0 60px rgba(255, 255, 255, 0.6); }
 }
+
 .text {
   margin-top: 2rem;
   text-align: center;
@@ -74,12 +101,14 @@ body {
   transition: all 0.5s ease;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
+
 .side:hover .text {
   opacity: 1;
   transform: translateY(-10px);
   font-size: 2.2rem;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
+
 .subtitle {
   margin-top: 1rem;
   font-size: 1.1rem;
@@ -87,10 +116,12 @@ body {
   font-style: italic;
   transition: all 0.3s ease;
 }
+
 .side:hover .subtitle {
   opacity: 1;
   transform: translateY(-5px);
 }
+
 .divider {
   position: absolute;
   left: 50%;
@@ -106,7 +137,9 @@ body {
   transform: translateX(-50%);
   z-index: 3;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
 }
+
 .glow {
   position: absolute;
   top: 50%;
@@ -118,14 +151,17 @@ body {
   pointer-events: none;
   z-index: 1;
 }
+
 .left-side .glow {
   background: radial-gradient(circle, rgba(138, 43, 226, 0.4) 0%, rgba(147, 112, 219, 0.2) 50%, transparent 70%);
   animation: pulse 4s infinite ease-in-out;
 }
+
 .right-side .glow {
   background: radial-gradient(circle, rgba(139, 0, 0, 0.4) 0%, rgba(220, 20, 60, 0.2) 50%, transparent 70%);
   animation: pulse 4s infinite ease-in-out reverse;
 }
+
 @keyframes pulse {
   0%, 100% {
     transform: translate(-50%, -50%) scale(0.8);
@@ -136,6 +172,7 @@ body {
     opacity: 0.8;
   }
 }
+
 .question-mark {
   position: absolute;
   top: 50%;
@@ -148,7 +185,15 @@ body {
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
   font-weight: bold;
   cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.2s ease;
 }
+
+.question-mark:hover,
+.question-mark:active {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
 @keyframes fadeInOut {
   0%, 100% {
     opacity: 0.4;
@@ -159,6 +204,7 @@ body {
     transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
   }
 }
+
 .petal {
   position: absolute;
   width: 12px;
@@ -167,15 +213,19 @@ body {
   animation: float 8s infinite ease-in-out;
   pointer-events: none;
   opacity: 0.7;
+  will-change: transform;
 }
+
 .left-side .petal {
   background: linear-gradient(45deg, rgba(138, 43, 226, 0.6), rgba(221, 160, 221, 0.4));
   box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
 }
+
 .right-side .petal {
   background: linear-gradient(45deg, rgba(139, 0, 0, 0.6), rgba(220, 20, 60, 0.4));
   box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
 }
+
 @keyframes float {
   0% {
     transform: translateY(100vh) rotate(0deg);
@@ -192,6 +242,7 @@ body {
     opacity: 0;
   }
 }
+
 .click-hint {
   position: absolute;
   bottom: 30px;
@@ -202,15 +253,14 @@ body {
   font-style: italic;
   z-index: 5;
   animation: hintPulse 3s infinite ease-in-out;
+  pointer-events: none;
 }
+
 @keyframes hintPulse {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
-.side.clicking {
-  transform: scale(1.05);
-  filter: brightness(1.5) saturate(1.5);
-}
+
 @keyframes sparkleFloat {
   0% {
     opacity: 0;
@@ -225,6 +275,7 @@ body {
     transform: translateY(-60px) scale(0.8) rotate(360deg);
   }
 }
+
 @keyframes breakingFall {
   0% {
     opacity: 1;
@@ -287,9 +338,11 @@ body {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
+  touch-action: manipulation;
 }
 
-.close-btn:hover {
+.close-btn:hover,
+.close-btn:active {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   transform: rotate(90deg);
@@ -302,6 +355,7 @@ body {
   background: rgba(0, 0, 0, 0.5);
   scrollbar-width: thin;
   scrollbar-color: rgba(138, 43, 226, 0.5) rgba(0, 0, 0, 0.2);
+  -webkit-overflow-scrolling: touch;
 }
 
 #file-manager::-webkit-scrollbar {
@@ -325,6 +379,14 @@ body {
   font-style: italic;
 }
 
+.error {
+  color: #e74c3c;
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.4rem;
+  font-style: italic;
+}
+
 .file-tree {
   list-style-type: none;
 }
@@ -339,9 +401,11 @@ body {
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  touch-action: manipulation;
 }
 
-.file-item:hover {
+.file-item:hover,
+.file-item:active {
   background: rgba(138, 43, 226, 0.2);
   border-color: rgba(138, 43, 226, 0.5);
   transform: translateX(5px);
@@ -352,6 +416,7 @@ body {
   margin-right: 1.2rem;
   font-size: 1.8rem;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+  flex-shrink: 0;
 }
 
 .file-name {
@@ -359,6 +424,7 @@ body {
   font-size: 1.1rem;
   letter-spacing: 0.5px;
   color: rgba(255, 255, 255, 0.9);
+  word-break: break-word;
 }
 
 .file-size {
@@ -366,6 +432,7 @@ body {
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.9rem;
   font-style: italic;
+  flex-shrink: 0;
 }
 
 .folder-children {
@@ -376,18 +443,12 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.error {
-  color: #e74c3c;
-  text-align: center;
-  padding: 3rem;
-  font-size: 1.4rem;
-  font-style: italic;
-}
-
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
   }
+  
   .divider {
     top: 50%;
     left: 10%;
@@ -395,41 +456,221 @@ body {
     height: 3px;
     transform: translateY(-50%);
   }
+  
   .rose {
     font-size: 6rem;
   }
+  
   .text {
     font-size: 1.5rem;
+    letter-spacing: 2px;
   }
+  
+  .side:hover .text {
+    font-size: 1.7rem;
+  }
+  
   .question-mark {
     font-size: 3rem;
   }
-  .file-manager-header {
-    padding: 1rem;
+  
+  .click-hint {
+    bottom: 15px;
+    font-size: 0.9rem;
   }
+  
+  /* File Manager Mobile Styles */
+  .file-manager-header {
+    padding: 1rem 1.5rem;
+  }
+  
   .file-manager-header h2 {
     font-size: 1.5rem;
+    letter-spacing: 1px;
   }
+  
   .close-btn {
     font-size: 2rem;
     width: 35px;
     height: 35px;
   }
+  
   #file-manager {
     padding: 1rem;
   }
+  
   .file-item {
     padding: 0.8rem 1rem;
+    margin: 0.3rem 0;
   }
+  
   .file-icon {
     font-size: 1.5rem;
     margin-right: 1rem;
   }
+  
   .file-name {
     font-size: 1rem;
   }
+  
+  .file-size {
+    font-size: 0.8rem;
+  }
+  
   .folder-children {
     margin-left: 1.5rem;
     padding-left: 1rem;
+  }
+  
+  .loading,
+  .error {
+    padding: 2rem 1rem;
+    font-size: 1.2rem;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .rose {
+    font-size: 4.5rem;
+  }
+  
+  .text {
+    font-size: 1.3rem;
+    margin-top: 1.5rem;
+  }
+  
+  .side:hover .text {
+    font-size: 1.5rem;
+  }
+  
+  .question-mark {
+    font-size: 2.5rem;
+  }
+  
+  .click-hint {
+    bottom: 10px;
+    font-size: 0.8rem;
+  }
+  
+  .file-manager-header {
+    padding: 0.8rem 1rem;
+  }
+  
+  .file-manager-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .close-btn {
+    font-size: 1.8rem;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .file-item {
+    padding: 0.6rem 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .file-icon {
+    margin-right: 0.5rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .file-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .file-size {
+    font-size: 0.7rem;
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .rose {
+    font-size: 4rem;
+  }
+  
+  .text {
+    font-size: 1.2rem;
+    margin-top: 1rem;
+  }
+  
+  .side:hover .text {
+    font-size: 1.4rem;
+  }
+  
+  .question-mark {
+    font-size: 2rem;
+  }
+  
+  .click-hint {
+    bottom: 5px;
+    font-size: 0.8rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .rose {
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+  }
+  
+  .text {
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .side,
+  .rose-container,
+  .rose,
+  .text,
+  .subtitle,
+  .question-mark,
+  .file-item {
+    transition: none;
+  }
+  
+  .petal,
+  .glow {
+    animation: none;
+  }
+  
+  @keyframes rosePulse,
+  @keyframes pulse,
+  @keyframes fadeInOut,
+  @keyframes float,
+  @keyframes hintPulse,
+  @keyframes sparkleFloat,
+  @keyframes breakingFall {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .petal,
+  .glow,
+  #file-manager-container {
+    display: none;
+  }
+  
+  .container {
+    background: white;
+    color: black;
   }
 }

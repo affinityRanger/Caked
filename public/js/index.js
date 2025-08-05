@@ -1,21 +1,39 @@
+// State management
 let petalInterval;
 let isPaused = false;
 let isNavigating = false;
+let animationFrameId = null;
 
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
+// Utility functions
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 function createPetal(side) {
-  if (isPaused || isNavigating) return;
+  if (isPaused || isNavigating || !side) return;
   
   const petal = document.createElement('div');
   petal.classList.add('petal');
   petal.style.left = Math.random() * 100 + '%';
   petal.style.animationDelay = Math.random() * 2 + 's';
   petal.style.animationDuration = (Math.random() * 4 + 6) + 's';
+  
   side.appendChild(petal);
+  
+  // Clean up petal after animation
   setTimeout(() => {
-    if (petal.parentNode) {
+    if (petal && petal.parentNode) {
       petal.remove();
     }
   }, 10000);
@@ -31,6 +49,10 @@ function resumePetals() {
 
 function createSparkleTransition() {
   const sparkleEmojis = ['✨', '⭐', '💘', '💜', '💖'];
+  const leftSide = document.querySelector('.left-side');
+  
+  if (!leftSide) return;
+  
   for (let i = 0; i < 20; i++) {
     setTimeout(() => {
       const sparkle = document.createElement('div');
@@ -42,14 +64,23 @@ function createSparkleTransition() {
       sparkle.style.zIndex = '10';
       sparkle.style.pointerEvents = 'none';
       sparkle.style.animation = 'sparkleFloat 1.2s ease-out forwards';
-      document.querySelector('.left-side').appendChild(sparkle);
-      setTimeout(() => sparkle.remove(), 1200);
+      
+      leftSide.appendChild(sparkle);
+      setTimeout(() => {
+        if (sparkle && sparkle.parentNode) {
+          sparkle.remove();
+        }
+      }, 1200);
     }, i * 60);
   }
 }
 
 function createBreakingHeartTransition() {
   const darkEmojis = ['💔', '🖤', '⚫', '💀', '🥀', '⛈️'];
+  const rightSide = document.querySelector('.right-side');
+  
+  if (!rightSide) return;
+  
   for (let i = 0; i < 25; i++) {
     setTimeout(() => {
       const piece = document.createElement('div');
@@ -61,34 +92,57 @@ function createBreakingHeartTransition() {
       piece.style.zIndex = '10';
       piece.style.pointerEvents = 'none';
       piece.style.animation = 'breakingFall 1.5s ease-in forwards';
-      document.querySelector('.right-side').appendChild(piece);
-      setTimeout(() => piece.remove(), 1500);
+      
+      rightSide.appendChild(piece);
+      setTimeout(() => {
+        if (piece && piece.parentNode) {
+          piece.remove();
+        }
+      }, 1500);
     }, i * 50);
   }
 }
 
-// FIXED NAVIGATION FUNCTIONS for Railway deployment
+// Navigation functions with better error handling
 function navigateToGarden() {
   if (isNavigating) return;
   isNavigating = true;
-     
+  
   const leftSide = document.querySelector('.left-side');
-  leftSide.classList.add('clicking');
+  if (leftSide) {
+    leftSide.classList.add('clicking');
+  }
+  
   createSparkleTransition();
-     
+  
   setTimeout(() => {
     try {
-      // For Railway deployment - use absolute path from root
-      window.location.href = '/hope';
+      // Stop petal animations
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      // Navigate with fallback options
+      const urls = ['/hope', '/hope.html', `${BACKEND_URL}/hope`];
+      
+      for (const url of urls) {
+        try {
+          window.location.href = url;
+          return;
+        } catch (error) {
+          console.warn(`Navigation attempt failed for ${url}:`, error);
+          continue;
+        }
+      }
+      
+      // If all else fails, use location.assign
+      window.location.assign(`${window.location.origin}/hope`);
+      
     } catch (error) {
-      console.error('Navigation failed:', error);
-      // Fallback: Try with .html extension
-      try {
-        window.location.href = '/hope.html';
-      } catch (fallbackError) {
-        console.error('Fallback navigation failed:', fallbackError);
-        // Last resort: Use location.assign with full URL
-        window.location.assign(`${window.location.origin}/hope`);
+      console.error('All navigation attempts failed:', error);
+      isNavigating = false;
+      if (leftSide) {
+        leftSide.classList.remove('clicking');
       }
     }
   }, 1200);
@@ -97,80 +151,53 @@ function navigateToGarden() {
 function navigateToDoubt() {
   if (isNavigating) return;
   isNavigating = true;
-     
+  
   const rightSide = document.querySelector('.right-side');
-  rightSide.classList.add('clicking');
+  if (rightSide) {
+    rightSide.classList.add('clicking');
+  }
+  
   createBreakingHeartTransition();
-     
+  
   setTimeout(() => {
     try {
-      // For Railway deployment - use absolute path from root
-      window.location.href = '/doubt';
+      // Stop petal animations
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      // Navigate with fallback options
+      const urls = ['/doubt', '/doubt.html', `${BACKEND_URL}/doubt`];
+      
+      for (const url of urls) {
+        try {
+          window.location.href = url;
+          return;
+        } catch (error) {
+          console.warn(`Navigation attempt failed for ${url}:`, error);
+          continue;
+        }
+      }
+      
+      // If all else fails, use location.assign
+      window.location.assign(`${window.location.origin}/doubt`);
+      
     } catch (error) {
-      console.error('Navigation failed:', error);
-      // Fallback: Try with .html extension
-      try {
-        window.location.href = '/doubt.html';
-      } catch (fallbackError) {
-        console.error('Fallback navigation failed:', fallbackError);
-        // Last resort: Use location.assign with full URL
-        window.location.assign(`${window.location.origin}/doubt`);
+      console.error('All navigation attempts failed:', error);
+      isNavigating = false;
+      if (rightSide) {
+        rightSide.classList.remove('clicking');
       }
     }
   }, 1500);
 }
 
-// Alternative version if you need to be more explicit about the full URL
-function navigateToGardenAlt() {
-  if (isNavigating) return;
-  isNavigating = true;
-     
-  const leftSide = document.querySelector('.left-side');
-  leftSide.classList.add('clicking');
-  createSparkleTransition();
-     
-  setTimeout(() => {
-    const baseUrl = 'https://caked-production.up.railway.app';
-    try {
-      window.location.href = `${baseUrl}/hope`;
-    } catch (error) {
-      console.error('Navigation failed:', error);
-      try {
-        window.location.href = `${baseUrl}/hope.html`;
-      } catch (fallbackError) {
-        window.location.assign(`${baseUrl}/hope`);
-      }
-    }
-  }, 1200);
-}
-
-function navigateToDoubtAlt() {
-  if (isNavigating) return;
-  isNavigating = true;
-     
-  const rightSide = document.querySelector('.right-side');
-  rightSide.classList.add('clicking');
-  createBreakingHeartTransition();
-     
-  setTimeout(() => {
-    const baseUrl = 'https://caked-production.up.railway.app';
-    try {
-      window.location.href = `${baseUrl}/doubt`;
-    } catch (error) {
-      console.error('Navigation failed:', error);
-      try {
-        window.location.href = `${baseUrl}/doubt.html`;
-      } catch (fallbackError) {
-        window.location.assign(`${baseUrl}/doubt`);
-      }
-    }
-  }, 1500);
-}
-
-// File Manager Functions (unchanged)
+// File Manager Functions
 function toggleFileManager() {
   const fileManager = document.getElementById('file-manager-container');
-     
+  
+  if (!fileManager) return;
+  
   if (fileManager.style.display === 'flex') {
     fileManager.style.display = 'none';
   } else {
@@ -178,8 +205,11 @@ function toggleFileManager() {
     loadFileStructure();
   }
 }
+
 function loadFileStructure() {
   const fileManager = document.getElementById('file-manager');
+  
+  if (!fileManager) return;
   
   // Show loading message
   fileManager.innerHTML = '<div class="loading">Loading files...</div>';
@@ -188,15 +218,12 @@ function loadFileStructure() {
   fetch(`${BACKEND_URL}/api/files`)
     .then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       return response.json();
     })
     .then(data => {
-      // Clear loading message
       fileManager.innerHTML = '';
-      
-      // Display file structure
       displayFileStructure(data, fileManager);
     })
     .catch(error => {
@@ -206,6 +233,8 @@ function loadFileStructure() {
 }
 
 function displayFileStructure(items, container) {
+  if (!items || !container) return;
+  
   const ul = document.createElement('ul');
   ul.className = 'file-tree';
   
@@ -221,11 +250,11 @@ function displayFileStructure(items, container) {
     // Create name element
     const name = document.createElement('span');
     name.className = 'file-name';
-    name.textContent = item.name;
+    name.textContent = item.name || 'Unknown';
     
     // Create file size element (for files)
     const size = document.createElement('span');
-    if (item.type === 'file') {
+    if (item.type === 'file' && item.size !== undefined) {
       size.className = 'file-size';
       size.textContent = formatFileSize(item.size);
     }
@@ -233,13 +262,14 @@ function displayFileStructure(items, container) {
     // Add elements to list item
     li.appendChild(icon);
     li.appendChild(name);
-    if (item.type === 'file') {
+    if (item.type === 'file' && item.size !== undefined) {
       li.appendChild(size);
     }
     
     // Add click event for files
-    if (item.type === 'file') {
-      li.addEventListener('click', function() {
+    if (item.type === 'file' && item.path) {
+      li.addEventListener('click', function(e) {
+        e.stopPropagation();
         window.open(`${BACKEND_URL}/${item.path}`, '_blank');
       });
     }
@@ -257,10 +287,10 @@ function displayFileStructure(items, container) {
         e.stopPropagation();
         if (childContainer.style.display === 'none') {
           childContainer.style.display = 'block';
-          icon.textContent = '📂'; // Open folder icon
+          icon.textContent = '📂';
         } else {
           childContainer.style.display = 'none';
-          icon.textContent = '📁'; // Closed folder icon
+          icon.textContent = '📁';
         }
       });
       
@@ -277,23 +307,9 @@ function getFileIcon(extension) {
   if (!extension) return '📄';
   
   const iconMap = {
-    'html': '🌐',
-    'css': '🎨',
-    'js': '📜',
-    'json': '📋',
-    'md': '📝',
-    'txt': '📄',
-    'jpg': '🖼️',
-    'jpeg': '🖼️',
-    'png': '🖼️',
-    'gif': '🖼️',
-    'svg': '🖼️',
-    'mp4': '🎬',
-    'mp3': '🎵',
-    'wav': '🎵',
-    'pdf': '📕',
-    'zip': '📦',
-    'rar': '📦'
+    'html': '🌐', 'css': '🎨', 'js': '📜', 'json': '📋', 'md': '📝', 'txt': '📄',
+    'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'svg': '🖼️',
+    'mp4': '🎬', 'mp3': '🎵', 'wav': '🎵', 'pdf': '📕', 'zip': '📦', 'rar': '📦'
   };
   
   return iconMap[extension.toLowerCase()] || '📄';
@@ -309,72 +325,112 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Enhanced mobile and desktop support
-function addTouchSupport() {
+// Enhanced touch and click handling
+function addInteractionSupport() {
   const leftSide = document.getElementById('hopeSection');
   const rightSide = document.getElementById('doubtSection');
+  const questionMark = document.querySelector('.question-mark');
+  const closeBtn = document.querySelector('.close-btn');
   
-  // Touch support for mobile devices
+  // Debounced navigation functions to prevent multiple calls
+  const debouncedNavigateToGarden = debounce(navigateToGarden, 300);
+  const debouncedNavigateToDoubt = debounce(navigateToDoubt, 300);
+  
+  // Left side interactions
   if (leftSide) {
+    // Mouse events
+    leftSide.addEventListener('mouseenter', pausePetals);
+    leftSide.addEventListener('mouseleave', resumePetals);
+    leftSide.addEventListener('click', debouncedNavigateToGarden);
+    
+    // Touch events for mobile
     leftSide.addEventListener('touchstart', function(e) {
       e.preventDefault();
       this.classList.add('touching');
+      pausePetals();
     }, { passive: false });
     
     leftSide.addEventListener('touchend', function(e) {
       e.preventDefault();
       this.classList.remove('touching');
-      navigateToGarden();
+      debouncedNavigateToGarden();
     }, { passive: false });
     
     leftSide.addEventListener('touchcancel', function(e) {
       this.classList.remove('touching');
+      resumePetals();
     });
   }
   
+  // Right side interactions
   if (rightSide) {
+    // Mouse events
+    rightSide.addEventListener('mouseenter', pausePetals);
+    rightSide.addEventListener('mouseleave', resumePetals);
+    rightSide.addEventListener('click', debouncedNavigateToDoubt);
+    
+    // Touch events for mobile
     rightSide.addEventListener('touchstart', function(e) {
       e.preventDefault();
       this.classList.add('touching');
+      pausePetals();
     }, { passive: false });
     
     rightSide.addEventListener('touchend', function(e) {
       e.preventDefault();
       this.classList.remove('touching');
-      navigateToDoubt();
+      debouncedNavigateToDoubt();
     }, { passive: false });
     
     rightSide.addEventListener('touchcancel', function(e) {
       this.classList.remove('touching');
+      resumePetals();
+    });
+  }
+  
+  // Question mark for file manager
+  if (questionMark) {
+    questionMark.addEventListener('click', toggleFileManager);
+    questionMark.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      toggleFileManager();
+    });
+  }
+  
+  // Close button for file manager
+  if (closeBtn) {
+    closeBtn.addEventListener('click', toggleFileManager);
+    closeBtn.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      toggleFileManager();
     });
   }
 }
 
-// Initialize petal animation and performance optimizations
-document.addEventListener('DOMContentLoaded', function() {
+// Optimized petal animation system
+function initPetalAnimation() {
   const leftSide = document.querySelector('.left-side');
   const rightSide = document.querySelector('.right-side');
   
-  // Add touch support for mobile
-  addTouchSupport();
+  if (!leftSide || !rightSide) return;
   
-  // Performance: Use requestAnimationFrame for smoother animations
   let lastPetalTime = 0;
   const petalInterval = 1200; // ms between petals
   
   function createPetalsLoop(timestamp) {
-    if (timestamp - lastPetalTime >= petalInterval && !isNavigating) {
+    if (isNavigating) return;
+    
+    if (timestamp - lastPetalTime >= petalInterval) {
       createPetal(leftSide);
       createPetal(rightSide);
       lastPetalTime = timestamp;
     }
-    if (!isNavigating) {
-      requestAnimationFrame(createPetalsLoop);
-    }
+    
+    animationFrameId = requestAnimationFrame(createPetalsLoop);
   }
   
-  // Start the petal animation loop
-  requestAnimationFrame(createPetalsLoop);
+  // Start the animation loop
+  animationFrameId = requestAnimationFrame(createPetalsLoop);
   
   // Add some initial petals with staggered timing
   setTimeout(() => {
@@ -385,56 +441,46 @@ document.addEventListener('DOMContentLoaded', function() {
       }, i * 200);
     }
   }, 1000);
-  
-  // Add click event to question mark for file manager
-  const questionMark = document.querySelector('.question-mark');
-  if (questionMark) {
-    questionMark.addEventListener('click', toggleFileManager);
-  }
-  
-  // Performance: Use passive event listeners for better scroll performance
-  if (leftSide) {
-    leftSide.addEventListener('mouseenter', pausePetals, { passive: true });
-    leftSide.addEventListener('mouseleave', resumePetals, { passive: true });
-    // Click event for desktop
-    leftSide.addEventListener('click', navigateToGarden);
-  }
-  
-  if (rightSide) {
-    rightSide.addEventListener('mouseenter', pausePetals, { passive: true });
-    rightSide.addEventListener('mouseleave', resumePetals, { passive: true });
-    // Click event for desktop
-    rightSide.addEventListener('click', navigateToDoubt);
-  }
-  
-  // Performance: Preload next pages
-  const linkPreloads = document.createElement('link');
-  linkPreloads.rel = 'prefetch';
-  linkPreloads.href = 'hope.html';
-  document.head.appendChild(linkPreloads);
-  
-  const linkPreloads2 = document.createElement('link');
-  linkPreloads2.rel = 'prefetch';
-  linkPreloads2.href = 'doubt.html';
-  document.head.appendChild(linkPreloads2);
-  
-  // Mobile optimization: Prevent zoom on double tap
-  document.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-  
+}
+
+// Mobile optimization and prevention of default behaviors
+function initMobileOptimizations() {
+  // Prevent zoom on double tap
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
-    const now = (new Date()).getTime();
+    const now = Date.now();
     if (now - lastTouchEnd <= 300) {
       e.preventDefault();
     }
     lastTouchEnd = now;
   }, { passive: false });
   
-  // Enhanced error handling for network issues
+  // Prevent multi-touch gestures
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  // Prevent context menu on long press
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+  
+  // Handle orientation changes
+  window.addEventListener('orientationchange', function() {
+    setTimeout(() => {
+      // Force a repaint after orientation change
+      document.body.style.height = window.innerHeight + 'px';
+      setTimeout(() => {
+        document.body.style.height = '100vh';
+      }, 100);
+    }, 100);
+  });
+}
+
+// Network status handling
+function initNetworkHandling() {
   window.addEventListener('online', function() {
     console.log('Connection restored');
   });
@@ -442,4 +488,35 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('offline', function() {
     console.log('Connection lost');
   });
+}
+
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+  // Reset navigation state on page load
+  isNavigating = false;
+  isPaused = false;
+  
+  // Initialize all components
+  addInteractionSupport();
+  initPetalAnimation();
+  initMobileOptimizations();
+  initNetworkHandling();
+  
+  // Preload next pages for better performance
+  const linkPreloads1 = document.createElement('link');
+  linkPreloads1.rel = 'prefetch';
+  linkPreloads1.href = '/hope';
+  document.head.appendChild(linkPreloads1);
+  
+  const linkPreloads2 = document.createElement('link');
+  linkPreloads2.rel = 'prefetch';
+  linkPreloads2.href = '/doubt';
+  document.head.appendChild(linkPreloads2);
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+  }
 });

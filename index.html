@@ -2,41 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0"/>
   <title>Two Roses - Choose Your Path</title>
   <link rel="stylesheet" href="https://caked-production.up.railway.app/css/index.css">
-  <link rel="preload" href="hope.html" as="document">
-  <link rel="preload" href="doubt.html" as="document">
+  <link rel="preload" href="/hope" as="document">
+  <link rel="preload" href="/doubt" as="document">
 </head>
 <body>
   <div class="container">
-    <div class="side left-side" id="hopeSection" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
+    <div class="side left-side" id="hopeSection">
       <div class="glow"></div>
       <div class="rose-container">
         <div class="rose">🌹</div>
-        <div class="text">
-          HOPE
-        </div>
+        <div class="text">HOPE</div>
       </div>
     </div>
+    
     <div class="divider"></div>
-    <div class="question-mark" onclick="toggleFileManager()">?</div>
-    <div class="side right-side" id="doubtSection" onmouseenter="pausePetals()" onmouseleave="resumePetals()">
+    <div class="question-mark">?</div>
+    
+    <div class="side right-side" id="doubtSection">
       <div class="glow"></div>
       <div class="rose-container">
         <div class="rose">🥀</div>
-        <div class="text">
-          DOUBT
-        </div>
+        <div class="text">DOUBT</div>
       </div>
     </div>
+    
     <div class="click-hint">Pick my Queen</div>
     
     <!-- File Manager Section -->
-    <div id="file-manager-container" style="display: none;">
+    <div id="file-manager-container">
       <div class="file-manager-header">
         <h2>File Manager</h2>
-        <button class="close-btn" onclick="toggleFileManager()">×</button>
+        <button class="close-btn">×</button>
       </div>
       <div id="file-manager">
         <div class="loading">Loading files...</div>
