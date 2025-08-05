@@ -185,7 +185,7 @@ function playMusic(num) {
         "DEEPER - PARTYNEXTDOOR", 
         "Dreamin - PARTYNEXTDOOR",
         "Some Of Your Love - PARTYNEXTDOOR",
-        "Kiss - I Was Made For Loving You.mp3"
+        "Amy Winehouse - Back To Black.mp3"
         
     ];
     
