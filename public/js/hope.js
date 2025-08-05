@@ -40,7 +40,7 @@ function getSongDisplayName(songFile) {
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
     'KEEP IT-Juice WRLD.mp3': 'KEEP IT - Juice WRLD',
-    'Kiss - I Was Made For' :'Loving You.mp3',
+    'Kiss - I Was Made For' : 'Loving You.mp3',
     'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',
     'PARTYNEXTDOOR - Some Of Your Love.mp3': 'Some Of Your Love - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - You ve Been Missed.mp3': 'You\'ve Been Missed - PARTYNEXTDOOR',

@@ -184,7 +184,9 @@ function playMusic(num) {
                 
         "Amy Winehouse - BackTo Black.mp3",
         "Don Toliver - Easy.mp3",
-        "Some Of Your Love - PARTYNEXTDOOR"
+        "Some Of Your Love - PARTYNEXTDOOR",
+        "Juice WRLD - Faded.mp3",
+        "All Out - Juice WRLD.mp3"
         
     ];
     
