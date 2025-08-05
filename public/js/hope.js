@@ -6,6 +6,7 @@ let musicPopupVisible = false;
 let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
 let exclamationPopupVisible = false;
 let isNavigating = false;
+let photoModalOpen = false;
 
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
@@ -162,12 +163,17 @@ function toggleExclamationPopup() {
   }
 }
 
-// IMPROVED: Click outside handler with better event targeting
+// COMPLETELY REWRITTEN: Click outside handler with proper photo modal support
 document.addEventListener('click', function(event) {
-  // Check if click is on photo modal background (not content)
+  // CRITICAL: Handle photo modal clicks properly
   const photoModal = getElement('photoModal');
-  if (photoModal && event.target === photoModal) {
-    closePhotoModal();
+  if (photoModal && photoModalOpen) {
+    // Only close if clicking on the modal background, NOT the image or close button
+    if (event.target === photoModal) {
+      closePhotoModal();
+      return;
+    }
+    // Don't handle other clicks when photo modal is open
     return;
   }
 
@@ -331,41 +337,54 @@ function createStars() {
   starsContainer.appendChild(fragment);
 }
 
-// FIXED: Photo enlargement with proper event handling
+// COMPLETELY REWRITTEN: Photo enlargement with proper event handling
 function enlargePhoto(img, event) {
-  // Prevent event bubbling that was causing immediate closure
+  // Prevent all event bubbling and default behavior
   if (event) {
     event.stopPropagation();
     event.preventDefault();
+    event.stopImmediatePropagation();
   }
   
   const modal = getElement('photoModal');
   const enlargedPhoto = getElement('enlargedPhoto');
   
-  if (!modal || !enlargedPhoto) return;
+  if (!modal || !enlargedPhoto || photoModalOpen) return;
   
+  // Set the image source
   enlargedPhoto.src = img.src;
   enlargedPhoto.alt = img.alt || 'Enlarged photo';
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
   
-  // Add a small delay to prevent immediate closure
-  setTimeout(() => {
-    modal.classList.add('photo-modal-open');
-  }, 10);
+  // Prevent body scrolling
+  document.body.classList.add('photo-modal-open');
+  
+  // Show modal
+  modal.style.display = 'flex';
+  photoModalOpen = true;
+  
+  // Add show class with a slight delay for smooth animation
+  requestAnimationFrame(() => {
+    modal.classList.add('show');
+  });
 }
 
-// FIXED: Close photo modal
+// COMPLETELY REWRITTEN: Close photo modal
 function closePhotoModal() {
   const modal = getElement('photoModal');
   const enlargedPhoto = getElement('enlargedPhoto');
   
-  if (!modal) return;
+  if (!modal || !photoModalOpen) return;
   
-  modal.classList.remove('photo-modal-open');
-  modal.style.display = 'none';
-  document.body.style.overflow = '';
-  if (enlargedPhoto) enlargedPhoto.src = '';
+  // Remove show class first
+  modal.classList.remove('show');
+  
+  // Wait for animation to complete before hiding
+  setTimeout(() => {
+    modal.style.display = 'none';
+    document.body.classList.remove('photo-modal-open');
+    if (enlargedPhoto) enlargedPhoto.src = '';
+    photoModalOpen = false;
+  }, 300);
 }
 
 // IMPROVED: Modal functions with better event handling
@@ -397,17 +416,19 @@ function closeModal(id) {
   }
 }
 
-// IMPROVED: Window click handler with better targeting
+// COMPLETELY REWRITTEN: Window click handler
 window.onclick = function (event) {
-  // Only handle clicks on modal backgrounds, not their content
   const target = event.target;
   
-  // Handle photo modal
+  // PRIORITY: Handle photo modal first
   const photoModal = getElement('photoModal');
-  if (photoModal && target === photoModal && photoModal.classList.contains('photo-modal-open')) {
+  if (photoModal && photoModalOpen && target === photoModal) {
     closePhotoModal();
     return;
   }
+  
+  // Skip other modal handling if photo modal is open
+  if (photoModalOpen) return;
   
   // Handle regular modals
   const modals = ["modal1", "modal2", "modal3"];
@@ -420,12 +441,11 @@ window.onclick = function (event) {
   }
 };
 
-// Keyboard support with performance improvements
+// IMPROVED: Keyboard support with photo modal priority
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
-    // Handle photo modal first
-    const photoModal = getElement('photoModal');
-    if (photoModal && photoModal.style.display === 'flex') {
+    // PRIORITY: Handle photo modal first
+    if (photoModalOpen) {
       closePhotoModal();
       return;
     }
@@ -514,19 +534,17 @@ function titleClick() {
   }
 }
 
-// DOM ready initialization (optimized)
-document.addEventListener('DOMContentLoaded', function() {
-  // Cache frequently used elements
-  cachedElements.globalAudio = globalAudio;
-  cachedElements.musicButton = musicButton;
-  cachedElements.musicPopup = musicPopup;
-  
-  globalAudio.volume = 0.4;
-  globalAudio.loop = false;
-  
-  currentSongIndex = playlist.indexOf(currentSong);
-  if (currentSongIndex === -1) {
-    currentSongIndex = 0;
-    currentSong = playlist[0];
-  }
-});
+// PERFORMANCE: Debounce function for better performance
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// PERFORMANCE: Throttle function

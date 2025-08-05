@@ -4,136 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Rose Garden</title>
+  <link rel="preload" href="https://caked-production.up.railway.app/css/hope.css" as="style">
   <link rel="stylesheet" href="https://caked-production.up.railway.app/css/hope.css">
-  <style>
-    /* Performance improvements */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.9);
-      backdrop-filter: blur(5px);
-      transition: opacity 0.3s ease;
-    }
-    
-    .modal.modal-open {
-      opacity: 1;
-    }
-    
-    .modal-content {
-      background-color: #1a1a1a;
-      margin: 5% auto;
-      padding: 20px;
-      border: 2px solid #ff6b9d;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-      animation: modalSlideIn 0.3s ease;
-    }
-    
-    @keyframes modalSlideIn {
-      from { transform: translateY(-50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    
-    .photo {
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      border-radius: 10px;
-      margin: 5px;
-      max-width: 200px;
-      height: auto;
-    }
-    
-    .photo:hover {
-      transform: scale(1.05);
-    }
-    
-    #photoModal {
-      z-index: 2000;
-    }
-    
-    #photoModal .modal-content {
-      background: rgba(0,0,0,0.95);
-      border: none;
-      padding: 0;
-      max-width: 90%;
-      max-height: 90%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    #enlargedPhoto {
-      max-width: 100%;
-      max-height: 80vh;
-      border-radius: 15px;
-      object-fit: contain;
-    }
-    
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      z-index: 1001;
-    }
-    
-    .close:hover,
-    .close:focus {
-      color: #fff;
-      text-decoration: none;
-    }
-    
-    /* Loading performance improvements */
-    .loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-    
-    .loading-screen.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-    
-    /* Stars optimization */
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      animation: twinkle 2s ease-in-out infinite alternate;
-      will-change: opacity;
-    }
-    
-    @keyframes twinkle {
-      from { opacity: 0.3; }
-      to { opacity: 1; }
-    }
-  </style>
+  <link rel="preload" href="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" as="audio">
+  <link rel="dns-prefetch" href="https://caked-production.up.railway.app">
+  <link rel="dns-prefetch" href="https://images.unsplash.com">
 </head>
 <body>
 
+  
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-rose">🌹</div>
@@ -173,6 +52,7 @@
       <button class="close-popup" onclick="toggleMusicPopup()">×</button>
     </div>
     <div class="background-music-selector">
+      <!-- CORRECTED SELECT OPTIONS TO MATCH ACTUAL AUDIO FILES -->
       <select id="globalMusicSelect" onchange="selectGlobalSong(this.value)">
         <option value="PARTYNEXTDOOR - Dreamin.mp3">Dreamin' - PARTYNEXTDOOR</option>
         <option value="PARTYNEXTDOOR - DEEPER.mp3">DEEPER - PARTYNEXTDOOR</option>
@@ -199,23 +79,23 @@
     <h1 class="title" onclick="titleClick()">✨La Sam✨</h1>
     <div class="roses-container">
       <!-- Rose 1 -->
-      <div class="rose-wrapper" onclick="openModal('modal1', event)">
+      <div class="rose-wrapper" onclick="openModal('modal1')">
         <div class="rose">
-          <img class="rose-image" id="rose1Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 1">
+          <img class="rose-image" id="rose1Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 1" loading="lazy">
         </div>
         <div class="rose-label">First Bloom</div>
       </div>
       <!-- Rose 2 -->
-      <div class="rose-wrapper" onclick="openModal('modal2', event)">
+      <div class="rose-wrapper" onclick="openModal('modal2')">
         <div class="rose">
-          <img class="rose-image" id="rose2Image" src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=300&h=400&fit=crop" alt="Rose 2">
+          <img class="rose-image" id="rose2Image" src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=300&h=400&fit=crop" alt="Rose 2" loading="lazy">
         </div>
         <div class="rose-label">Heart's Robbed</div>
       </div>
       <!-- Rose 3 -->
-      <div class="rose-wrapper" onclick="openModal('modal3', event)">
+      <div class="rose-wrapper" onclick="openModal('modal3')">
         <div class="rose">
-          <img class="rose-image" id="rose3Image" src="https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=300&h=400&fit=crop" alt="Rose 3">
+          <img class="rose-image" id="rose3Image" src="https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=300&h=400&fit=crop" alt="Rose 3" loading="lazy">
         </div>
         <div class="rose-label">Forever</div>
       </div>
@@ -245,10 +125,11 @@
         <p> But I also know I cant do it alone. </p>
         <p> I gotta see this face drunk again . And high in the moment.</p>
         <p> Just dont treat me like them niggaz I aint those.  </p>
+
       </div>
       <div class="photo-container">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this, event)">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this, event)">
+        <img class="photo" src="https://caked-production.up.railway.app/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this, event)" loading="lazy">
       </div>
     </div>
   </div>
@@ -267,8 +148,8 @@
         <p>We were gonna be on a beach high together. You fr sweared</p>
       </div>
       <div class="photo-container">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this, event)">
-        <img class="photo" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&h=300&fit=crop" alt="Memory 4" onclick="enlargePhoto(this, event)">
+        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&h=300&fit=crop" alt="Memory 4" onclick="enlargePhoto(this, event)" loading="lazy">
       </div>
     </div>
   </div>
@@ -285,11 +166,12 @@
         <p> Lakini nilikua nimekudedi bado ukiwa semi-kienyo😂😂 sahii bruuh!! acha tu  </p>
         <p>Suburban fyn shyt💜</p>
         <p> Even if you choose the other side, I still cant belive I fumbled and stumbled on this girl😅😔things change</p>
+
       </div>
       <div class="photo-container">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this, event)">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this, event)">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this, event)">
+        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this, event)" loading="lazy">
       </div>
     </div>
   </div>
@@ -316,15 +198,16 @@
       </p>
       <p>I also just Discovered my hypocricy. I have never really done anything for you. Consider this my first sentiment to what I I'm to say.</p>
       <p>  CALL ME but dont call me Crazy. YET!! </p>
+      
+
+      
     </div>
   </div>
   
-  <!-- Photo Enlargement Modal -->
-  <div id="photoModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closePhotoModal()">&times;</span>
-      <img id="enlargedPhoto" alt="Enlarged photo">
-    </div>
+  <!-- FIXED: Photo Enlargement Modal -->
+  <div id="photoModal">
+    <span class="close" onclick="closePhotoModal()">&times;</span>
+    <img id="enlargedPhoto" alt="Enlarged photo">
   </div>
   
   <footer>
@@ -365,42 +248,6 @@
       <p> If you wanna hear my Angelic singing voice. PND dont got nothing on me. Kama singeku tech bro ningekua msanii nishakushoo. </p>
     </div>
   </footer>
-  
-  <script>
-    // Inline critical JavaScript for faster loading
-    const globalAudio = document.getElementById("globalAudio");
-    const musicButton = document.getElementById("musicButton");
-    const musicPopup = document.getElementById("musicPopup");
-    let musicPopupVisible = false;
-    let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
-    let exclamationPopupVisible = false;
-    let isNavigating = false;
-
-    // Backend URL configuration
-    const BACKEND_URL = 'https://caked-production.up.railway.app';
-
-    // Song playlist array
-    const playlist = [
-      'PARTYNEXTDOOR - Dreamin.mp3',
-      'PARTYNEXTDOOR - DEEPER.mp3', 
-      'PARTYNEXTDOOR - TRAUMA .mp3',
-      'KEEP IT-Juice WRLD.mp3',
-      'Juice WRLD - GRACE.mp3',
-      'PARTYNEXTDOOR - Some Of Your Love.mp3',
-      'PARTYNEXTDOOR - You ve Been Missed.mp3',
-      'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
-    ];
-    let currentSongIndex = 0;
-
-    // Performance optimization: Cache DOM elements
-    const cachedElements = {};
-    function getElement(id) {
-      if (!cachedElements[id]) {
-        cachedElements[id] = document.getElementById(id);
-      }
-      return cachedElements[id];
-    }
-  </script>
   <script src="https://caked-production.up.railway.app/js/hope.js"></script>
 </body>
 </html>

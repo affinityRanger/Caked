@@ -461,7 +461,7 @@ img {
   display: none;
 }
 
-/* Main Container - FIXED */
+/* Main Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -549,7 +549,7 @@ img {
   50% { text-shadow: 2px 2px 20px rgba(255,255,255,0.5); }
 }
 
-/* Roses Container - FIXED */
+/* Roses Container */
 .roses-container {
   display: flex;
   flex-direction: row;
@@ -585,7 +585,7 @@ img {
   border: 1px solid rgba(142, 36, 170, 0.8);
 }
 
-/* FIXED: Rose container for proper image display */
+/* Rose container for proper image display */
 .rose {
   position: relative;
   width: 120px;
@@ -598,7 +598,7 @@ img {
   background: transparent;
 }
 
-/* FIXED: Rose image display */
+/* Rose image display */
 .rose-image {
   width: 100%;
   height: 100%;
@@ -811,7 +811,7 @@ img {
   box-shadow: 0 5px 15px rgba(255, 153, 204, 0.3);
 }
 
-/* Photo Container - FIXED */
+/* Photo Container */
 .photo-container {
   display: flex;
   gap: 15px;
@@ -823,7 +823,7 @@ img {
   flex-shrink: 0;
 }
 
-/* FIXED: Photo display */
+/* Photo display */
 .photo {
   width: 120px;
   height: 120px;
@@ -846,31 +846,77 @@ img {
   box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
 }
 
-/* FIXED: Enhanced Photo Modal for Enlarged Images - MAIN FIX */
+/* FIXED: Photo Modal - Completely restructured */
 #photoModal {
   display: none;
   position: fixed;
-  z-index: 8000;
+  z-index: 9999;
   left: 0;
   top: 0;
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(8px);
-  cursor: pointer;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   overflow: hidden;
+  cursor: pointer;
 }
 
 #photoModal.show {
-  display: flex;
+  display: flex !important;
   opacity: 1;
   align-items: center;
   justify-content: center;
+}
+
+/* FIXED: Photo Modal Content - Simplified structure */
+#photoModal .modal-content {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none;
+}
+
+/* FIXED: Close button for photo modal */
+#photoModal .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10000;
+  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+#photoModal .close:hover {
+  color: #ff1493;
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
 }
 
 #enlargedPhoto {
@@ -887,15 +933,10 @@ img {
   user-select: none;
   border: none;
   transform: scale(0.8);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
 }
 
 #photoModal.show #enlargedPhoto {
   transform: scale(1);
-  translate: -50% -50%;
 }
 
 /* Mobile adjustments */
@@ -905,6 +946,14 @@ img {
     max-height: 85vh;
     border-radius: 8px;
   }
+  
+  #photoModal .close {
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    width: 40px;
+    height: 40px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -912,6 +961,14 @@ img {
     max-width: 98vw;
     max-height: 80vh;
     border-radius: 6px;
+  }
+  
+  #photoModal .close {
+    top: 10px;
+    right: 15px;
+    font-size: 25px;
+    width: 35px;
+    height: 35px;
   }
 }
 
@@ -1238,40 +1295,32 @@ footer p {
 
 /* CRITICAL FIX: Prevent body scroll when photo modal is open */
 body.photo-modal-open {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
-
-/* CRITICAL FIX: Remove any white background from photo modal */
-#photoModal, #photoModal * {
-  background: transparent !important;
-}
-
-#photoModal {
-  background-color: rgba(0, 0, 0, 0.95) !important;
-}
-
-/* CRITICAL FIX: Ensure photo is perfectly centered */
-#photoModal.show {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  overflow: hidden !important;
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-#enlargedPhoto {
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
-  translate: none !important;
-  transform: scale(1) !important;
-  margin: 0 !important;
+/* Performance optimizations */
+.rose-image, .photo, #enlargedPhoto {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Smooth transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better click targets on mobile */
+@media (max-width: 768px) {
+  .photo {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .close, .exclamation-close, .close-popup {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
