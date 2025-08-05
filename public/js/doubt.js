@@ -181,11 +181,10 @@ function playMusic(num) {
     const audioElement = document.getElementById(`musicAudio${num}`);
     const buttonElement = document.getElementById(`musicBtn${num}`);
     const titles = [
-        "TRAUMA - PARTYNEXTDOOR",
-        "DEEPER - PARTYNEXTDOOR", 
-        "Dreamin - PARTYNEXTDOOR",
-        "Some Of Your Love - PARTYNEXTDOOR",
-        "Amy Winehouse - Back To Black.mp3"
+                
+        "Amy Winehouse - BackTo Black.mp3",
+        "Don Toliver - Easy.mp3",
+        "Some Of Your Love - PARTYNEXTDOOR"
         
     ];
     
