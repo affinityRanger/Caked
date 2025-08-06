@@ -11,13 +11,15 @@ let photoModalOpen = false;
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
-// Song playlist array - matching EXACT files in assets folder
+// CORRECTED: Song playlist array with proper file names
 const playlist = [
   'PARTYNEXTDOOR - Dreamin.mp3',
   'PARTYNEXTDOOR - DEEPER.mp3', 
   'PARTYNEXTDOOR - TRAUMA .mp3',
   'KEEP IT-Juice WRLD.mp3',
   'Juice WRLD - GRACE.mp3',
+  'Kiss-I Was Made For Lovin You.mp3',  // FIXED: Corrected filename
+  'Lovers Lane - JuiceWrld.mp3',        // FIXED: Added to playlist
   'PARTYNEXTDOOR - Some Of Your Love.mp3',
   'PARTYNEXTDOOR - You ve Been Missed.mp3',
   'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
@@ -33,14 +35,16 @@ function getElement(id) {
   return cachedElements[id];
 }
 
-// Updated display names to match actual files
+// CORRECTED: Display names to match actual files
+
 function getSongDisplayName(songFile) {
   const songNames = {
     'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
     'KEEP IT-Juice WRLD.mp3': 'KEEP IT - Juice WRLD',
-    'Kiss - I Was Made For' : 'Loving You.mp3',
+    'Kiss-I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin You',  // FIXED: Proper display name
+    'Lovers Lane - JuiceWrld.mp3': 'Lovers Lane - Juice WRLD',               // FIXED: Added display name
     'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',
     'PARTYNEXTDOOR - Some Of Your Love.mp3': 'Some Of Your Love - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - You ve Been Missed.mp3': 'You\'ve Been Missed - PARTYNEXTDOOR',
