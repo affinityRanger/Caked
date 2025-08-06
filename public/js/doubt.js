@@ -53,6 +53,7 @@ function showMessage() {
     const modal = document.getElementById('messageModal');
     if (modal) {
         modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
     }
 }
 
@@ -61,6 +62,7 @@ function hideMessage() {
     const modal = document.getElementById('messageModal');
     if (modal) {
         modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
     }
 }
 
@@ -87,24 +89,31 @@ function stopAllAudio() {
     
     // Reset all visual states
     document.querySelectorAll('.music-chaos').forEach(btn => {
-        btn.classList.remove('playing');
+        btn.classList.remove('playing', 'pulsing');
     });
     
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart) {
-        mainHeart.classList.remove('playing');
+        mainHeart.classList.remove('playing', 'beating');
     }
     
     hideAudioStatus();
     currentPlayingElement = null;
 }
 
-// Show audio status
+// Show audio status with mobile optimization
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
     if (status) {
         status.textContent = message;
         status.classList.add('show');
+        
+        // Auto-hide on mobile after 3 seconds to save space
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                hideAudioStatus();
+            }, 3000);
+        }
     }
 }
 
@@ -116,7 +125,7 @@ function hideAudioStatus() {
     }
 }
 
-// Play audio with fallback
+// Play audio with fallback and better mobile support
 function playAudioWithFallback(audioElement, title, visualElement) {
     if (!audioElement) {
         console.log('Audio element not found');
@@ -128,15 +137,22 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     currentAudio = audioElement;
     currentPlayingElement = visualElement;
     
-    // Add visual feedback
+    // Add visual feedback with enhanced mobile animations
     if (visualElement) {
         visualElement.classList.add('playing');
+        if (visualElement.classList.contains('music-chaos')) {
+            visualElement.classList.add('pulsing');
+        }
+        if (visualElement.id === 'mainHeart') {
+            visualElement.classList.add('beating');
+        }
     }
     
     showAudioStatus(`🎵 ${title}`);
     
-    // Set volume
-    audioElement.volume = 0.3;
+    // Set volume with mobile consideration
+    const isMobile = window.innerWidth <= 768;
+    audioElement.volume = isMobile ? 0.4 : 0.3;
     
     // Try to play the audio
     const playPromise = audioElement.play();
@@ -145,6 +161,11 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         playPromise.then(() => {
             // Audio started successfully
             console.log('Audio playing:', title);
+            
+            // Add haptic feedback on mobile if available
+            if (isMobile && navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }).catch(error => {
             console.log('Audio play failed:', error);
             showAudioStatus(`🎵 ${title} (Loading...)`);
@@ -154,7 +175,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     // Handle audio end
     audioElement.onended = () => {
         if (visualElement) {
-            visualElement.classList.remove('playing');
+            visualElement.classList.remove('playing', 'pulsing', 'beating');
         }
         hideAudioStatus();
         currentAudio = null;
@@ -166,14 +187,14 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         showAudioStatus(`🎵 ${title} (Error loading)`);
         setTimeout(() => {
             if (visualElement) {
-                visualElement.classList.remove('playing');
+                visualElement.classList.remove('playing', 'pulsing', 'beating');
             }
             hideAudioStatus();
         }, 2000);
     };
 }
 
-// Music functionality
+// Music functionality with updated track list (removed PND track)
 function playMusic(num) {
     // Preload audio on demand
     preloadAudioOnDemand(`musicAudio${num}`);
@@ -181,13 +202,10 @@ function playMusic(num) {
     const audioElement = document.getElementById(`musicAudio${num}`);
     const buttonElement = document.getElementById(`musicBtn${num}`);
     const titles = [
-                
-        "Amy Winehouse - BackTo Black.mp3",
-        "Don Toliver - Easy.mp3",
-        "Some Of Your Love - PARTYNEXTDOOR",
-        "Juice WRLD - Faded.mp3",
-        "All Out - Juice WRLD.mp3"
-        
+        "Amy Winehouse - Back To Black",
+        "Don Toliver - Easy",
+        "Juice WRLD - Faded", 
+        "All Out - Juice WRLD"
     ];
     
     playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
@@ -207,23 +225,25 @@ function playMainMusic() {
     createHeartExplosion();
 }
 
-// Create heart explosion effect
+// Create heart explosion effect with mobile optimization
 function createHeartExplosion() {
-    for (let i = 0; i < 10; i++) {
+    const heartCount = window.innerWidth <= 768 ? 6 : 10; // Fewer hearts on mobile
+    
+    for (let i = 0; i < heartCount; i++) {
         setTimeout(() => {
             const heart = document.createElement('div');
             heart.innerHTML = '💔';
             heart.style.position = 'absolute';
             heart.style.left = '50%';
             heart.style.top = '50%';
-            heart.style.fontSize = '3rem';
+            heart.style.fontSize = window.innerWidth <= 768 ? '2rem' : '3rem';
             heart.style.zIndex = '15';
             heart.style.pointerEvents = 'none';
             heart.style.color = '#ff1744';
             heart.style.filter = 'drop-shadow(0 0 20px rgba(255, 23, 68, 0.8))';
             
-            const angle = (360 / 10) * i;
-            const distance = 200 + Math.random() * 100;
+            const angle = (360 / heartCount) * i;
+            const distance = window.innerWidth <= 768 ? 150 : 200 + Math.random() * 100;
             const radians = angle * Math.PI / 180;
             
             heart.style.animation = `explodeHeart${i} 2s ease-out forwards`;
@@ -261,15 +281,16 @@ function createHeartExplosion() {
     }
 }
 
-// Create music explosion effect
+// Create music explosion effect with mobile optimization
 function createMusicExplosion(element) {
     if (!element) return;
     
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
+    const noteCount = window.innerWidth <= 768 ? 3 : 5;
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < noteCount; i++) {
         setTimeout(() => {
             const note = document.createElement('div');
             const notes = ['🎵', '🎶', '🎼', '🎤', '🎧'];
@@ -277,13 +298,13 @@ function createMusicExplosion(element) {
             note.style.position = 'fixed';
             note.style.left = centerX + 'px';
             note.style.top = centerY + 'px';
-            note.style.fontSize = '2rem';
+            note.style.fontSize = window.innerWidth <= 768 ? '1.5rem' : '2rem';
             note.style.zIndex = '15';
             note.style.pointerEvents = 'none';
             note.style.color = '#ff1744';
             
             const angle = Math.random() * 360;
-            const distance = 100 + Math.random() * 50;
+            const distance = window.innerWidth <= 768 ? 80 : 100 + Math.random() * 50;
             const radians = angle * Math.PI / 180;
             
             note.style.animation = `explodeNote${i}-${Date.now()} 1.5s ease-out forwards`;
@@ -320,7 +341,7 @@ function createMusicExplosion(element) {
     }
 }
 
-// Random glitch effects
+// Random glitch effects with mobile consideration
 setInterval(() => {
     const elements = document.querySelectorAll('.chaos-text, .image-frame');
     const randomElement = elements[Math.floor(Math.random() * elements.length)];
@@ -329,9 +350,9 @@ setInterval(() => {
         
         setTimeout(() => {
             randomElement.classList.remove('glitch');
-        }, 1000);
+        }, window.innerWidth <= 768 ? 500 : 1000);
     }
-}, 3000);
+}, window.innerWidth <= 768 ? 5000 : 3000);
 
 // Preload audio on first interaction
 function preloadAudioOnDemand(audioId) {
@@ -342,9 +363,27 @@ function preloadAudioOnDemand(audioId) {
     }
 }
 
+// Mobile touch handling
+function addTouchSupport() {
+    const elements = document.querySelectorAll('.music-chaos, #mainHeart, .back-button, .message-icon');
+    
+    elements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
+        }, { passive: true });
+        
+        element.addEventListener('touchend', function() {
+            this.style.transform = '';
+        }, { passive: true });
+    });
+}
+
 // Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
+    
+    // Add mobile touch support
+    addTouchSupport();
     
     // Set up event listeners using JavaScript instead of inline onclick
     const backButton = document.querySelector('.back-button');
@@ -377,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Main heart listener added');
     }
     
-    // Set up music buttons
+    // Set up music buttons (now only 4 buttons)
     for (let i = 1; i <= 4; i++) {
         const musicBtn = document.getElementById(`musicBtn${i}`);
         if (musicBtn) {
@@ -421,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const audio = document.getElementById(`musicAudio${i}`);
         if (audio) {
             audio.preload = 'none'; // Don't preload these
-            audio.volume = 0.3;
+            audio.volume = window.innerWidth <= 768 ? 0.4 : 0.3;
         }
     }
     
@@ -431,10 +470,19 @@ document.addEventListener('DOMContentLoaded', function() {
         hideAudioStatus();
     }, 3000);
     
+    // Handle orientation changes on mobile
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            // Recalculate positions after orientation change
+            const viewport = document.querySelector('meta[name=viewport]');
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+        }, 500);
+    });
+    
     console.log('Initialization complete');
 });
 
-// Keyboard shortcuts
+// Keyboard shortcuts with mobile consideration
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideMessage();
@@ -467,3 +515,14 @@ document.addEventListener('touchstart', function() {
         audioContext.resume();
     }
 }, { once: true });
+
+// Prevent zoom on double tap for mobile
+document.addEventListener('touchend', function(event) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+let lastTouchEnd = 0;

@@ -41,7 +41,7 @@ function getElement(id) {
 function getSongDisplayName(songFile) {
   const songNames = {
     'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
-        'Kiss - I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin\' You',  // FIXED: Correct filename
+    'Kiss - I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin\' You',  // FIXED: Correct filename
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
     'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',

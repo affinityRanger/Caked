@@ -2,12 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
     <title>Missing You - Chaos of Doubt</title>
     <link rel="stylesheet" href="https://caked-production.up.railway.app/css/doubt.css">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://caked-production.up.railway.app">
 </head>
 <body>
-    <!-- Audio elements -->
+    <!-- Audio elements - Updated with only 4 music tracks -->
     <audio id="mainHeartAudio" preload="auto">
         <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - You ve Been Missed.mp3" type="audio/mpeg">
     </audio>
@@ -25,84 +31,94 @@
     </audio>
 
     <div class="chaos-container">
-        <button class="back-button">← Back to Choice</button>
-        <button class="message-icon">💌</button>
+        <button class="back-button" role="button" aria-label="Go back to main page">← Back to Choice</button>
+        <button class="message-icon" role="button" aria-label="Open message">💌</button>
         
         <!-- Main broken heart -->
-        <div class="broken-heart main-heart" id="mainHeart">💔</div>
+        <div class="broken-heart main-heart" id="mainHeart" role="button" aria-label="Play main song" tabindex="0">💔</div>
         
         <!-- Floating broken hearts -->
-        <div class="floating-heart" style="top: 10%; left: 20%; animation-delay: -1s;">🖤</div>
-        <div class="floating-heart" style="top: 80%; left: 80%; animation-delay: -3s;">💔</div>
-        <div class="floating-heart" style="top: 30%; left: 90%; animation-delay: -5s;">🥀</div>
-        <div class="floating-heart" style="top: 70%; left: 10%; animation-delay: -2s;">⚫</div>
-        <div class="floating-heart" style="top: 15%; left: 70%; animation-delay: -4s;">🖤</div>
+        <div class="floating-heart" style="top: 10%; left: 20%; animation-delay: -1s;" aria-hidden="true">🖤</div>
+        <div class="floating-heart" style="top: 80%; left: 80%; animation-delay: -3s;" aria-hidden="true">💔</div>
+        <div class="floating-heart" style="top: 30%; left: 90%; animation-delay: -5s;" aria-hidden="true">🥀</div>
+        <div class="floating-heart" style="top: 70%; left: 10%; animation-delay: -2s;" aria-hidden="true">⚫</div>
+        <div class="floating-heart" style="top: 15%; left: 70%; animation-delay: -4s;" aria-hidden="true">🖤</div>
         
         <!-- Chaotic text messages -->
-        <div class="chaos-text glitch" style="top: 15%; left: 15%; animation-delay: -1s;">
+        <div class="chaos-text glitch" style="top: 15%; left: 15%; animation-delay: -1s;" aria-hidden="true">
             "I miss your laugh..."
         </div>
-        <div class="chaos-text" style="top: 25%; right: 10%; animation-delay: -2s;">
+        <div class="chaos-text" style="top: 25%; right: 10%; animation-delay: -2s;" aria-hidden="true">
             "Empty without you"
         </div>
-        <div class="chaos-text glitch" style="bottom: 20%; left: 25%; animation-delay: -3s;">
+        <div class="chaos-text glitch" style="bottom: 20%; left: 25%; animation-delay: -3s;" aria-hidden="true">
             "What if?"
         </div>
-        <div class="chaos-text" style="top: 40%; left: 5%; animation-delay: -4s;">
+        <div class="chaos-text" style="top: 40%; left: 5%; animation-delay: -4s;" aria-hidden="true">
             "Lost in my Abyss"
         </div>
-        <div class="chaos-text glitch" style="bottom: 40%; right: 20%; animation-delay: -5s;">
+        <div class="chaos-text glitch" style="bottom: 40%; right: 20%; animation-delay: -5s;" aria-hidden="true">
             "DREADED"
         </div>
-        <div class="chaos-text" style="top: 60%; right: 15%; animation-delay: -6s;">
+        <div class="chaos-text" style="top: 60%; right: 15%; animation-delay: -6s;" aria-hidden="true">
             "I CANT I tried"
         </div>
         
         <!-- Image frames with your pre-uploaded photos -->
         <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
-            <img src="https://caked-production.up.railway.app/assets/images/sikununuli.png" alt="Our memories" onerror="showPlaceholder(1)">
+            <img src="https://caked-production.up.railway.app/assets/images/sikununuli.png" alt="Our memories" loading="lazy" onerror="showPlaceholder(1)">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Our memories
             </div>
         </div>
         <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <img src="https://caked-production.up.railway.app/assets/images/psychosis.png" alt="Our special moment" onerror="showPlaceholder(2)">
+            <img src="https://caked-production.up.railway.app/assets/images/psychosis.png" alt="Our special moment" loading="lazy" onerror="showPlaceholder(2)">
             <div class="placeholder" style="display: none;">
                 📷<br>Our moment
             </div>
         </div>
         <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" onerror="showPlaceholder(3)">
+            <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" loading="lazy" onerror="showPlaceholder(3)">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Missing this
             </div>
         </div>
         <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <img src="https://caked-production.up.railway.app/assets/images/lost.png" alt="Your beauty" onerror="showPlaceholder(4)">
+            <img src="https://caked-production.up.railway.app/assets/images/lost.png" alt="Your beauty" loading="lazy" onerror="showPlaceholder(4)">
             <div class="placeholder" style="display: none;">
                 📸<br>Your beauty
             </div>
         </div>
         <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times" onerror="showPlaceholder(5)">
+            <img src="https://caked-production.up.railway.app/assets/images/memory5.jpg" alt="Lonely times" loading="lazy" onerror="showPlaceholder(5)">
             <div class="placeholder" style="display: none;">
                 📷<br>Lonely times
             </div>
         </div>
         
-        <!-- Music chaos buttons -->
-        <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" id="musicBtn1">🎵</div>
-        <div class="music-chaos" style="bottom: 25%; left: 15%; animation-delay: -2s;" id="musicBtn2">🎶</div>
-        <div class="music-chaos" style="top: 65%; left: 60%; animation-delay: -3s;" id="musicBtn3">🎼</div>
-        <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" id="musicBtn4">🎧</div>
+        <!-- Music chaos buttons - Now only 4 buttons -->
+        <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" id="musicBtn1" data-track="1" role="button" aria-label="Play Amy Winehouse - Back To Black" tabindex="0">🎵</div>
+        <div class="music-chaos" style="bottom: 25%; left: 15%; animation-delay: -2s;" id="musicBtn2" data-track="2" role="button" aria-label="Play Don Toliver - Easy" tabindex="0">🎶</div>
+        <div class="music-chaos" style="top: 65%; left: 60%; animation-delay: -3s;" id="musicBtn3" data-track="3" role="button" aria-label="Play Juice WRLD - Faded" tabindex="0">🎼</div>
+        <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" id="musicBtn4" data-track="4" role="button" aria-label="Play All Out - Juice WRLD" tabindex="0">🎧</div>
         
-        <div class="audio-status" id="audioStatus">🎵 Now Playing...</div>
+        <div class="audio-status" id="audioStatus" role="status" aria-live="polite">🎵 Now Playing...</div>
+        
+        <!-- Audio controls (hidden by default) -->
+        <div class="audio-controls" id="audioControls" style="display: none;">
+            <button id="playPauseBtn" aria-label="Play/Pause">⏸️</button>
+            <button id="stopBtn" aria-label="Stop">⏹️</button>
+            <div class="volume-control">
+                <input type="range" id="volumeSlider" min="0" max="100" value="30">
+                <span id="volumeDisplay">30%</span>
+            </div>
+        </div>
     </div>
     
     <!-- Message Modal -->
     <div class="message-modal" id="messageModal">
         <div class="message-content">
-            <button class="close-message">&times;</button>
+            <button class="close-message" aria-label="Close message">&times;</button>
             <div class="message-header">
                 <h2>💔 From Me to Yours 💔</h2>
             </div>
