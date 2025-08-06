@@ -18,7 +18,7 @@ const playlist = [
   'PARTYNEXTDOOR - TRAUMA .mp3',
   'KEEP IT-Juice WRLD.mp3',
   'Juice WRLD - GRACE.mp3',
-  'Kiss-I Was Made For Lovin You.mp3',  // FIXED: Corrected filename
+  'Kiss - I Was Made For Lovin You.mp3',  // FIXED: Exact filename with spaces around dash
   'Lovers Lane - JuiceWrld.mp3',        // FIXED: Added to playlist
   'PARTYNEXTDOOR - Some Of Your Love.mp3',
   'PARTYNEXTDOOR - You ve Been Missed.mp3',
@@ -43,7 +43,7 @@ function getSongDisplayName(songFile) {
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
     'KEEP IT-Juice WRLD.mp3': 'KEEP IT - Juice WRLD',
-    'Kiss-I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin You',  // FIXED: Proper display name
+    'Kiss - I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin\' You',  // FIXED: Correct filename
     'Lovers Lane - JuiceWrld.mp3': 'Lovers Lane - Juice WRLD',               // FIXED: Added display name
     'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',
     'PARTYNEXTDOOR - Some Of Your Love.mp3': 'Some Of Your Love - PARTYNEXTDOOR',
