@@ -1,20 +1,242 @@
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
+
 // Audio context for Web Audio API
 let audioContext = null;
 let currentAudio = null;
+let nextAudio = null;
 let currentPlayingElement = null;
+let analyser = null;
+let dataArray = null;
+let animationId = null;
+let crossfadeInterval = null;
+
+// Feature states
+let isDarkMode = true;
+let cachedTracks = new Set();
+let isOffline = false;
 
 // Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            setupAudioAnalyser();
         } catch (error) {
             console.log('Web Audio API not supported');
         }
     }
     return audioContext;
+}
+
+// Setup audio analyser for visualization
+function setupAudioAnalyser() {
+    if (!audioContext) return;
+    
+    try {
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 128;
+        const bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+        
+        // Create visualizer bars
+        createVisualizer();
+    } catch (error) {
+        console.log('Audio analyser setup failed:', error);
+    }
+}
+
+// Create audio visualizer
+function createVisualizer() {
+    const visualizer = document.createElement('div');
+    visualizer.className = 'audio-visualizer';
+    visualizer.id = 'audioVisualizer';
+    
+    // Create 32 bars for visualization
+    for (let i = 0; i < 32; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'visualizer-bar';
+        bar.style.height = '2px';
+        visualizer.appendChild(bar);
+    }
+    
+    document.body.appendChild(visualizer);
+}
+
+// Update audio visualization
+function updateVisualization() {
+    if (!analyser || !dataArray) return;
+    
+    analyser.getByteFrequencyData(dataArray);
+    const visualizer = document.getElementById('audioVisualizer');
+    const bars = visualizer?.querySelectorAll('.visualizer-bar');
+    
+    if (bars) {
+        bars.forEach((bar, index) => {
+            const value = dataArray[index * 2] || 0;
+            const height = Math.max(2, (value / 255) * 60);
+            bar.style.height = height + 'px';
+        });
+    }
+    
+    animationId = requestAnimationFrame(updateVisualization);
+}
+
+// Start visualization
+function startVisualization() {
+    const visualizer = document.getElementById('audioVisualizer');
+    if (visualizer) {
+        visualizer.classList.add('active');
+        updateVisualization();
+    }
+}
+
+// Stop visualization
+function stopVisualization() {
+    const visualizer = document.getElementById('audioVisualizer');
+    if (visualizer) {
+        visualizer.classList.remove('active');
+    }
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+}
+
+// Crossfade between tracks
+function crossfadeToNext(currentElement, nextElement, duration = 2000) {
+    if (!currentElement || !nextElement) return;
+    
+    const steps = 50;
+    const stepDuration = duration / steps;
+    let step = 0;
+    
+    // Clear any existing crossfade
+    if (crossfadeInterval) {
+        clearInterval(crossfadeInterval);
+    }
+    
+    crossfadeInterval = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        
+        // Fade out current, fade in next
+        if (currentElement.volume !== undefined) {
+            currentElement.volume = Math.max(0, 0.3 * (1 - progress));
+        }
+        if (nextElement.volume !== undefined) {
+            nextElement.volume = Math.min(0.3, 0.3 * progress);
+        }
+        
+        if (step >= steps) {
+            clearInterval(crossfadeInterval);
+            crossfadeInterval = null;
+            
+            // Stop the previous track
+            currentElement.pause();
+            currentElement.currentTime = 0;
+        }
+    }, stepDuration);
+}
+
+// Theme toggle functionality
+function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('light-mode', !isDarkMode);
+    
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.innerHTML = isDarkMode ? '🌙' : '☀️';
+    }
+    
+    // Save theme preference
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    
+    showTypingMessage(isDarkMode ? 'Switched to dark mode' : 'Switched to light mode');
+}
+
+// Auto theme based on time
+function setAutoTheme() {
+    const hour = new Date().getHours();
+    const shouldBeDark = hour < 6 || hour >= 18;
+    
+    if (shouldBeDark !== isDarkMode) {
+        toggleTheme();
+    }
+}
+
+// Typing effect message
+function showTypingMessage(text, duration = 3000) {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing-text';
+    
+    const textSpan = document.createElement('span');
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    cursor.innerHTML = '|';
+    
+    typingDiv.appendChild(textSpan);
+    typingDiv.appendChild(cursor);
+    document.body.appendChild(typingDiv);
+    
+    // Show the container
+    setTimeout(() => typingDiv.classList.add('show'), 100);
+    
+    let i = 0;
+    const typeInterval = setInterval(() => {
+        if (i < text.length) {
+            textSpan.innerHTML += text.charAt(i);
+            i++;
+        } else {
+            clearInterval(typeInterval);
+            // Hide after duration
+            setTimeout(() => {
+                typingDiv.classList.remove('show');
+                setTimeout(() => {
+                    if (typingDiv.parentNode) {
+                        typingDiv.remove();
+                    }
+                }, 300);
+            }, duration);
+        }
+    }, 100);
+}
+
+// Offline mode functionality
+function checkOfflineStatus() {
+    isOffline = !navigator.onLine;
+    const indicator = document.getElementById('offlineIndicator');
+    
+    if (isOffline) {
+        if (!indicator) {
+            createOfflineIndicator();
+        }
+        document.getElementById('offlineIndicator')?.classList.add('show');
+        showTypingMessage('You are now offline. Playing cached content...');
+    } else {
+        document.getElementById('offlineIndicator')?.classList.remove('show');
+    }
+}
+
+// Create offline indicator
+function createOfflineIndicator() {
+    const indicator = document.createElement('div');
+    indicator.className = 'offline-indicator';
+    indicator.id = 'offlineIndicator';
+    indicator.innerHTML = '📴 Offline Mode';
+    document.body.appendChild(indicator);
+}
+
+// Cache audio for offline use
+function cacheAudio(audioId) {
+    const audio = document.getElementById(audioId);
+    if (audio && !cachedTracks.has(audioId)) {
+        // Simulate caching by preloading
+        audio.preload = 'auto';
+        audio.load();
+        cachedTracks.add(audioId);
+        console.log(`Cached: ${audioId}`);
+    }
 }
 
 // Create falling tears
@@ -39,11 +261,9 @@ setInterval(createTear, 800);
 // Go back to landing page
 function goBackToMain() {
     stopAllAudio();
-    // You can customize this to navigate to your main page
     if (window.history.length > 1) {
         window.history.back();
     } else {
-        // Fallback navigation
         window.location.href = 'index.html';
     }
 }
@@ -53,7 +273,7 @@ function showMessage() {
     const modal = document.getElementById('messageModal');
     if (modal) {
         modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -62,7 +282,7 @@ function hideMessage() {
     const modal = document.getElementById('messageModal');
     if (modal) {
         modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Restore scrolling
+        document.body.style.overflow = 'auto';
     }
 }
 
@@ -80,14 +300,27 @@ function showPlaceholder(num) {
 
 // Stop all audio
 function stopAllAudio() {
-    // Stop HTML5 audio
+    // Stop current audio
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
         currentAudio = null;
     }
     
-    // Reset all visual states
+    // Stop next audio if crossfading
+    if (nextAudio) {
+        nextAudio.pause();
+        nextAudio.currentTime = 0;
+        nextAudio = null;
+    }
+    
+    // Clear crossfade interval
+    if (crossfadeInterval) {
+        clearInterval(crossfadeInterval);
+        crossfadeInterval = null;
+    }
+    
+    // Reset visual states
     document.querySelectorAll('.music-chaos').forEach(btn => {
         btn.classList.remove('playing', 'pulsing');
     });
@@ -97,18 +330,18 @@ function stopAllAudio() {
         mainHeart.classList.remove('playing', 'beating');
     }
     
+    stopVisualization();
     hideAudioStatus();
     currentPlayingElement = null;
 }
 
-// Show audio status with mobile optimization
+// Show audio status
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
     if (status) {
         status.textContent = message;
         status.classList.add('show');
         
-        // Auto-hide on mobile after 3 seconds to save space
         if (window.innerWidth <= 768) {
             setTimeout(() => {
                 hideAudioStatus();
@@ -125,19 +358,34 @@ function hideAudioStatus() {
     }
 }
 
-// Play audio with fallback and better mobile support
+// Play audio with enhanced features
 function playAudioWithFallback(audioElement, title, visualElement) {
     if (!audioElement) {
         console.log('Audio element not found');
         return;
     }
     
-    stopAllAudio();
+    // If same track is playing, stop it
+    if (currentAudio === audioElement) {
+        stopAllAudio();
+        return;
+    }
+    
+    // Cache the track
+    cacheAudio(audioElement.id);
+    
+    // Handle crossfade if another track is playing
+    if (currentAudio && currentAudio !== audioElement) {
+        nextAudio = audioElement;
+        crossfadeToNext(currentAudio, nextAudio);
+    } else {
+        stopAllAudio();
+    }
     
     currentAudio = audioElement;
     currentPlayingElement = visualElement;
     
-    // Add visual feedback with enhanced mobile animations
+    // Add visual feedback
     if (visualElement) {
         visualElement.classList.add('playing');
         if (visualElement.classList.contains('music-chaos')) {
@@ -148,9 +396,21 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         }
     }
     
-    showAudioStatus(`🎵 ${title}`);
+    // Connect to analyser for visualization
+    if (audioContext && analyser && !audioElement.connected) {
+        try {
+            const source = audioContext.createMediaElementSource(audioElement);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            audioElement.connected = true;
+        } catch (error) {
+            console.log('Audio connection failed:', error);
+        }
+    }
     
-    // Set volume with mobile consideration
+    showAudioStatus(`🎵 ${title}`);
+    startVisualization();
+    
     const isMobile = window.innerWidth <= 768;
     audioElement.volume = isMobile ? 0.4 : 0.3;
     
@@ -159,13 +419,14 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     
     if (playPromise !== undefined) {
         playPromise.then(() => {
-            // Audio started successfully
             console.log('Audio playing:', title);
             
             // Add haptic feedback on mobile if available
             if (isMobile && navigator.vibrate) {
                 navigator.vibrate(50);
             }
+            
+            showTypingMessage(`🎵 Now playing: ${title}`);
         }).catch(error => {
             console.log('Audio play failed:', error);
             showAudioStatus(`🎵 ${title} (Loading...)`);
@@ -177,9 +438,11 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         if (visualElement) {
             visualElement.classList.remove('playing', 'pulsing', 'beating');
         }
+        stopVisualization();
         hideAudioStatus();
         currentAudio = null;
         currentPlayingElement = null;
+        showTypingMessage('Track ended');
     };
     
     // Handle audio error
@@ -190,13 +453,13 @@ function playAudioWithFallback(audioElement, title, visualElement) {
                 visualElement.classList.remove('playing', 'pulsing', 'beating');
             }
             hideAudioStatus();
+            stopVisualization();
         }, 2000);
     };
 }
 
-// Music functionality with updated track list (removed PND track)
+// Music functionality with updated track list
 function playMusic(num) {
-    // Preload audio on demand
     preloadAudioOnDemand(`musicAudio${num}`);
     
     const audioElement = document.getElementById(`musicAudio${num}`);
@@ -209,8 +472,6 @@ function playMusic(num) {
     ];
     
     playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
-    
-    // Create explosion effect
     createMusicExplosion(buttonElement);
 }
 
@@ -220,14 +481,12 @@ function playMainMusic() {
     const heartElement = document.getElementById('mainHeart');
     
     playAudioWithFallback(audioElement, "You've Been Missed - PARTYNEXTDOOR", heartElement);
-    
-    // Create explosion of broken hearts
     createHeartExplosion();
 }
 
-// Create heart explosion effect with mobile optimization
+// Create heart explosion effect
 function createHeartExplosion() {
-    const heartCount = window.innerWidth <= 768 ? 6 : 10; // Fewer hearts on mobile
+    const heartCount = window.innerWidth <= 768 ? 6 : 10;
     
     for (let i = 0; i < heartCount; i++) {
         setTimeout(() => {
@@ -248,7 +507,6 @@ function createHeartExplosion() {
             
             heart.style.animation = `explodeHeart${i} 2s ease-out forwards`;
             
-            // Create unique explosion animation
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes explodeHeart${i} {
@@ -281,7 +539,7 @@ function createHeartExplosion() {
     }
 }
 
-// Create music explosion effect with mobile optimization
+// Create music explosion effect
 function createMusicExplosion(element) {
     if (!element) return;
     
@@ -341,7 +599,7 @@ function createMusicExplosion(element) {
     }
 }
 
-// Random glitch effects with mobile consideration
+// Random glitch effects
 setInterval(() => {
     const elements = document.querySelectorAll('.chaos-text, .image-frame');
     const randomElement = elements[Math.floor(Math.random() * elements.length)];
@@ -354,18 +612,18 @@ setInterval(() => {
     }
 }, window.innerWidth <= 768 ? 5000 : 3000);
 
-// Preload audio on first interaction
+// Preload audio on demand
 function preloadAudioOnDemand(audioId) {
     const audio = document.getElementById(audioId);
     if (audio && audio.preload === 'none') {
         audio.preload = 'auto';
-        audio.load(); // Force load
+        audio.load();
     }
 }
 
 // Mobile touch handling
 function addTouchSupport() {
-    const elements = document.querySelectorAll('.music-chaos, #mainHeart, .back-button, .message-icon');
+    const elements = document.querySelectorAll('.music-chaos, #mainHeart, .back-button, .message-icon, #themeToggle');
     
     elements.forEach(element => {
         element.addEventListener('touchstart', function() {
@@ -382,10 +640,33 @@ function addTouchSupport() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
     
+    // Load saved theme preference or set auto theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        isDarkMode = savedTheme === 'dark';
+        document.body.classList.toggle('light-mode', !isDarkMode);
+    } else {
+        setAutoTheme();
+    }
+    
+    // Create theme toggle button
+    const themeToggle = document.createElement('button');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.id = 'themeToggle';
+    themeToggle.innerHTML = isDarkMode ? '🌙' : '☀️';
+    themeToggle.setAttribute('aria-label', 'Toggle theme');
+    themeToggle.addEventListener('click', toggleTheme);
+    document.body.appendChild(themeToggle);
+    
+    // Check offline status
+    checkOfflineStatus();
+    window.addEventListener('online', checkOfflineStatus);
+    window.addEventListener('offline', checkOfflineStatus);
+    
     // Add mobile touch support
     addTouchSupport();
     
-    // Set up event listeners using JavaScript instead of inline onclick
+    // Set up event listeners
     const backButton = document.querySelector('.back-button');
     if (backButton) {
         backButton.addEventListener('click', function(e) {
@@ -416,7 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Main heart listener added');
     }
     
-    // Set up music buttons (now only 4 buttons)
+    // Set up music buttons
     for (let i = 1; i <= 4; i++) {
         const musicBtn = document.getElementById(`musicBtn${i}`);
         if (musicBtn) {
@@ -439,7 +720,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Close button for modal
         const closeMessage = document.querySelector('.close-message');
         if (closeMessage) {
             closeMessage.addEventListener('click', hideMessage);
@@ -449,31 +729,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize audio context
     initAudioContext();
     
-    // Optimize audio loading - only preload the main heart audio
+    // Optimize audio loading
     const mainAudio = document.getElementById('mainHeartAudio');
     if (mainAudio) {
         mainAudio.preload = 'auto';
+        cacheAudio('mainHeartAudio');
     }
     
     // Set other audio files to load only when needed
     for (let i = 1; i <= 4; i++) {
         const audio = document.getElementById(`musicAudio${i}`);
         if (audio) {
-            audio.preload = 'none'; // Don't preload these
+            audio.preload = 'none';
             audio.volume = window.innerWidth <= 768 ? 0.4 : 0.3;
         }
     }
     
-    // Show loading indicator
-    showAudioStatus('🎵 Loading audio files...');
+    // Show welcome message
     setTimeout(() => {
-        hideAudioStatus();
-    }, 3000);
+        showTypingMessage('Welcome to the chaos of doubt... 💔');
+    }, 1000);
     
     // Handle orientation changes on mobile
     window.addEventListener('orientationchange', function() {
         setTimeout(() => {
-            // Recalculate positions after orientation change
             const viewport = document.querySelector('meta[name=viewport]');
             viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
         }, 500);
@@ -482,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Initialization complete');
 });
 
-// Keyboard shortcuts with mobile consideration
+// Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideMessage();
@@ -491,9 +770,12 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'm' || e.key === 'M') {
         showMessage();
     }
-    if (e.key === ' ') { // Spacebar to stop audio
+    if (e.key === ' ') {
         e.preventDefault();
         stopAllAudio();
+    }
+    if (e.key === 't' || e.key === 'T') {
+        toggleTheme();
     }
 });
 
@@ -504,7 +786,7 @@ document.addEventListener('click', function() {
     }
 }, { once: true });
 
-// Prevent right-click context menu for a more immersive experience
+// Prevent right-click context menu
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
@@ -517,6 +799,7 @@ document.addEventListener('touchstart', function() {
 }, { once: true });
 
 // Prevent zoom on double tap for mobile
+let lastTouchEnd = 0;
 document.addEventListener('touchend', function(event) {
     const now = (new Date()).getTime();
     if (now - lastTouchEnd <= 300) {
@@ -524,5 +807,3 @@ document.addEventListener('touchend', function(event) {
     }
     lastTouchEnd = now;
 }, false);
-
-let lastTouchEnd = 0;

@@ -11,28 +11,32 @@
     
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://caked-production.up.railway.app">
+    
+    <!-- PWA manifest for offline support -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <!-- Audio elements - Updated with only 4 music tracks -->
-    <audio id="mainHeartAudio" preload="auto">
+    <audio id="mainHeartAudio" preload="auto" crossorigin="anonymous">
         <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - You ve Been Missed.mp3" type="audio/mpeg">
     </audio>
-    <audio id="musicAudio1" preload="none">
+    <audio id="musicAudio1" preload="none" crossorigin="anonymous">
         <source src="https://caked-production.up.railway.app/assets/audio/Amy Winehouse - Back To Black.mp3" type="audio/mpeg">
     </audio>
-    <audio id="musicAudio2" preload="none">
+    <audio id="musicAudio2" preload="none" crossorigin="anonymous">
         <source src="https://caked-production.up.railway.app/assets/audio/Don Toliver - Easy.mp3" type="audio/mpeg">
     </audio>
-    <audio id="musicAudio3" preload="none">
+    <audio id="musicAudio3" preload="none" crossorigin="anonymous">
         <source src="https://caked-production.up.railway.app/assets/audio/Juice WRLD - Faded.mp3" type="audio/mpeg">
     </audio>
-    <audio id="musicAudio4" preload="none">
+    <audio id="musicAudio4" preload="none" crossorigin="anonymous">
         <source src="https://caked-production.up.railway.app/assets/audio/All Out - Juice WRLD.mp3" type="audio/mpeg">
     </audio>
 
     <div class="chaos-container">
         <button class="back-button" role="button" aria-label="Go back to main page">← Back to Choice</button>
         <button class="message-icon" role="button" aria-label="Open message">💌</button>
+        <!-- Theme toggle button will be added dynamically -->
         
         <!-- Main broken heart -->
         <div class="broken-heart main-heart" id="mainHeart" role="button" aria-label="Play main song" tabindex="0">💔</div>
@@ -104,6 +108,10 @@
         
         <div class="audio-status" id="audioStatus" role="status" aria-live="polite">🎵 Now Playing...</div>
         
+        <!-- Audio visualizer will be added dynamically -->
+        <!-- Offline indicator will be added dynamically -->
+        <!-- Typing messages will be added dynamically -->
+        
         <!-- Audio controls (hidden by default) -->
         <div class="audio-controls" id="audioControls" style="display: none;">
             <button id="playPauseBtn" aria-label="Play/Pause">⏸️</button>
@@ -123,7 +131,7 @@
                 <h2>💔 From Me to Yours 💔</h2>
             </div>
             <div class="message-body">
-                <p>You can start by clicking the music icons. Didnt think of a good song for this page. Still dont understand a dime</p>
+                <p>You can start by clicking the music icons🎶🎼🎧. Didnt think of a good song for this page. Still dont understand a dime whats going on😂demit</p>
                 <p>I wonder if you think 'what if it could have worked out like I do'</p>
                 <p>This page is minimal. The reason is obvious</p>
                 <p>I know I messed up. Cool who doesn't at times but trust me I know why. Nita admit vizuri One day trust. But trust I've always been into you</p>
