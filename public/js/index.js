@@ -103,6 +103,25 @@ function createBreakingHeartTransition() {
   }
 }
 
+// Reset navigation state function
+function resetNavigationState() {
+  isNavigating = false;
+  isPaused = false;
+  
+  // Remove any lingering click/touch classes
+  const leftSide = document.querySelector('.left-side');
+  const rightSide = document.querySelector('.right-side');
+  
+  if (leftSide) {
+    leftSide.classList.remove('clicking', 'touching');
+  }
+  if (rightSide) {
+    rightSide.classList.remove('clicking', 'touching');
+  }
+  
+  console.log('Navigation state reset - roses are now clickable');
+}
+
 // Navigation functions with better error handling
 function navigateToGarden() {
   if (isNavigating) return;
@@ -140,10 +159,7 @@ function navigateToGarden() {
       
     } catch (error) {
       console.error('All navigation attempts failed:', error);
-      isNavigating = false;
-      if (leftSide) {
-        leftSide.classList.remove('clicking');
-      }
+      resetNavigationState(); // Reset state on navigation failure
     }
   }, 1200);
 }
@@ -184,10 +200,7 @@ function navigateToDoubt() {
       
     } catch (error) {
       console.error('All navigation attempts failed:', error);
-      isNavigating = false;
-      if (rightSide) {
-        rightSide.classList.remove('clicking');
-      }
+      resetNavigationState(); // Reset state on navigation failure
     }
   }, 1500);
 }
@@ -490,17 +503,44 @@ function initNetworkHandling() {
   });
 }
 
+// Page visibility handling for back button navigation
+function initPageVisibilityHandling() {
+  // Reset navigation state when page becomes visible again
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // Page is now visible - reset navigation state
+      setTimeout(resetNavigationState, 100);
+    }
+  });
+  
+  // Also handle page focus events
+  window.addEventListener('focus', function() {
+    setTimeout(resetNavigationState, 100);
+  });
+  
+  // Handle pageshow event (fired when navigating back to page)
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      // Page was restored from cache
+      resetNavigationState();
+    }
+  });
+}
+
 // Main initialization
 document.addEventListener('DOMContentLoaded', function() {
   // Reset navigation state on page load
-  isNavigating = false;
-  isPaused = false;
+  resetNavigationState();
   
   // Initialize all components
   addInteractionSupport();
   initPetalAnimation();
   initMobileOptimizations();
   initNetworkHandling();
+  initPageVisibilityHandling(); // Add page visibility handling
+  
+  // Additional reset after a short delay to ensure everything is loaded
+  setTimeout(resetNavigationState, 500);
   
   // Preload next pages for better performance
   const linkPreloads1 = document.createElement('link');
@@ -519,4 +559,14 @@ window.addEventListener('beforeunload', function() {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
   }
+});
+
+// Additional event listeners for back button navigation
+window.addEventListener('popstate', function() {
+  resetNavigationState();
+});
+
+// Reset on page load (for cached pages)
+window.addEventListener('load', function() {
+  resetNavigationState();
 });
