@@ -1,6 +1,5 @@
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
-
 // Audio context for Web Audio API
 let audioContext = null;
 let currentAudio = null;
@@ -10,15 +9,12 @@ let analyser = null;
 let dataArray = null;
 let animationId = null;
 let crossfadeInterval = null;
-
 // Feature states
 let isDarkMode = true;
 let cachedTracks = new Set();
 let isOffline = false;
-
 // Auto-play attempt flag
 let autoPlayAttempted = false;
-
 // Global music player variables
 let globalMusicIndex = 0;
 let globalMusicFiles = [
@@ -33,7 +29,6 @@ let globalMusicFiles = [
     'PARTYNEXTDOOR - You ve Been Missed.mp3',
     'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
-
 let globalMusicTitles = [
     "Dreamin' - PARTYNEXTDOOR",
     "DEEPER - PARTYNEXTDOOR",
@@ -46,7 +41,6 @@ let globalMusicTitles = [
     "You've Been Missed - PARTYNEXTDOOR",
     "BELIEVE IT - PARTYNEXTDOOR & Rihanna"
 ];
-
 // Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
@@ -58,7 +52,6 @@ function initAudioContext() {
     }
     return audioContext;
 }
-
 // Attempt to start music automatically
 function attemptAutoPlay() {
     if (autoPlayAttempted) return;
@@ -94,7 +87,6 @@ function attemptAutoPlay() {
         }
     }
 }
-
 // Modal functions
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -104,7 +96,6 @@ function openModal(modalId) {
         modal.classList.add('show');
     }
 }
-
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -113,7 +104,6 @@ function closeModal(modalId) {
         modal.classList.remove('show');
     }
 }
-
 // FIXED: Photo enlargement functionality
 function enlargePhoto(img, event) {
     if (event) {
@@ -143,7 +133,6 @@ function enlargePhoto(img, event) {
         console.log('Photo modal opened with image:', img.src);
     }
 }
-
 function closePhotoModal() {
     const modal = document.getElementById('photoModal');
     const enlargedPhoto = document.getElementById('enlargedPhoto');
@@ -164,7 +153,6 @@ function closePhotoModal() {
         document.body.style.overflow = 'auto';
     }
 }
-
 // Title click functionality
 function titleClick() {
     const popup = document.getElementById('titlePopup');
@@ -179,7 +167,6 @@ function titleClick() {
         }, 8000);
     }
 }
-
 // Message functionality
 function showSavedMessage(messageId) {
     const messageDiv = document.getElementById(messageId);
@@ -192,7 +179,6 @@ function showSavedMessage(messageId) {
         }
     }
 }
-
 // Music popup functionality
 function toggleMusicPopup() {
     const popup = document.getElementById('musicPopup');
@@ -216,7 +202,6 @@ function toggleMusicPopup() {
         }
     }
 }
-
 // Exclamation popup functionality
 function toggleExclamationPopup() {
     const popup = document.getElementById('exclamationPopup');
@@ -234,32 +219,41 @@ function toggleExclamationPopup() {
         }
     }
 }
-
-// Global music functions
+// Global music functions - FIXED VERSION
 function selectGlobalSong(filename) {
     const audio = document.getElementById('globalAudio');
     const nowPlaying = document.getElementById('globalNowPlaying');
     
-    if (audio && filename) {
-        // Find the index of the selected song
-        globalMusicIndex = globalMusicFiles.indexOf(filename);
-        
-        // Update audio source
-        audio.src = `${BACKEND_URL}/assets/audio/${filename}`;
-        
-        // Update now playing display
-        if (nowPlaying) {
-            nowPlaying.textContent = globalMusicTitles[globalMusicIndex];
-        }
-        
-        // Update select dropdown
-        const select = document.getElementById('globalMusicSelect');
-        if (select) {
-            select.value = filename;
-        }
-        
-        console.log('Selected song:', filename);
+    if (!audio || !filename) {
+        console.log('Audio element or filename not found');
+        return;
     }
+    
+    // Find the index of the selected song
+    globalMusicIndex = globalMusicFiles.indexOf(filename);
+    
+    // Pause the current audio and reset time
+    audio.pause();
+    audio.currentTime = 0;
+    
+    // Update audio source
+    audio.src = `${BACKEND_URL}/assets/audio/${filename}`;
+    
+    // Load the new source (this is critical)
+    audio.load();
+    
+    // Update now playing display
+    if (nowPlaying) {
+        nowPlaying.textContent = globalMusicTitles[globalMusicIndex];
+    }
+    
+    // Update select dropdown
+    const select = document.getElementById('globalMusicSelect');
+    if (select) {
+        select.value = filename;
+    }
+    
+    console.log('Selected song:', filename);
 }
 
 function toggleGlobalMusic() {
@@ -269,16 +263,36 @@ function toggleGlobalMusic() {
     
     if (audio && playBtn) {
         if (audio.paused) {
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    playBtn.textContent = '⏸️';
-                    if (musicButton) {
-                        musicButton.classList.add('playing');
-                        musicButton.classList.remove('pulse');
+            // Check if audio is ready to play
+            if (audio.readyState >= HTMLAudioElement.HAVE_ENOUGH_DATA) {
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        playBtn.textContent = '⏸️';
+                        if (musicButton) {
+                            musicButton.classList.add('playing');
+                            musicButton.classList.remove('pulse');
+                        }
+                    }).catch(error => {
+                        console.log('Audio play failed:', error);
+                    });
+                }
+            } else {
+                // Wait for audio to be loaded before playing
+                audio.addEventListener('canplay', function onCanPlay() {
+                    audio.removeEventListener('canplay', onCanPlay);
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            playBtn.textContent = '⏸️';
+                            if (musicButton) {
+                                musicButton.classList.add('playing');
+                                musicButton.classList.remove('pulse');
+                            }
+                        }).catch(error => {
+                            console.log('Audio play failed:', error);
+                        });
                     }
-                }).catch(error => {
-                    console.log('Audio play failed:', error);
                 });
             }
         } else {
@@ -296,8 +310,42 @@ function playPreviousSong() {
     selectGlobalSong(globalMusicFiles[globalMusicIndex]);
     
     const audio = document.getElementById('globalAudio');
-    if (audio && !audio.paused) {
-        audio.play();
+    const playBtn = document.getElementById('globalPlayBtn');
+    const musicButton = document.getElementById('musicButton');
+    
+    if (audio) {
+        // Check if audio is ready to play
+        if (audio.readyState >= HTMLAudioElement.HAVE_ENOUGH_DATA) {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    if (playBtn) playBtn.textContent = '⏸️';
+                    if (musicButton) {
+                        musicButton.classList.add('playing');
+                        musicButton.classList.remove('pulse');
+                    }
+                }).catch(error => {
+                    console.log('Audio play failed:', error);
+                });
+            }
+        } else {
+            // Wait for audio to be loaded before playing
+            audio.addEventListener('canplay', function onCanPlay() {
+                audio.removeEventListener('canplay', onCanPlay);
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        if (playBtn) playBtn.textContent = '⏸️';
+                        if (musicButton) {
+                            musicButton.classList.add('playing');
+                            musicButton.classList.remove('pulse');
+                        }
+                    }).catch(error => {
+                        console.log('Audio play failed:', error);
+                    });
+                }
+            });
+        }
     }
 }
 
@@ -306,8 +354,42 @@ function playNextSong() {
     selectGlobalSong(globalMusicFiles[globalMusicIndex]);
     
     const audio = document.getElementById('globalAudio');
-    if (audio && !audio.paused) {
-        audio.play();
+    const playBtn = document.getElementById('globalPlayBtn');
+    const musicButton = document.getElementById('musicButton');
+    
+    if (audio) {
+        // Check if audio is ready to play
+        if (audio.readyState >= HTMLAudioElement.HAVE_ENOUGH_DATA) {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    if (playBtn) playBtn.textContent = '⏸️';
+                    if (musicButton) {
+                        musicButton.classList.add('playing');
+                        musicButton.classList.remove('pulse');
+                    }
+                }).catch(error => {
+                    console.log('Audio play failed:', error);
+                });
+            }
+        } else {
+            // Wait for audio to be loaded before playing
+            audio.addEventListener('canplay', function onCanPlay() {
+                audio.removeEventListener('canplay', onCanPlay);
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        if (playBtn) playBtn.textContent = '⏸️';
+                        if (musicButton) {
+                            musicButton.classList.add('playing');
+                            musicButton.classList.remove('pulse');
+                        }
+                    }).catch(error => {
+                        console.log('Audio play failed:', error);
+                    });
+                }
+            });
+        }
     }
 }
 
@@ -327,7 +409,6 @@ function stopGlobalMusic() {
         }
     }
 }
-
 // Create stars background
 function createStars() {
     const starsContainer = document.getElementById('stars');
@@ -357,7 +438,6 @@ function createStars() {
         starsContainer.appendChild(star);
     }
 }
-
 // Initialize loading screen
 function initLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -375,7 +455,6 @@ function initLoadingScreen() {
         }, 3000);
     }
 }
-
 // Image loading optimization
 function optimizeImageLoading() {
     const images = document.querySelectorAll('img');
@@ -391,7 +470,6 @@ function optimizeImageLoading() {
         }
     });
 }
-
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing hope page...');
@@ -418,6 +496,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set initial song
         selectGlobalSong(globalMusicFiles[0]);
+        
+        // Explicitly load the audio
+        globalAudio.load();
         
         // Try to load the audio
         globalAudio.addEventListener('loadeddata', function() {
@@ -555,14 +636,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Hope page initialization complete');
 });
-
 // Handle orientation change
 window.addEventListener('orientationchange', function() {
     setTimeout(() => {
         createStars(); // Recreate stars for new viewport
     }, 500);
 });
-
 // Handle resize
 window.addEventListener('resize', function() {
     // Recreate stars on significant size changes
@@ -571,7 +650,6 @@ window.addEventListener('resize', function() {
         createStars();
     }, 250);
 });
-
 // Prevent right-click context menu
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
