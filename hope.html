@@ -33,7 +33,7 @@
   </div>
   
   <!-- Background Music -->
-  <audio id="globalAudio" class="background-music" preload="none">
+  <audio id="globalAudio" class="background-music" preload="auto">
     <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
   </audio>
   
@@ -85,21 +85,21 @@
       <!-- Rose 1 -->
       <div class="rose-wrapper" onclick="openModal('modal1')">
         <div class="rose">
-          <img class="rose-image" id="rose1Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 1" loading="lazy">
+          <img class="rose-image loaded" id="rose1Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 1" loading="lazy" onload="this.classList.add('loaded')">
         </div>
         <div class="rose-label">First Bloom</div>
       </div>
       <!-- Rose 2 -->
       <div class="rose-wrapper" onclick="openModal('modal2')">
         <div class="rose">
-          <img class="rose-image" id="rose2Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 2" loading="lazy">
+          <img class="rose-image loaded" id="rose2Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 2" loading="lazy" onload="this.classList.add('loaded')">
         </div>
         <div class="rose-label">Heart's Robbed</div>
       </div>
       <!-- Rose 3 -->
       <div class="rose-wrapper" onclick="openModal('modal3')">
         <div class="rose">
-          <img class="rose-image" id="rose3Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 3" loading="lazy">
+          <img class="rose-image loaded" id="rose3Image" src="https://caked-production.up.railway.app/assets/images/rose-unsplash.jpg" alt="Rose 3" loading="lazy" onload="this.classList.add('loaded')">
         </div>
         <div class="rose-label">Forever</div>
       </div>
@@ -137,8 +137,8 @@
       </div>
       <!-- ENHANCED: Photo container with smoother animations -->
       <div class="photo-container">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this, event)" loading="lazy">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
       </div>
     </div>
   </div>
@@ -161,8 +161,8 @@
       </div>
       <!-- ENHANCED: Photo container with smoother animations -->
       <div class="photo-container">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this, event)" loading="lazy">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/expparty.png" alt="Memory 4" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/expparty.png" alt="Memory 4" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
       </div>
     </div>
   </div>
@@ -189,9 +189,9 @@
       </div>
       <!-- ENHANCED: Photo container with smoother animations -->
       <div class="photo-container">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this, event)" loading="lazy">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this, event)" loading="lazy">
-        <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this, event)" loading="lazy">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
+        <img class="photo loaded" src="https://caked-production.up.railway.app/assets/images/sst11.jpg" alt="Memory 7" onclick="enlargePhoto(this, event)" loading="lazy" onload="this.classList.add('loaded')">
       </div>
     </div>
   </div>
@@ -226,10 +226,10 @@
     </div>
   </div>
   
-  <!-- ENHANCED: Photo Enlargement Modal with Smooth Animations -->
+  <!-- CRITICAL FIX: Photo Enlargement Modal with proper structure -->
   <div id="photoModal" class="photo-modal">
     <span class="close" onclick="closePhotoModal()">&times;</span>
-    <img id="enlargedPhoto" alt="Enlarged photo">
+    <img id="enlargedPhoto" alt="Enlarged photo" onload="this.classList.add('loaded')">
   </div>
   
   <footer>

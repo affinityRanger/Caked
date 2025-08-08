@@ -1,615 +1,515 @@
-// JavaScript code for the Roses Gallery - OPTIMIZED WITH SMOOTH IMAGE ANIMATIONS
-const globalAudio = document.getElementById("globalAudio");
-const musicButton = document.getElementById("musicButton");
-const musicPopup = document.getElementById("musicPopup");
-let musicPopupVisible = false;
-let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
-let exclamationPopupVisible = false;
-let isNavigating = false;
-let photoModalOpen = false;
-let isImageTransitioning = false;
-
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
-// CORRECTED: Song playlist array with proper file names
-const playlist = [
-  'PARTYNEXTDOOR - Dreamin.mp3',
-  'Kiss - I Was Made For Lovin You.mp3',
-  'PARTYNEXTDOOR - DEEPER.mp3', 
-  'PARTYNEXTDOOR - TRAUMA .mp3',
-  'Juice WRLD - GRACE.mp3',
-  'PARTYNEXTDOOR - Some Of Your Love.mp3',
-  'KEEP IT-Juice WRLD.mp3',
-  'Lovers Lane - JuiceWrld.mp3',
-  'PARTYNEXTDOOR - You ve Been Missed.mp3',
-  'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
+// Audio context for Web Audio API
+let audioContext = null;
+let currentAudio = null;
+let nextAudio = null;
+let currentPlayingElement = null;
+let analyser = null;
+let dataArray = null;
+let animationId = null;
+let crossfadeInterval = null;
+
+// Feature states
+let isDarkMode = true;
+let cachedTracks = new Set();
+let isOffline = false;
+
+// Global music player variables
+let globalMusicIndex = 0;
+let globalMusicFiles = [
+    'PARTYNEXTDOOR - Dreamin.mp3',
+    'PARTYNEXTDOOR - DEEPER.mp3',
+    'PARTYNEXTDOOR - TRAUMA .mp3',
+    'KEEP IT-Juice WRLD.mp3',
+    'Juice WRLD - GRACE.mp3',
+    'Kiss - I Was Made For Lovin You.mp3',
+    'Lovers Lane - JuiceWrld.mp3',
+    'PARTYNEXTDOOR - Some Of Your Love.mp3',
+    'PARTYNEXTDOOR - You ve Been Missed.mp3',
+    'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
-let currentSongIndex = 0;
 
-// Performance optimization: Cache DOM elements
-const cachedElements = {};
-function getElement(id) {
-  if (!cachedElements[id]) {
-    cachedElements[id] = document.getElementById(id);
-  }
-  return cachedElements[id];
-}
+let globalMusicTitles = [
+    "Dreamin' - PARTYNEXTDOOR",
+    "DEEPER - PARTYNEXTDOOR",
+    "TRAUMA - PARTYNEXTDOOR",
+    "KEEP IT - Juice WRLD",
+    "GRACE - Juice WRLD",
+    "Kiss - I Was Made For Lovin' You",
+    "Lovers Lane - Juice WRLD",
+    "Some Of Your Love - PARTYNEXTDOOR",
+    "You've Been Missed - PARTYNEXTDOOR",
+    "BELIEVE IT - PARTYNEXTDOOR & Rihanna"
+];
 
-// CORRECTED: Display names to match actual files
-function getSongDisplayName(songFile) {
-  const songNames = {
-    'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
-    'Kiss - I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin\' You',
-    'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
-    'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
-    'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',
-    'PARTYNEXTDOOR - Some Of Your Love.mp3': 'Some Of Your Love - PARTYNEXTDOOR',
-    'KEEP IT-Juice WRLD.mp3': 'KEEP IT - Juice WRLD',
-    'Lovers Lane - JuiceWrld.mp3': 'Lovers Lane - Juice WRLD',
-    'PARTYNEXTDOOR - You ve Been Missed.mp3': 'You\'ve Been Missed - PARTYNEXTDOOR',
-    'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3': 'BELIEVE IT - PARTYNEXTDOOR & Rihanna'
-  };
-  return songNames[songFile] || songFile.replace('.mp3', '');
-}
-
-// Initialize audio on page load - WITH AUTO-PLAY RESTORED
-window.addEventListener('load', function() {
-  globalAudio.volume = 0.4;
-  globalAudio.loop = false;
-  
-  // Faster loading - reduced delays but AUTO-PLAY RESTORED
-  setTimeout(() => {
-    const loadingScreen = getElement('loadingScreen');
-    if (loadingScreen) {
-      loadingScreen.classList.add('fade-out');
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        initializeBackground();
-        startAutoPlay();
-      }, 500);
+// Initialize audio context
+function initAudioContext() {
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (error) {
+            console.log('Web Audio API not supported');
+        }
     }
-  }, 1000);
-});
-
-// AUTO-PLAY function RESTORED
-function startAutoPlay() {
-  globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
-  globalAudio.play().then(() => {
-    musicButton.classList.add('playing');
-    const playBtn = getElement('globalPlayBtn');
-    const nowPlaying = getElement('globalNowPlaying');
-    if (playBtn) playBtn.textContent = '⏸️';
-    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
-    updateSelectDropdown();
-  }).catch(() => {
-    const nowPlaying = getElement('globalNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = 'Click play to start music';
-  });
+    return audioContext;
 }
 
-// Update select dropdown
-function updateSelectDropdown() {
-  const select = getElement('globalMusicSelect');
-  if (select && playlist.includes(currentSong)) {
-    select.value = currentSong;
-  }
-}
-
-// Simplified play next song
-function playNextSong() {
-  currentSongIndex = (currentSongIndex + 1) % playlist.length;
-  currentSong = playlist[currentSongIndex];
-  
-  globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
-  globalAudio.volume = 0.4;
-  
-  updateSelectDropdown();
-  
-  globalAudio.play().then(() => {
-    const nowPlaying = getElement('globalNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
-    musicButton.classList.add('playing');
-    const playBtn = getElement('globalPlayBtn');
-    if (playBtn) playBtn.textContent = '⏸️';
-  }).catch(() => {
-    if (currentSongIndex < playlist.length - 1) {
-      setTimeout(() => playNextSong(), 500);
+// Modal functions
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        modal.classList.add('show');
     }
-  });
 }
 
-// Simplified play previous song
-function playPreviousSong() {
-  currentSongIndex = currentSongIndex === 0 ? playlist.length - 1 : currentSongIndex - 1;
-  currentSong = playlist[currentSongIndex];
-  
-  globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
-  globalAudio.volume = 0.4;
-  
-  updateSelectDropdown();
-  
-  globalAudio.play().then(() => {
-    const nowPlaying = getElement('globalNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
-    musicButton.classList.add('playing');
-    const playBtn = getElement('globalPlayBtn');
-    if (playBtn) playBtn.textContent = '⏸️';
-  }).catch(() => {
-    const nowPlaying = getElement('globalNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = `Failed: ${getSongDisplayName(currentSong)}`;
-  });
-}
-
-// Music popup toggle with smooth animations
-function toggleMusicPopup() {
-  const popup = getElement('musicPopup');
-  const button = getElement('musicButton');
-  
-  musicPopupVisible = !musicPopupVisible;
-  
-  if (musicPopupVisible) {
-    popup.style.display = 'block';
-    button.classList.add('active');
-    requestAnimationFrame(() => {
-      popup.classList.add('show');
-    });
-  } else {
-    popup.classList.remove('show');
-    button.classList.remove('active');
-    setTimeout(() => {
-      if (!musicPopupVisible) popup.style.display = 'none';
-    }, 300);
-  }
-}
-
-// Exclamation popup toggle
-function toggleExclamationPopup() {
-  const popup = getElement('exclamationPopup');
-  const icon = getElement('exclamationIcon');
-  
-  exclamationPopupVisible = !exclamationPopupVisible;
-  
-  if (exclamationPopupVisible) {
-    if (popup) popup.classList.add('show');
-    if (icon) icon.classList.add('active');
-  } else {
-    if (popup) popup.classList.remove('show');
-    if (icon) icon.classList.remove('active');
-  }
-}
-
-// ENHANCED: Click outside handler with proper photo modal support
-document.addEventListener('click', function(event) {
-  // Handle photo modal clicks properly
-  const photoModal = getElement('photoModal');
-  if (photoModal && photoModalOpen) {
-    if (event.target === photoModal) {
-      closePhotoModal();
-      return;
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        modal.classList.remove('show');
     }
-    return;
-  }
-
-  // Handle exclamation popup
-  const popup = getElement('exclamationPopup');
-  const icon = getElement('exclamationIcon');
-  
-  if (popup && icon && 
-      !popup.contains(event.target) && 
-      !icon.contains(event.target) && 
-      exclamationPopupVisible) {
-    popup.classList.remove('show');
-    icon.classList.remove('active');
-    exclamationPopupVisible = false;
-  }
-  
-  // Handle music popup
-  if (musicButton && musicPopup && 
-      !musicButton.contains(event.target) && 
-      !musicPopup.contains(event.target)) {
-    musicPopup.classList.remove('show');
-    musicButton.classList.remove('active');
-    musicPopupVisible = false;
-    setTimeout(() => {
-      if (!musicPopupVisible) musicPopup.style.display = 'none';
-    }, 300);
-  }
-});
-
-// Select song function
-function selectGlobalSong(songFile) {
-  if (songFile && playlist.includes(songFile)) {
-    const wasPlaying = !globalAudio.paused;
-    
-    currentSongIndex = playlist.indexOf(songFile);
-    currentSong = songFile;
-    
-    globalAudio.src = `${BACKEND_URL}/assets/audio/${songFile}`;
-    globalAudio.volume = 0.4;
-    
-    const nowPlaying = getElement('globalNowPlaying');
-    const playBtn = getElement('globalPlayBtn');
-    
-    if (wasPlaying) {
-      globalAudio.play().then(() => {
-        if (nowPlaying) nowPlaying.textContent = getSongDisplayName(songFile);
-        musicButton.classList.add('playing');
-        if (playBtn) playBtn.textContent = '⏸️';
-      }).catch(() => {
-        if (nowPlaying) nowPlaying.textContent = `Failed: ${getSongDisplayName(songFile)}`;
-      });
-    } else {
-      if (nowPlaying) nowPlaying.textContent = getSongDisplayName(songFile);
-    }
-  }
 }
 
-// Toggle music play/pause
-function toggleGlobalMusic() {
-  const playBtn = getElement('globalPlayBtn');
-  const nowPlaying = getElement('globalNowPlaying');
-  
-  if (globalAudio.paused) {
-    if (!globalAudio.src) {
-      globalAudio.src = `${BACKEND_URL}/assets/audio/${currentSong}`;
-    }
-    
-    globalAudio.play().then(() => {
-      musicButton.classList.add('playing');
-      if (playBtn) playBtn.textContent = '⏸️';
-      if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
-    }).catch(() => {
-      if (nowPlaying) nowPlaying.textContent = `Error: ${getSongDisplayName(currentSong)}`;
-    });
-  } else {
-    globalAudio.pause();
-    musicButton.classList.remove('playing');
-    if (playBtn) playBtn.textContent = '▶️';
-    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
-  }
-}
-
-// Stop music
-function stopGlobalMusic() {
-  const playBtn = getElement('globalPlayBtn');
-  const nowPlaying = getElement('globalNowPlaying');
-  
-  globalAudio.pause();
-  globalAudio.currentTime = 0;
-  musicButton.classList.remove('playing');
-  if (playBtn) playBtn.textContent = '▶️';
-  if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
-}
-
-// Essential audio event listeners only
-globalAudio.addEventListener('ended', () => {
-  playNextSong();
-});
-
-// FIXED NAVIGATION FUNCTIONS for Railway deployment
-function navigateToGarden() {
-  if (isNavigating) return;
-  isNavigating = true;
-     
-  const leftSide = document.querySelector('.left-side');
-  if (leftSide) leftSide.classList.add('clicking');
-  if (typeof createSparkleTransition === 'function') createSparkleTransition();
-     
-  setTimeout(() => {
-    window.location.href = '/hope';
-  }, 1200);
-}
-
-function navigateToDoubt() {
-  if (isNavigating) return;
-  isNavigating = true;
-     
-  const rightSide = document.querySelector('.right-side');
-  if (rightSide) rightSide.classList.add('clicking');
-  if (typeof createBreakingHeartTransition === 'function') createBreakingHeartTransition();
-     
-  setTimeout(() => {
-    window.location.href = '/doubt';
-  }, 1500);
-}
-
-// File Manager Functions
-function toggleFileManager() {
-  const fileManager = getElement('file-manager-container');
-     
-  if (fileManager) {
-    if (fileManager.style.display === 'flex') {
-      fileManager.style.display = 'none';
-    } else {
-      fileManager.style.display = 'flex';
-      if (typeof loadFileStructure === 'function') loadFileStructure();
-    }
-  }
-}
-
-// Initialize background
-function initializeBackground() {
-  createStars();
-}
-
-// Create stars (optimized for faster loading)
-function createStars() {
-  const starsContainer = getElement('stars');
-  if (!starsContainer) return;
-  
-  const fragment = document.createDocumentFragment();
-  
-  for (let i = 0; i < 20; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.width = star.style.height = Math.random() * 2 + 1 + 'px';
-    star.style.animationDelay = Math.random() * 2 + 's';
-    fragment.appendChild(star);
-  }
-  
-  starsContainer.appendChild(fragment);
-}
-
-// ENHANCED: Photo enlargement with smooth transition animations
+// FIXED: Photo enlargement functionality
 function enlargePhoto(img, event) {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }
-  
-  if (photoModalOpen || isImageTransitioning) return;
-  
-  isImageTransitioning = true;
-  
-  const modal = getElement('photoModal');
-  const enlargedPhoto = getElement('enlargedPhoto');
-  
-  if (!modal || !enlargedPhoto) {
-    isImageTransitioning = false;
-    return;
-  }
-  
-  // Store original image position for smooth transition
-  const rect = img.getBoundingClientRect();
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-  
-  // Set initial position and size to match clicked image
-  enlargedPhoto.style.position = 'fixed';
-  enlargedPhoto.style.top = (rect.top + scrollTop) + 'px';
-  enlargedPhoto.style.left = (rect.left + scrollLeft) + 'px';
-  enlargedPhoto.style.width = rect.width + 'px';
-  enlargedPhoto.style.height = rect.height + 'px';
-  enlargedPhoto.style.transform = 'scale(1)';
-  enlargedPhoto.style.borderRadius = window.getComputedStyle(img).borderRadius;
-  
-  // Set the image source
-  enlargedPhoto.src = img.src;
-  enlargedPhoto.alt = img.alt || 'Enlarged photo';
-  
-  // Prevent body scrolling
-  document.body.classList.add('photo-modal-open');
-  
-  // Show modal with initial opacity
-  modal.style.display = 'flex';
-  modal.style.opacity = '0';
-  
-  photoModalOpen = true;
-  
-  // Start the smooth transition
-  requestAnimationFrame(() => {
-    // Fade in background
-    modal.style.transition = 'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    modal.style.opacity = '1';
+    if (event) {
+        event.stopPropagation();
+    }
     
-    // Animate image to center and full size
-    enlargedPhoto.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    enlargedPhoto.style.top = '50%';
-    enlargedPhoto.style.left = '50%';
-    enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(1)';
-    enlargedPhoto.style.width = 'auto';
-    enlargedPhoto.style.height = 'auto';
-    enlargedPhoto.style.maxWidth = '90vw';
-    enlargedPhoto.style.maxHeight = '90vh';
-    enlargedPhoto.style.borderRadius = '12px';
-    enlargedPhoto.style.boxShadow = '0 25px 80px rgba(0, 0, 0, 0.8)';
+    const modal = document.getElementById('photoModal');
+    const enlargedPhoto = document.getElementById('enlargedPhoto');
     
-    setTimeout(() => {
-      isImageTransitioning = false;
-    }, 600);
-  });
+    if (modal && enlargedPhoto && img) {
+        // Set the source
+        enlargedPhoto.src = img.src;
+        enlargedPhoto.alt = img.alt || 'Enlarged photo';
+        
+        // Show modal immediately
+        modal.style.display = 'flex';
+        document.body.classList.add('photo-modal-open');
+        
+        // Add show class for animation after a brief delay
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+        
+        // Prevent body scrolling
+        document.body.style.overflow = 'hidden';
+        
+        console.log('Photo modal opened with image:', img.src);
+    }
 }
 
-// ENHANCED: Close photo modal with smooth reverse animation
 function closePhotoModal() {
-  if (!photoModalOpen || isImageTransitioning) return;
-  
-  isImageTransitioning = true;
-  
-  const modal = getElement('photoModal');
-  const enlargedPhoto = getElement('enlargedPhoto');
-  
-  if (!modal || !enlargedPhoto) {
-    isImageTransitioning = false;
-    return;
-  }
-  
-  // Start reverse animation
-  modal.style.transition = 'opacity 0.4s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
-  enlargedPhoto.style.transition = 'all 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
-  
-  // Animate out
-  modal.style.opacity = '0';
-  enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(0.8)';
-  enlargedPhoto.style.opacity = '0';
-  
-  setTimeout(() => {
-    modal.style.display = 'none';
-    document.body.classList.remove('photo-modal-open');
-    if (enlargedPhoto) {
-      enlargedPhoto.src = '';
-      enlargedPhoto.style.cssText = '';
+    const modal = document.getElementById('photoModal');
+    const enlargedPhoto = document.getElementById('enlargedPhoto');
+    
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.classList.remove('photo-modal-open');
+        
+        // Hide modal after animation completes
+        setTimeout(() => {
+            modal.style.display = 'none';
+            if (enlargedPhoto) {
+                enlargedPhoto.src = '';
+            }
+        }, 400);
+        
+        // Restore body scrolling
+        document.body.style.overflow = 'auto';
     }
-    photoModalOpen = false;
-    isImageTransitioning = false;
-  }, 500);
 }
 
-// IMPROVED: Modal functions with better event handling
-function openModal(id, event) {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
-  
-  const modal = getElement(id);
-  if (modal) {
-    modal.style.display = "block";
-    document.body.style.overflow = 'hidden';
-    
-    setTimeout(() => {
-      modal.classList.add('modal-open');
-    }, 10);
-  }
+// Title click functionality
+function titleClick() {
+    const popup = document.getElementById('titlePopup');
+    if (popup) {
+        popup.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Auto close after 8 seconds
+        setTimeout(() => {
+            popup.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }, 8000);
+    }
 }
 
-function closeModal(id) {
-  const modal = getElement(id);
-  if (modal) {
-    modal.classList.remove('modal-open');
-    modal.style.display = "none";
-    document.body.style.overflow = '';
-  }
+// Message functionality
+function showSavedMessage(messageId) {
+    const messageDiv = document.getElementById(messageId);
+    if (messageDiv) {
+        const isVisible = messageDiv.style.display === 'block';
+        messageDiv.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible) {
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
 }
 
-// ENHANCED: Window click handler
-window.onclick = function (event) {
-  const target = event.target;
-  
-  // Handle photo modal first
-  const photoModal = getElement('photoModal');
-  if (photoModal && photoModalOpen && target === photoModal) {
-    closePhotoModal();
-    return;
-  }
-  
-  if (photoModalOpen) return;
-  
-  // Handle regular modals
-  const modals = ["modal1", "modal2", "modal3"];
-  for (let id of modals) {
-    const modal = getElement(id);
-    if (modal && target === modal && modal.classList.contains('modal-open')) {
-      closeModal(id);
-      return;
+// Music popup functionality
+function toggleMusicPopup() {
+    const popup = document.getElementById('musicPopup');
+    const button = document.getElementById('musicButton');
+    
+    if (popup && button) {
+        const isVisible = popup.classList.contains('show');
+        
+        if (isVisible) {
+            popup.classList.remove('show');
+            button.classList.remove('active');
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 400);
+        } else {
+            popup.style.display = 'block';
+            requestAnimationFrame(() => {
+                popup.classList.add('show');
+                button.classList.add('active');
+            });
+        }
     }
-  }
-};
+}
 
-// IMPROVED: Keyboard support with photo modal priority
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape') {
-    if (photoModalOpen) {
-      closePhotoModal();
-      return;
+// Exclamation popup functionality
+function toggleExclamationPopup() {
+    const popup = document.getElementById('exclamationPopup');
+    const button = document.getElementById('exclamationIcon');
+    
+    if (popup && button) {
+        const isVisible = popup.classList.contains('show');
+        
+        if (isVisible) {
+            popup.classList.remove('show');
+            button.classList.remove('active');
+        } else {
+            popup.classList.add('show');
+            button.classList.add('active');
+        }
+    }
+}
+
+// Global music functions
+function selectGlobalSong(filename) {
+    const audio = document.getElementById('globalAudio');
+    const nowPlaying = document.getElementById('globalNowPlaying');
+    
+    if (audio && filename) {
+        // Find the index of the selected song
+        globalMusicIndex = globalMusicFiles.indexOf(filename);
+        
+        // Update audio source
+        audio.src = `${BACKEND_URL}/assets/audio/${filename}`;
+        
+        // Update now playing display
+        if (nowPlaying) {
+            nowPlaying.textContent = globalMusicTitles[globalMusicIndex];
+        }
+        
+        // Update select dropdown
+        const select = document.getElementById('globalMusicSelect');
+        if (select) {
+            select.value = filename;
+        }
+        
+        console.log('Selected song:', filename);
+    }
+}
+
+function toggleGlobalMusic() {
+    const audio = document.getElementById('globalAudio');
+    const playBtn = document.getElementById('globalPlayBtn');
+    const musicButton = document.getElementById('musicButton');
+    
+    if (audio && playBtn) {
+        if (audio.paused) {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    playBtn.textContent = '⏸️';
+                    if (musicButton) {
+                        musicButton.classList.add('playing');
+                    }
+                }).catch(error => {
+                    console.log('Audio play failed:', error);
+                });
+            }
+        } else {
+            audio.pause();
+            playBtn.textContent = '▶️';
+            if (musicButton) {
+                musicButton.classList.remove('playing');
+            }
+        }
+    }
+}
+
+function playPreviousSong() {
+    globalMusicIndex = (globalMusicIndex - 1 + globalMusicFiles.length) % globalMusicFiles.length;
+    selectGlobalSong(globalMusicFiles[globalMusicIndex]);
+    
+    const audio = document.getElementById('globalAudio');
+    if (audio && !audio.paused) {
+        audio.play();
+    }
+}
+
+function playNextSong() {
+    globalMusicIndex = (globalMusicIndex + 1) % globalMusicFiles.length;
+    selectGlobalSong(globalMusicFiles[globalMusicIndex]);
+    
+    const audio = document.getElementById('globalAudio');
+    if (audio && !audio.paused) {
+        audio.play();
+    }
+}
+
+function stopGlobalMusic() {
+    const audio = document.getElementById('globalAudio');
+    const playBtn = document.getElementById('globalPlayBtn');
+    const musicButton = document.getElementById('musicButton');
+    
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        if (playBtn) {
+            playBtn.textContent = '▶️';
+        }
+        if (musicButton) {
+            musicButton.classList.remove('playing');
+        }
+    }
+}
+
+// Create stars background
+function createStars() {
+    const starsContainer = document.getElementById('stars');
+    if (!starsContainer) return;
+    
+    // Clear existing stars
+    starsContainer.innerHTML = '';
+    
+    const starCount = window.innerWidth <= 768 ? 50 : 100;
+    
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // Random position
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        
+        // Random size
+        const size = Math.random() * 3 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        
+        // Random animation delay
+        star.style.animationDelay = Math.random() * 3 + 's';
+        
+        starsContainer.appendChild(star);
+    }
+}
+
+// Initialize loading screen
+function initLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        // Hide loading screen after 3 seconds
+        setTimeout(() => {
+            loadingScreen.classList.add('fade-out');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 1000);
+        }, 3000);
+    }
+}
+
+// Image loading optimization
+function optimizeImageLoading() {
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        if (!img.complete) {
+            img.addEventListener('load', function() {
+                this.style.opacity = '1';
+            });
+            img.addEventListener('error', function() {
+                console.log('Image failed to load:', this.src);
+                // Add placeholder or fallback behavior here
+            });
+        }
+    });
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing hope page...');
+    
+    // Initialize loading screen
+    initLoadingScreen();
+    
+    // Create stars background
+    createStars();
+    
+    // Initialize audio context
+    initAudioContext();
+    
+    // Optimize image loading
+    optimizeImageLoading();
+    
+    // Set up global audio
+    const globalAudio = document.getElementById('globalAudio');
+    if (globalAudio) {
+        globalAudio.volume = 0.3;
+        globalAudio.addEventListener('ended', function() {
+            playNextSong(); // Auto play next song
+        });
+        
+        // Set initial song
+        selectGlobalSong(globalMusicFiles[0]);
     }
     
-    const popup = getElement('exclamationPopup');
-    const icon = getElement('exclamationIcon');
-    if (popup && exclamationPopupVisible) {
-      popup.classList.remove('show');
-      if (icon) icon.classList.remove('active');
-      exclamationPopupVisible = false;
-      return;
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        // Close photo modal when clicking on modal background
+        const photoModal = document.getElementById('photoModal');
+        if (event.target === photoModal) {
+            closePhotoModal();
+        }
+        
+        // Close regular modals
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close title popup when clicking outside
+        const titlePopup = document.getElementById('titlePopup');
+        if (event.target === titlePopup) {
+            titlePopup.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close music popup when clicking outside
+        const musicPopup = document.getElementById('musicPopup');
+        if (musicPopup && !musicPopup.contains(event.target) && 
+            !document.getElementById('musicButton').contains(event.target)) {
+            if (musicPopup.classList.contains('show')) {
+                toggleMusicPopup();
+            }
+        }
+        
+        // Close exclamation popup when clicking outside
+        const exclamationPopup = document.getElementById('exclamationPopup');
+        if (exclamationPopup && !exclamationPopup.contains(event.target) && 
+            !document.getElementById('exclamationIcon').contains(event.target)) {
+            if (exclamationPopup.classList.contains('show')) {
+                toggleExclamationPopup();
+            }
+        }
+    });
+    
+    // Handle escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            // Close photo modal
+            const photoModal = document.getElementById('photoModal');
+            if (photoModal && photoModal.classList.contains('show')) {
+                closePhotoModal();
+                return;
+            }
+            
+            // Close other popups
+            const titlePopup = document.getElementById('titlePopup');
+            if (titlePopup && titlePopup.classList.contains('show')) {
+                titlePopup.classList.remove('show');
+                document.body.style.overflow = 'auto';
+                return;
+            }
+            
+            const musicPopup = document.getElementById('musicPopup');
+            if (musicPopup && musicPopup.classList.contains('show')) {
+                toggleMusicPopup();
+                return;
+            }
+            
+            const exclamationPopup = document.getElementById('exclamationPopup');
+            if (exclamationPopup && exclamationPopup.classList.contains('show')) {
+                toggleExclamationPopup();
+                return;
+            }
+            
+            // Close regular modals
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+        
+        // Space bar controls for global music
+        if (event.key === ' ' && !event.target.matches('input, textarea, select')) {
+            event.preventDefault();
+            toggleGlobalMusic();
+        }
+    });
+    
+    // Handle user interaction to enable audio context
+    document.addEventListener('click', function() {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }, { once: true });
+    
+    // Mobile optimizations
+    if (window.innerWidth <= 768) {
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // Add touch support for audio context
+        document.addEventListener('touchstart', function() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
     }
     
-    if (musicPopupVisible && musicPopup) {
-      musicPopup.classList.remove('show');
-      musicButton.classList.remove('active');
-      musicPopupVisible = false;
-      setTimeout(() => {
-        if (!musicPopupVisible) musicPopup.style.display = 'none';
-      }, 300);
-      return;
-    }
-    
-    const modals = ["modal1", "modal2", "modal3"];
-    for (let id of modals) {
-      const modal = getElement(id);
-      if (modal && modal.style.display === 'block') {
-        closeModal(id);
-        return;
-      }
-    }
-  }
+    console.log('Hope page initialization complete');
 });
 
-// Message functions
-function showSavedMessage(messageId) {
-  const msg = getElement(messageId);
-  if (msg) {
-    if (msg.style.display === 'block') {
-      msg.style.display = 'none';
-    } else {
-      msg.style.display = 'block';
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 100);
-      });
-    }
-  }
-}
-
-function hideSavedMessage(messageId) {
-  const msg = getElement(messageId);
-  if (msg) {
-    msg.style.display = 'none';
-  }
-}
-
-// Title click with smooth animations
-function titleClick() {
-  const popup = getElement('titlePopup');
-  
-  if (popup && popup.classList.contains('show')) {
-    popup.classList.remove('show');
-  } else if (popup) {
-    popup.classList.add('show');
+// Handle orientation change
+window.addEventListener('orientationchange', function() {
     setTimeout(() => {
-      popup.classList.remove('show');
-    }, 3000);
-  }
-  
-  const title = document.querySelector('.title');
-  if (title) {
-    requestAnimationFrame(() => {
-      title.style.transform = 'scale(1.1)';
-      title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
-      
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          title.style.transform = 'scale(1)';
-          title.style.textShadow = '2px 2px 10px rgba(0,0,0,0.3)';
-        });
-      }, 300);
-    });
-  }
-}
+        createStars(); // Recreate stars for new viewport
+    }, 500);
+});
 
-// Performance optimization functions
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+// Handle resize
+window.addEventListener('resize', function() {
+    // Recreate stars on significant size changes
+    clearTimeout(window.resizeTimer);
+    window.resizeTimer = setTimeout(() => {
+        createStars();
+    }, 250);
+});
+
+// Prevent right-click context menu
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
