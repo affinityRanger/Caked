@@ -16,6 +16,9 @@ let isDarkMode = true;
 let cachedTracks = new Set();
 let isOffline = false;
 
+// Auto-play attempt flag
+let autoPlayAttempted = false;
+
 // Global music player variables
 let globalMusicIndex = 0;
 let globalMusicFiles = [
@@ -54,6 +57,42 @@ function initAudioContext() {
         }
     }
     return audioContext;
+}
+
+// Attempt to start music automatically
+function attemptAutoPlay() {
+    if (autoPlayAttempted) return;
+    autoPlayAttempted = true;
+    
+    const audio = document.getElementById('globalAudio');
+    const playBtn = document.getElementById('globalPlayBtn');
+    const musicButton = document.getElementById('musicButton');
+    
+    if (audio) {
+        // Set volume and prepare audio
+        audio.volume = 0.3;
+        
+        // Try to play
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log('Auto-play successful');
+                if (playBtn) {
+                    playBtn.textContent = '⏸️';
+                }
+                if (musicButton) {
+                    musicButton.classList.add('playing');
+                }
+            }).catch(error => {
+                console.log('Auto-play blocked by browser:', error);
+                // Show a subtle indicator that user can start music
+                if (musicButton) {
+                    musicButton.classList.add('pulse');
+                }
+            });
+        }
+    }
 }
 
 // Modal functions
@@ -236,6 +275,7 @@ function toggleGlobalMusic() {
                     playBtn.textContent = '⏸️';
                     if (musicButton) {
                         musicButton.classList.add('playing');
+                        musicButton.classList.remove('pulse');
                     }
                 }).catch(error => {
                     console.log('Audio play failed:', error);
@@ -327,6 +367,10 @@ function initLoadingScreen() {
             loadingScreen.classList.add('fade-out');
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
+                // Try to start music after loading screen disappears
+                setTimeout(() => {
+                    attemptAutoPlay();
+                }, 500);
             }, 1000);
         }, 3000);
     }
@@ -374,6 +418,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set initial song
         selectGlobalSong(globalMusicFiles[0]);
+        
+        // Try to load the audio
+        globalAudio.addEventListener('loadeddata', function() {
+            console.log('Audio loaded and ready');
+        });
+        
+        // Handle audio errors
+        globalAudio.addEventListener('error', function(e) {
+            console.log('Audio error:', e);
+        });
     }
     
     // Close modals when clicking outside
@@ -463,12 +517,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Handle user interaction to enable audio context
-    document.addEventListener('click', function() {
+    // Handle user interaction to enable audio context and try autoplay
+    function handleUserInteraction() {
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
         }
-    }, { once: true });
+        // Try to start music on first user interaction
+        if (!autoPlayAttempted) {
+            attemptAutoPlay();
+        }
+    }
+    
+    // Add event listeners for user interaction
+    document.addEventListener('click', handleUserInteraction, { once: true });
+    document.addEventListener('keydown', handleUserInteraction, { once: true });
+    document.addEventListener('touchstart', handleUserInteraction, { once: true });
     
     // Mobile optimizations
     if (window.innerWidth <= 768) {
