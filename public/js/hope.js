@@ -1,4 +1,4 @@
-// JavaScript code for the Roses Gallery - OPTIMIZED WITH IMAGE MODAL FIX
+// JavaScript code for the Roses Gallery - OPTIMIZED WITH SMOOTH IMAGE ANIMATIONS
 const globalAudio = document.getElementById("globalAudio");
 const musicButton = document.getElementById("musicButton");
 const musicPopup = document.getElementById("musicPopup");
@@ -7,21 +7,21 @@ let currentSong = "PARTYNEXTDOOR - Dreamin.mp3";
 let exclamationPopupVisible = false;
 let isNavigating = false;
 let photoModalOpen = false;
+let isImageTransitioning = false;
 
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
 // CORRECTED: Song playlist array with proper file names
 const playlist = [
-
   'PARTYNEXTDOOR - Dreamin.mp3',
-  'Kiss - I Was Made For Lovin You.mp3',  // FIXED: Exact filename with spaces around dash
+  'Kiss - I Was Made For Lovin You.mp3',
   'PARTYNEXTDOOR - DEEPER.mp3', 
   'PARTYNEXTDOOR - TRAUMA .mp3',
   'Juice WRLD - GRACE.mp3',
   'PARTYNEXTDOOR - Some Of Your Love.mp3',
   'KEEP IT-Juice WRLD.mp3',
-  'Lovers Lane - JuiceWrld.mp3',        // FIXED: Added to playlist
+  'Lovers Lane - JuiceWrld.mp3',
   'PARTYNEXTDOOR - You ve Been Missed.mp3',
   'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
@@ -37,17 +37,16 @@ function getElement(id) {
 }
 
 // CORRECTED: Display names to match actual files
-
 function getSongDisplayName(songFile) {
   const songNames = {
     'PARTYNEXTDOOR - Dreamin.mp3': 'Dreamin\' - PARTYNEXTDOOR',
-    'Kiss - I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin\' You',  // FIXED: Correct filename
+    'Kiss - I Was Made For Lovin You.mp3': 'Kiss - I Was Made For Lovin\' You',
     'PARTYNEXTDOOR - DEEPER.mp3': 'DEEPER - PARTYNEXTDOOR',
     'PARTYNEXTDOOR - TRAUMA .mp3': 'TRAUMA - PARTYNEXTDOOR',
     'Juice WRLD - GRACE.mp3': 'GRACE - Juice WRLD',
     'PARTYNEXTDOOR - Some Of Your Love.mp3': 'Some Of Your Love - PARTYNEXTDOOR',
     'KEEP IT-Juice WRLD.mp3': 'KEEP IT - Juice WRLD',
-    'Lovers Lane - JuiceWrld.mp3': 'Lovers Lane - Juice WRLD',               // FIXED: Added display name
+    'Lovers Lane - JuiceWrld.mp3': 'Lovers Lane - Juice WRLD',
     'PARTYNEXTDOOR - You ve Been Missed.mp3': 'You\'ve Been Missed - PARTYNEXTDOOR',
     'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3': 'BELIEVE IT - PARTYNEXTDOOR & Rihanna'
   };
@@ -67,7 +66,7 @@ window.addEventListener('load', function() {
       setTimeout(() => {
         loadingScreen.style.display = 'none';
         initializeBackground();
-        startAutoPlay(); // AUTO-PLAY RESTORED
+        startAutoPlay();
       }, 500);
     }
   }, 1000);
@@ -80,8 +79,8 @@ function startAutoPlay() {
     musicButton.classList.add('playing');
     const playBtn = getElement('globalPlayBtn');
     const nowPlaying = getElement('globalNowPlaying');
-    if (playBtn) playBtn.textContent = '⏸️ Pause';
-    if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    if (playBtn) playBtn.textContent = '⏸️';
+    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
     updateSelectDropdown();
   }).catch(() => {
     const nowPlaying = getElement('globalNowPlaying');
@@ -109,12 +108,11 @@ function playNextSong() {
   
   globalAudio.play().then(() => {
     const nowPlaying = getElement('globalNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
     musicButton.classList.add('playing');
     const playBtn = getElement('globalPlayBtn');
-    if (playBtn) playBtn.textContent = '⏸️ Pause';
+    if (playBtn) playBtn.textContent = '⏸️';
   }).catch(() => {
-    // If this song fails, try next one
     if (currentSongIndex < playlist.length - 1) {
       setTimeout(() => playNextSong(), 500);
     }
@@ -133,23 +131,35 @@ function playPreviousSong() {
   
   globalAudio.play().then(() => {
     const nowPlaying = getElement('globalNowPlaying');
-    if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
     musicButton.classList.add('playing');
     const playBtn = getElement('globalPlayBtn');
-    if (playBtn) playBtn.textContent = '⏸️ Pause';
+    if (playBtn) playBtn.textContent = '⏸️';
   }).catch(() => {
     const nowPlaying = getElement('globalNowPlaying');
     if (nowPlaying) nowPlaying.textContent = `Failed: ${getSongDisplayName(currentSong)}`;
   });
 }
 
-// Music popup toggle
+// Music popup toggle with smooth animations
 function toggleMusicPopup() {
+  const popup = getElement('musicPopup');
+  const button = getElement('musicButton');
+  
   musicPopupVisible = !musicPopupVisible;
+  
   if (musicPopupVisible) {
-    musicPopup.classList.add('show');
+    popup.style.display = 'block';
+    button.classList.add('active');
+    requestAnimationFrame(() => {
+      popup.classList.add('show');
+    });
   } else {
-    musicPopup.classList.remove('show');
+    popup.classList.remove('show');
+    button.classList.remove('active');
+    setTimeout(() => {
+      if (!musicPopupVisible) popup.style.display = 'none';
+    }, 300);
   }
 }
 
@@ -169,17 +179,15 @@ function toggleExclamationPopup() {
   }
 }
 
-// COMPLETELY REWRITTEN: Click outside handler with proper photo modal support
+// ENHANCED: Click outside handler with proper photo modal support
 document.addEventListener('click', function(event) {
-  // CRITICAL: Handle photo modal clicks properly
+  // Handle photo modal clicks properly
   const photoModal = getElement('photoModal');
   if (photoModal && photoModalOpen) {
-    // Only close if clicking on the modal background, NOT the image or close button
     if (event.target === photoModal) {
       closePhotoModal();
       return;
     }
-    // Don't handle other clicks when photo modal is open
     return;
   }
 
@@ -201,7 +209,11 @@ document.addEventListener('click', function(event) {
       !musicButton.contains(event.target) && 
       !musicPopup.contains(event.target)) {
     musicPopup.classList.remove('show');
+    musicButton.classList.remove('active');
     musicPopupVisible = false;
+    setTimeout(() => {
+      if (!musicPopupVisible) musicPopup.style.display = 'none';
+    }, 300);
   }
 });
 
@@ -221,14 +233,14 @@ function selectGlobalSong(songFile) {
     
     if (wasPlaying) {
       globalAudio.play().then(() => {
-        if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(songFile)}`;
+        if (nowPlaying) nowPlaying.textContent = getSongDisplayName(songFile);
         musicButton.classList.add('playing');
-        if (playBtn) playBtn.textContent = '⏸️ Pause';
+        if (playBtn) playBtn.textContent = '⏸️';
       }).catch(() => {
         if (nowPlaying) nowPlaying.textContent = `Failed: ${getSongDisplayName(songFile)}`;
       });
     } else {
-      if (nowPlaying) nowPlaying.textContent = `Ready: ${getSongDisplayName(songFile)}`;
+      if (nowPlaying) nowPlaying.textContent = getSongDisplayName(songFile);
     }
   }
 }
@@ -245,16 +257,16 @@ function toggleGlobalMusic() {
     
     globalAudio.play().then(() => {
       musicButton.classList.add('playing');
-      if (playBtn) playBtn.textContent = '⏸️ Pause';
-      if (nowPlaying) nowPlaying.textContent = `Playing: ${getSongDisplayName(currentSong)}`;
+      if (playBtn) playBtn.textContent = '⏸️';
+      if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
     }).catch(() => {
       if (nowPlaying) nowPlaying.textContent = `Error: ${getSongDisplayName(currentSong)}`;
     });
   } else {
     globalAudio.pause();
     musicButton.classList.remove('playing');
-    if (playBtn) playBtn.textContent = '▶️ Play';
-    if (nowPlaying) nowPlaying.textContent = `Paused: ${getSongDisplayName(currentSong)}`;
+    if (playBtn) playBtn.textContent = '▶️';
+    if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
   }
 }
 
@@ -266,8 +278,8 @@ function stopGlobalMusic() {
   globalAudio.pause();
   globalAudio.currentTime = 0;
   musicButton.classList.remove('playing');
-  if (playBtn) playBtn.textContent = '▶️ Play';
-  if (nowPlaying) nowPlaying.textContent = `Stopped: ${getSongDisplayName(currentSong)}`;
+  if (playBtn) playBtn.textContent = '▶️';
+  if (nowPlaying) nowPlaying.textContent = getSongDisplayName(currentSong);
 }
 
 // Essential audio event listeners only
@@ -326,10 +338,8 @@ function createStars() {
   const starsContainer = getElement('stars');
   if (!starsContainer) return;
   
-  // Use document fragment for better performance
   const fragment = document.createDocumentFragment();
   
-  // Reduced from 50 to 20 stars for even faster rendering
   for (let i = 0; i < 20; i++) {
     const star = document.createElement('div');
     star.className = 'star';
@@ -343,19 +353,39 @@ function createStars() {
   starsContainer.appendChild(fragment);
 }
 
-// COMPLETELY REWRITTEN: Photo enlargement with proper event handling
+// ENHANCED: Photo enlargement with smooth transition animations
 function enlargePhoto(img, event) {
-  // Prevent all event bubbling and default behavior
   if (event) {
     event.stopPropagation();
     event.preventDefault();
     event.stopImmediatePropagation();
   }
   
+  if (photoModalOpen || isImageTransitioning) return;
+  
+  isImageTransitioning = true;
+  
   const modal = getElement('photoModal');
   const enlargedPhoto = getElement('enlargedPhoto');
   
-  if (!modal || !enlargedPhoto || photoModalOpen) return;
+  if (!modal || !enlargedPhoto) {
+    isImageTransitioning = false;
+    return;
+  }
+  
+  // Store original image position for smooth transition
+  const rect = img.getBoundingClientRect();
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+  
+  // Set initial position and size to match clicked image
+  enlargedPhoto.style.position = 'fixed';
+  enlargedPhoto.style.top = (rect.top + scrollTop) + 'px';
+  enlargedPhoto.style.left = (rect.left + scrollLeft) + 'px';
+  enlargedPhoto.style.width = rect.width + 'px';
+  enlargedPhoto.style.height = rect.height + 'px';
+  enlargedPhoto.style.transform = 'scale(1)';
+  enlargedPhoto.style.borderRadius = window.getComputedStyle(img).borderRadius;
   
   // Set the image source
   enlargedPhoto.src = img.src;
@@ -364,38 +394,73 @@ function enlargePhoto(img, event) {
   // Prevent body scrolling
   document.body.classList.add('photo-modal-open');
   
-  // Show modal
+  // Show modal with initial opacity
   modal.style.display = 'flex';
+  modal.style.opacity = '0';
+  
   photoModalOpen = true;
   
-  // Add show class with a slight delay for smooth animation
+  // Start the smooth transition
   requestAnimationFrame(() => {
-    modal.classList.add('show');
+    // Fade in background
+    modal.style.transition = 'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    modal.style.opacity = '1';
+    
+    // Animate image to center and full size
+    enlargedPhoto.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    enlargedPhoto.style.top = '50%';
+    enlargedPhoto.style.left = '50%';
+    enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(1)';
+    enlargedPhoto.style.width = 'auto';
+    enlargedPhoto.style.height = 'auto';
+    enlargedPhoto.style.maxWidth = '90vw';
+    enlargedPhoto.style.maxHeight = '90vh';
+    enlargedPhoto.style.borderRadius = '12px';
+    enlargedPhoto.style.boxShadow = '0 25px 80px rgba(0, 0, 0, 0.8)';
+    
+    setTimeout(() => {
+      isImageTransitioning = false;
+    }, 600);
   });
 }
 
-// COMPLETELY REWRITTEN: Close photo modal
+// ENHANCED: Close photo modal with smooth reverse animation
 function closePhotoModal() {
+  if (!photoModalOpen || isImageTransitioning) return;
+  
+  isImageTransitioning = true;
+  
   const modal = getElement('photoModal');
   const enlargedPhoto = getElement('enlargedPhoto');
   
-  if (!modal || !photoModalOpen) return;
+  if (!modal || !enlargedPhoto) {
+    isImageTransitioning = false;
+    return;
+  }
   
-  // Remove show class first
-  modal.classList.remove('show');
+  // Start reverse animation
+  modal.style.transition = 'opacity 0.4s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
+  enlargedPhoto.style.transition = 'all 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
   
-  // Wait for animation to complete before hiding
+  // Animate out
+  modal.style.opacity = '0';
+  enlargedPhoto.style.transform = 'translate(-50%, -50%) scale(0.8)';
+  enlargedPhoto.style.opacity = '0';
+  
   setTimeout(() => {
     modal.style.display = 'none';
     document.body.classList.remove('photo-modal-open');
-    if (enlargedPhoto) enlargedPhoto.src = '';
+    if (enlargedPhoto) {
+      enlargedPhoto.src = '';
+      enlargedPhoto.style.cssText = '';
+    }
     photoModalOpen = false;
-  }, 300);
+    isImageTransitioning = false;
+  }, 500);
 }
 
 // IMPROVED: Modal functions with better event handling
 function openModal(id, event) {
-  // Prevent event bubbling
   if (event) {
     event.stopPropagation();
     event.preventDefault();
@@ -406,7 +471,6 @@ function openModal(id, event) {
     modal.style.display = "block";
     document.body.style.overflow = 'hidden';
     
-    // Add a small delay to prevent immediate closure
     setTimeout(() => {
       modal.classList.add('modal-open');
     }, 10);
@@ -422,18 +486,17 @@ function closeModal(id) {
   }
 }
 
-// COMPLETELY REWRITTEN: Window click handler
+// ENHANCED: Window click handler
 window.onclick = function (event) {
   const target = event.target;
   
-  // PRIORITY: Handle photo modal first
+  // Handle photo modal first
   const photoModal = getElement('photoModal');
   if (photoModal && photoModalOpen && target === photoModal) {
     closePhotoModal();
     return;
   }
   
-  // Skip other modal handling if photo modal is open
   if (photoModalOpen) return;
   
   // Handle regular modals
@@ -450,13 +513,11 @@ window.onclick = function (event) {
 // IMPROVED: Keyboard support with photo modal priority
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
-    // PRIORITY: Handle photo modal first
     if (photoModalOpen) {
       closePhotoModal();
       return;
     }
     
-    // Handle exclamation popup
     const popup = getElement('exclamationPopup');
     const icon = getElement('exclamationIcon');
     if (popup && exclamationPopupVisible) {
@@ -466,14 +527,16 @@ document.addEventListener('keydown', function(event) {
       return;
     }
     
-    // Handle music popup
     if (musicPopupVisible && musicPopup) {
       musicPopup.classList.remove('show');
+      musicButton.classList.remove('active');
       musicPopupVisible = false;
+      setTimeout(() => {
+        if (!musicPopupVisible) musicPopup.style.display = 'none';
+      }, 300);
       return;
     }
     
-    // Handle regular modals
     const modals = ["modal1", "modal2", "modal3"];
     for (let id of modals) {
       const modal = getElement(id);
@@ -485,7 +548,7 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-// IMPROVED: Message functions with performance optimization
+// Message functions
 function showSavedMessage(messageId) {
   const msg = getElement(messageId);
   if (msg) {
@@ -493,7 +556,6 @@ function showSavedMessage(messageId) {
       msg.style.display = 'none';
     } else {
       msg.style.display = 'block';
-      // Use requestAnimationFrame for smoother scrolling
       requestAnimationFrame(() => {
         setTimeout(() => {
           msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -510,7 +572,7 @@ function hideSavedMessage(messageId) {
   }
 }
 
-// IMPROVED: Title click with performance optimization
+// Title click with smooth animations
 function titleClick() {
   const popup = getElement('titlePopup');
   
@@ -525,7 +587,6 @@ function titleClick() {
   
   const title = document.querySelector('.title');
   if (title) {
-    // Use requestAnimationFrame for smoother animation
     requestAnimationFrame(() => {
       title.style.transform = 'scale(1.1)';
       title.style.textShadow = '0 0 30px rgba(255,255,255,1)';
@@ -540,7 +601,7 @@ function titleClick() {
   }
 }
 
-// PERFORMANCE: Debounce function for better performance
+// Performance optimization functions
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -552,5 +613,3 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
-
-// PERFORMANCE: Throttle function

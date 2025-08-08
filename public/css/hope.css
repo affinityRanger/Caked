@@ -95,54 +95,81 @@ img {
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Music Button - Floating Button */
+/* MODERN MUSIC BUTTON - Glassmorphism Design */
 .music-button {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #ff69b4, #ff1493);
-  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 1000;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 4px 20px rgba(255, 20, 147, 0.4);
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 8px 32px rgba(255, 105, 180, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.music-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s;
+}
+
+.music-button:hover::before {
+  left: 100%;
 }
 
 .music-button:hover {
-  transform: scale(1.1) rotate(5deg);
-  background: linear-gradient(135deg, #ff1493, #dc143c);
-  box-shadow: 0 8px 30px rgba(255, 20, 147, 0.6);
-  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05) translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 12px 40px rgba(255, 105, 180, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.music-button.active {
+  background: rgba(255, 105, 180, 0.2);
+  transform: scale(1.05);
+  box-shadow: 
+    0 12px 40px rgba(255, 105, 180, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .music-button:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 .music-button-icon {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.music-button.playing .music-button-icon {
   animation: musicPulse 2s ease-in-out infinite;
+  color: #ff69b4;
+  text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
 }
 
 @keyframes musicPulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
-.music-button.playing .music-button-icon {
-  animation: musicSpin 4s linear infinite;
-}
-
-@keyframes musicSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  50% { transform: scale(1.2); }
 }
 
 /* Exclamation Mark Button - Bottom Right */
@@ -150,70 +177,76 @@ img {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #ff4757, #ff3838);
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 71, 87, 0.15);
+  backdrop-filter: blur(20px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 1000;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 8px 25px rgba(255, 71, 87, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   animation: exclamationPulse 3s ease-in-out infinite;
 }
 
 .exclamation-button:hover {
-  transform: scale(1.15) rotate(-5deg);
-  background: linear-gradient(135deg, #ff3838, #e55656);
-  box-shadow: 0 6px 25px rgba(255, 56, 56, 0.6);
-  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.1) translateY(-3px);
+  background: rgba(255, 71, 87, 0.25);
+  box-shadow: 
+    0 12px 30px rgba(255, 71, 87, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .exclamation-button.active {
-  background: linear-gradient(135deg, #ff6b6b, #ff5252);
+  background: rgba(255, 107, 107, 0.3);
   transform: scale(1.1);
 }
 
 .exclamation-icon {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: white;
   font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes exclamationPulse {
   0%, 100% { 
     transform: scale(1);
-    box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
+    box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
   }
   50% { 
     transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 20, 147, 0.6);
+    box-shadow: 0 12px 30px rgba(255, 71, 87, 0.4);
   }
 }
 
 /* Exclamation Popup */
 .exclamation-popup {
   position: fixed;
-  bottom: 90px;
+  bottom: 100px;
   right: 30px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 245, 250, 0.95));
-  border: 2px solid #ff69b4;
-  border-radius: 20px;
-  width: 350px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 105, 180, 0.3);
+  border-radius: 24px;
+  width: 360px;
   max-width: calc(100vw - 60px);
   max-height: 400px;
   padding: 25px;
   z-index: 999;
-  backdrop-filter: blur(20px);
-  transform: translateY(20px) scale(0.8);
+  transform: translateY(20px) scale(0.9);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.15),
+    0 8px 20px rgba(255, 105, 180, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -228,13 +261,13 @@ img {
 .exclamation-popup::before {
   content: '';
   position: absolute;
-  bottom: -10px;
-  right: 20px;
+  bottom: -12px;
+  right: 25px;
   width: 0;
   height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid rgba(255, 255, 255, 0.95);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid rgba(255, 255, 255, 0.95);
 }
 
 .exclamation-header {
@@ -249,11 +282,11 @@ img {
 }
 
 .exclamation-close {
-  background: rgba(255, 105, 180, 0.2);
+  background: rgba(255, 105, 180, 0.1);
   border: none;
   color: #c71585;
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -261,65 +294,67 @@ img {
   justify-content: center;
   transition: all 0.3s ease;
   font-weight: bold;
+  font-size: 16px;
 }
 
 .exclamation-close:hover {
-  background: rgba(255, 105, 180, 0.3);
-  transform: rotate(90deg);
+  background: rgba(255, 105, 180, 0.2);
+  transform: rotate(90deg) scale(1.1);
 }
 
 .exclamation-content {
   color: #b30059;
   font-size: 1rem;
-  line-height: 1.3;
+  line-height: 1.4;
   font-style: italic;
   text-align: center;
-  background: rgba(255, 240, 250, 0.7);
-  padding: 10px;
-  border-radius: 12px;
+  background: rgba(255, 245, 250, 0.8);
+  padding: 15px;
+  border-radius: 16px;
   border-left: 4px solid #ff99cc;
   overflow-y: auto;
   max-height: 300px;
   flex: 1;
 }
 
-/* Custom scrollbar for exclamation content */
-.exclamation-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.exclamation-content::-webkit-scrollbar-track {
-  background: rgba(255, 192, 203, 0.2);
-  border-radius: 3px;
-}
-
-.exclamation-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 105, 180, 0.6);
-  border-radius: 3px;
-}
-
-.exclamation-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 105, 180, 0.8);
-}
-
-/* Music Popup */
+/* MODERN MUSIC POPUP - Glassmorphism Design */
 .music-popup {
   position: fixed;
-  top: 90px;
+  top: 100px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  width: 320px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  width: 380px;
   max-width: calc(100vw - 40px);
   padding: 25px;
   z-index: 999;
-  backdrop-filter: blur(20px);
-  transform: translateY(-20px) scale(0.8);
+  transform: translateY(-20px) scale(0.9);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(255, 105, 180, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: none;
+  overflow: hidden;
+}
+
+.music-popup::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 105, 180, 0.05) 50%, 
+    rgba(142, 36, 170, 0.1) 100%);
+  pointer-events: none;
+  border-radius: 24px;
 }
 
 .music-popup.show {
@@ -328,16 +363,17 @@ img {
   visibility: visible;
 }
 
-.music-popup::before {
+.music-popup::after {
   content: '';
   position: absolute;
-  top: -10px;
-  right: 30px;
+  top: -12px;
+  right: 35px;
   width: 0;
   height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 10px solid rgba(255, 255, 255, 0.15);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
 }
 
 .music-header {
@@ -347,68 +383,93 @@ img {
   margin-bottom: 20px;
   color: white;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .close-popup {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .close-popup:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Modern Music Selector */
+.background-music-selector {
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .background-music-selector select {
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #ff69b4;
-  border-radius: 12px;
-  padding: 10px 15px;
-  font-size: 0.9rem;
-  color: #c71585;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 105, 180, 0.3);
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  color: #4a148c;
   cursor: pointer;
   outline: none;
   width: 100%;
-  margin-bottom: 15px;
   transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
 }
 
 .background-music-selector select:hover {
-  border-color: #ff1493;
-  box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+  border-color: #ff69b4;
+  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.2);
+  background: rgba(255, 255, 255, 0.95);
 }
 
+.background-music-selector select:focus {
+  border-color: #ff1493;
+  box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.2);
+}
+
+/* Modern Control Buttons */
 .background-controls {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .bg-control-btn {
-  background: linear-gradient(135deg, #ff69b4, #ff1493);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
   color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 8px;
+  border-radius: 16px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .bg-control-btn::before {
@@ -418,7 +479,7 @@ img {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.6s ease;
 }
 
@@ -427,33 +488,41 @@ img {
 }
 
 .bg-control-btn:hover {
-  background: linear-gradient(135deg, #ff1493, #dc143c);
+  background: rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.bg-control-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .bg-control-btn:disabled {
-  background: linear-gradient(135deg, #ccc, #999);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
   transform: none;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.bg-control-btn:disabled::before {
-  display: none;
-}
-
+/* Modern Now Playing Display */
 .bg-now-playing {
   color: white;
-  font-size: 0.8rem;
-  font-style: italic;
+  font-size: 0.9rem;
+  font-weight: 500;
   text-align: center;
-  opacity: 0.9;
   background: rgba(255, 255, 255, 0.1);
-  padding: 8px 12px;
-  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  padding: 12px 16px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   word-wrap: break-word;
   overflow-wrap: break-word;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Background Music */
@@ -479,7 +548,7 @@ img {
   text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
   animation: titleGlow 3s ease-in-out infinite;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .title:hover {
@@ -493,18 +562,18 @@ img {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0);
-  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,240,250,0.95));
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(30px);
   padding: 30px 40px;
   border-radius: 25px;
-  border: 3px solid #ff69b4;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255, 105, 180, 0.3);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
   z-index: 6000;
   max-width: 400px;
   max-height: 70vh;
   text-align: center;
-  backdrop-filter: blur(20px);
   opacity: 0;
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -523,25 +592,6 @@ img {
   margin-bottom: 20px;
   flex: 1;
   overflow-y: auto;
-}
-
-/* Custom scrollbar for title popup */
-.title-popup::-webkit-scrollbar {
-  width: 6px;
-}
-
-.title-popup::-webkit-scrollbar-track {
-  background: rgba(255, 192, 203, 0.2);
-  border-radius: 3px;
-}
-
-.title-popup::-webkit-scrollbar-thumb {
-  background: rgba(255, 105, 180, 0.6);
-  border-radius: 3px;
-}
-
-.title-popup::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 105, 180, 0.8);
 }
 
 @keyframes titleGlow {
@@ -566,23 +616,40 @@ img {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   padding: 20px;
   border-radius: 20px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.rose-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.rose-wrapper:hover::before {
+  left: 100%;
 }
 
 .rose-wrapper:hover {
-  transform: scale(1.05);
+  transform: translateY(-8px) scale(1.05);
   background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 15px 40px rgba(255, 105, 180, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .rose-wrapper:active {
-  transform: scale(0.98);
-  background: rgba(74, 20, 140, 0.6);
-  border: 1px solid rgba(142, 36, 170, 0.8);
+  transform: translateY(-5px) scale(1.02);
 }
 
 /* Rose container for proper image display */
@@ -598,7 +665,7 @@ img {
   background: transparent;
 }
 
-/* Rose image display */
+/* ENHANCED: Rose image with smooth hover animations */
 .rose-image {
   width: 100%;
   height: 100%;
@@ -606,17 +673,23 @@ img {
   border-radius: 15px;
   filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
   animation: roseBloom 4s ease-in-out infinite;
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: block;
   background: transparent;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  will-change: transform;
+}
+
+.rose-wrapper:hover .rose-image {
+  transform: scale(1.05);
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.4)) brightness(1.1);
 }
 
 @keyframes roseBloom {
   0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.05) rotate(2deg); }
+  50% { transform: scale(1.02) rotate(1deg); }
 }
 
 .rose-label {
@@ -625,6 +698,12 @@ img {
   font-weight: bold;
   text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.rose-wrapper:hover .rose-label {
+  transform: translateY(-2px);
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
 }
 
 /* Modal Styles */
@@ -641,7 +720,8 @@ img {
 }
 
 .modal-content {
-  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,240,250,0.95));
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(30px);
   margin: 5% auto;
   padding: 30px;
   border-radius: 20px;
@@ -649,37 +729,18 @@ img {
   max-width: 600px;
   max-height: 85vh;
   position: relative;
-  animation: modalSlideIn 0.5s ease-out;
-  backdrop-filter: blur(20px);
+  animation: modalSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   border: 1px solid rgba(255,255,255,0.3);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-}
-
-/* Custom scrollbar for modal content */
-.modal-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-  background: rgba(255, 192, 203, 0.2);
-  border-radius: 4px;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 105, 180, 0.6);
-  border-radius: 4px;
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 105, 180, 0.8);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes modalSlideIn {
-  from { opacity: 0; transform: translateY(-50px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-50px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .close {
@@ -688,11 +749,22 @@ img {
   font-size: 28px;
   font-weight: bold;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.3s ease;
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 105, 180, 0.1);
 }
 
-.close:hover { color: #ff1493; }
+.close:hover { 
+  color: #ff1493; 
+  background: rgba(255, 105, 180, 0.2);
+  transform: scale(1.1) rotate(90deg);
+}
 
 .modal h2 {
   color: #c71585;
@@ -725,65 +797,30 @@ img {
   overflow-y: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  line-height: 1.2;
-}
-
-/* Custom scrollbar for message */
-.message::-webkit-scrollbar {
-  width: 6px;
-}
-
-.message::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.message::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 3px;
-}
-
-.message::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+  box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
 }
 
 .user-message {
   display: none;
   margin-top: 15px;
   padding: 15px 20px;
-  background: rgba(240, 211, 217, 0.9);
+  background: rgba(255, 245, 250, 0.9);
+  backdrop-filter: blur(10px);
   border-left: 4px solid #ff99cc;
   border-radius: 12px;
   font-style: italic;
-  font-family: 'Cursive', serif;
+  font-family: 'Georgia', serif;
   color: #b30059;
   animation: fadeIn 0.4s ease-in-out;
   white-space: pre-wrap;
-  line-height: 0.7;
+  line-height: 1.5;
   max-height: 300px;
   overflow-y: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
   flex-shrink: 0;
-}
-
-/* Custom scrollbar for user message */
-.user-message::-webkit-scrollbar {
-  width: 6px;
-}
-
-.user-message::-webkit-scrollbar-track {
-  background: rgba(255, 192, 203, 0.2);
-  border-radius: 3px;
-}
-
-.user-message::-webkit-scrollbar-thumb {
-  background: rgba(255, 105, 180, 0.6);
-  border-radius: 3px;
-}
-
-.user-message::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 105, 180, 0.8);
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
 }
 
 @keyframes fadeIn {
@@ -793,25 +830,44 @@ img {
 
 .add-message-btn {
   margin-top: 15px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #ffe0f0, #ffcce5);
+  padding: 12px 24px;
+  background: rgba(255, 224, 240, 0.9);
+  backdrop-filter: blur(10px);
   border: 1px solid #ff99cc;
   border-radius: 25px;
   font-weight: bold;
   color: #c71585;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-size: 1rem;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-message-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 105, 180, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.add-message-btn:hover::before {
+  left: 100%;
 }
 
 .add-message-btn:hover {
-  background: linear-gradient(135deg, #ffcce5, #ffb3d9);
+  background: rgba(255, 204, 229, 0.9);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 153, 204, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 153, 204, 0.3);
+  border-color: #ff69b4;
 }
 
-/* Photo Container */
+/* ENHANCED: Photo Container with better spacing */
 .photo-container {
   display: flex;
   gap: 15px;
@@ -823,14 +879,14 @@ img {
   flex-shrink: 0;
 }
 
-/* Photo display */
+/* ENHANCED: Photo display with smooth hover animations */
 .photo {
   width: 120px;
   height: 120px;
   object-fit: cover;
   border-radius: 12px;
-  border: 2px solid #ff99cc;
-  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 153, 204, 0.6);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   flex-shrink: 0;
   display: block;
@@ -838,15 +894,39 @@ img {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.photo:hover::before {
+  opacity: 1;
 }
 
 .photo:hover {
-  transform: scale(1.05);
+  transform: scale(1.08) translateY(-5px);
   border-color: #ff69b4;
-  box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+  box-shadow: 0 12px 30px rgba(255, 105, 180, 0.4);
+  filter: brightness(1.1) contrast(1.05);
 }
 
-/* FIXED: Photo Modal - Completely restructured */
+.photo:active {
+  transform: scale(1.05) translateY(-3px);
+}
+
+/* ENHANCED: Photo Modal with smooth animations */
 #photoModal {
   display: none;
   position: fixed;
@@ -856,43 +936,24 @@ img {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   overflow: hidden;
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
 }
 
 #photoModal.show {
   display: flex !important;
   opacity: 1;
-  align-items: center;
-  justify-content: center;
 }
 
-/* FIXED: Photo Modal Content - Simplified structure */
-#photoModal .modal-content {
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: auto !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
-  position: static !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  pointer-events: none;
-}
-
-/* FIXED: Close button for photo modal */
+/* ENHANCED: Close button for photo modal */
 #photoModal .close {
   position: absolute;
   top: 20px;
@@ -902,21 +963,24 @@ img {
   font-weight: bold;
   cursor: pointer;
   z-index: 10000;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 #photoModal .close:hover {
   color: #ff1493;
   background: rgba(0, 0, 0, 0.8);
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(90deg);
+  border-color: rgba(255, 20, 147, 0.5);
 }
 
 #enlargedPhoto {
@@ -925,51 +989,20 @@ img {
   width: auto;
   height: auto;
   object-fit: contain;
-  border-radius: 10px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  border-radius: 12px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
   cursor: default;
   pointer-events: auto;
   user-select: none;
   border: none;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0;
   transform: scale(0.8);
 }
 
 #photoModal.show #enlargedPhoto {
+  opacity: 1;
   transform: scale(1);
-}
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  #enlargedPhoto {
-    max-width: 95vw;
-    max-height: 85vh;
-    border-radius: 8px;
-  }
-  
-  #photoModal .close {
-    top: 15px;
-    right: 20px;
-    font-size: 30px;
-    width: 40px;
-    height: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  #enlargedPhoto {
-    max-width: 98vw;
-    max-height: 80vh;
-    border-radius: 6px;
-  }
-  
-  #photoModal .close {
-    top: 10px;
-    right: 15px;
-    font-size: 25px;
-    width: 35px;
-    height: 35px;
-  }
 }
 
 /* Footer */
@@ -1000,12 +1033,18 @@ footer p {
 .message-icon {
   font-size: 2rem;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   animation: bounce 2s infinite;
+  padding: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .message-icon:hover {
-  transform: scale(1.2);
+  transform: scale(1.2) translateY(-5px);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
 }
 
 @keyframes bounce {
@@ -1014,30 +1053,61 @@ footer p {
   60% { transform: translateY(-5px); }
 }
 
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 192, 203, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 105, 180, 0.6);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 105, 180, 0.8);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .title { 
     font-size: 2.5rem; 
   }
   
+  .music-button {
+    width: 60px;
+    height: 60px;
+    right: 15px;
+  }
+  
+  .music-button-icon {
+    font-size: 1.5rem;
+  }
+  
   .exclamation-button {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     bottom: 20px;
     right: 20px;
   }
   
   .exclamation-popup {
-    width: 280px;
+    width: 320px;
     max-width: calc(100vw - 40px);
     right: 10px;
-    bottom: 65px;
+    bottom: 75px;
     padding: 20px;
     max-height: 50vh;
   }
   
   .exclamation-icon {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
   
   .modal-content { 
@@ -1053,7 +1123,7 @@ footer p {
   
   .message {
     font-size: 1rem;
-    padding: 7px;
+    padding: 15px;
     max-height: 150px;
   }
   
@@ -1074,16 +1144,20 @@ footer p {
   }
   
   .music-popup {
-    width: 280px;
+    width: 320px;
     max-width: calc(100vw - 30px);
     right: 10px;
     padding: 20px;
   }
   
-  .music-button {
-    width: 50px;
-    height: 50px;
-    right: 15px;
+  .background-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .bg-control-btn {
+    padding: 10px 6px;
+    font-size: 0.8rem;
   }
   
   .photo {
@@ -1109,14 +1183,34 @@ footer p {
   }
   
   .bg-now-playing {
-    font-size: 0.75rem;
-    padding: 6px 10px;
+    font-size: 0.8rem;
+    padding: 10px 12px;
   }
 }
 
 @media (max-width: 480px) {
   .title { 
     font-size: 2rem; 
+  }
+  
+  .music-button {
+    width: 55px;
+    height: 55px;
+    top: 15px;
+    right: 15px;
+  }
+  
+  .music-button-icon {
+    font-size: 1.3rem;
+  }
+  
+  .exclamation-button {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .exclamation-icon {
+    font-size: 1.1rem;
   }
   
   .photo {
@@ -1162,14 +1256,29 @@ footer p {
   }
   
   .music-popup {
-    width: 260px;
+    width: 300px;
     max-width: calc(100vw - 20px);
     padding: 18px;
     right: 10px;
   }
   
+  .music-header {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+  
+  .background-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .bg-control-btn {
+    padding: 8px 6px;
+    font-size: 0.75rem;
+  }
+  
   .exclamation-popup {
-    width: 260px;
+    width: 280px;
     max-width: calc(100vw - 20px);
     padding: 18px;
     right: 10px;
@@ -1192,41 +1301,68 @@ footer p {
     font-size: 0.9rem;
   }
   
-  .bg-control-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-  }
-  
   .bg-now-playing {
-    font-size: 0.7rem;
-    padding: 5px 8px;
+    font-size: 0.75rem;
+    padding: 8px 10px;
   }
   
   .add-message-btn {
-    padding: 8px 16px;
+    padding: 10px 18px;
     font-size: 0.9rem;
   }
-}
-
-/* Additional enhancements for smooth photo modal experience */
-@media (hover: hover) {
-  .photo:hover {
-    transform: scale(1.08);
-    box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+  
+  .background-music-selector select {
+    font-size: 0.85rem;
+    padding: 10px 12px;
   }
 }
 
-/* Loading states for images */
-.photo:not([src]), .photo[src=""] {
-  background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
-  background-size: 400% 400%;
+/* Enhanced mobile photo modal */
+@media (max-width: 768px) {
+  #enlargedPhoto {
+    max-width: 95vw;
+    max-height: 85vh;
+    border-radius: 8px;
+  }
+  
+  #photoModal .close {
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  #enlargedPhoto {
+    max-width: 98vw;
+    max-height: 80vh;
+    border-radius: 6px;
+  }
+  
+  #photoModal .close {
+    top: 10px;
+    right: 15px;
+    font-size: 25px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Loading states for images with shimmer effect */
+.photo:not([src]), .photo[src=""], .rose-image:not([src]), .rose-image[src=""] {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* Prevent text selection and scrolling on photo modal */
@@ -1237,19 +1373,35 @@ footer p {
   -ms-user-select: none;
 }
 
-/* Add subtle animation when photo modal opens */
-#photoModal {
-  animation: modalFadeIn 0.3s ease-out;
+/* CRITICAL: Prevent body scroll when photo modal is open */
+body.photo-modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
+/* Performance optimizations */
+.rose-image, .photo, #enlargedPhoto {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better click targets on mobile */
+@media (max-width: 768px) {
+  .photo {
+    min-width: 44px;
+    min-height: 44px;
   }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(8px);
+  
+  .close, .exclamation-close, .close-popup {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
@@ -1273,7 +1425,7 @@ footer p {
   .exclamation-close, .close-popup {
     width: 30px;
     height: 30px;
-    font-size: 16px;
+    font-size: 14px;
   }
 }
 
@@ -1293,34 +1445,17 @@ footer p {
   }
 }
 
-/* CRITICAL FIX: Prevent body scroll when photo modal is open */
-body.photo-modal-open {
-  overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Performance optimizations */
-.rose-image, .photo, #enlargedPhoto {
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-/* Smooth transitions */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Better click targets on mobile */
-@media (max-width: 768px) {
-  .photo {
-    min-width: 44px;
-    min-height: 44px;
+/* Enhanced glassmorphism effects */
+@supports (backdrop-filter: blur()) {
+  .music-popup, .exclamation-popup, .title-popup {
+    backdrop-filter: blur(20px);
   }
   
-  .close, .exclamation-close, .close-popup {
-    min-width: 44px;
-    min-height: 44px;
+  .music-button, .exclamation-button {
+    backdrop-filter: blur(15px);
+  }
+  
+  .rose-wrapper {
+    backdrop-filter: blur(10px);
   }
 }

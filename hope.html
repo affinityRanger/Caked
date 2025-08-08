@@ -37,39 +37,44 @@
     <source src="https://caked-production.up.railway.app/assets/audio/PARTYNEXTDOOR - Dreamin.mp3" type="audio/mpeg">
   </audio>
   
-  <!-- Music Button -->
+  <!-- MODERN MUSIC BUTTON -->
   <div class="music-button" id="musicButton" onclick="toggleMusicPopup()">
     <div class="music-button-icon">🎵</div>
   </div>
   
-  <!-- Music Popup -->
+  <!-- MODERN MUSIC POPUP -->
   <div class="music-popup" id="musicPopup">
     <div class="music-header">
       <span>🎵 Music Player</span>
       <button class="close-popup" onclick="toggleMusicPopup()">×</button>
     </div>
-    <!-- CORRECTED: Music selector dropdown with proper options -->
-<div class="background-music-selector">
-  <select id="globalMusicSelect" onchange="selectGlobalSong(this.value)">
-    <option value="PARTYNEXTDOOR - Dreamin.mp3">Dreamin' - PARTYNEXTDOOR</option>
-    <option value="PARTYNEXTDOOR - DEEPER.mp3">DEEPER - PARTYNEXTDOOR</option>
-    <option value="PARTYNEXTDOOR - TRAUMA .mp3">TRAUMA - PARTYNEXTDOOR</option>
-    <option value="KEEP IT-Juice WRLD.mp3">KEEP IT - Juice WRLD</option>
-    <option value="Juice WRLD - GRACE.mp3">GRACE - Juice WRLD</option>
-    <option value="Kiss - I Was Made For Lovin You.mp3">Kiss - I Was Made For Lovin' You</option>
-    <option value="Lovers Lane - JuiceWrld.mp3">Lovers Lane - Juice WRLD</option>
-    <option value="PARTYNEXTDOOR - Some Of Your Love.mp3">Some Of Your Love - PARTYNEXTDOOR</option>
-    <option value="PARTYNEXTDOOR - You ve Been Missed.mp3">You've Been Missed - PARTYNEXTDOOR</option>
-    <option value="PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3">BELIEVE IT - PARTYNEXTDOOR & Rihanna</option>
-  </select>
-</div>
-    <div class="background-controls">
-      <button class="bg-control-btn" onclick="playPreviousSong()">⏮️ Previous</button>
-      <button class="bg-control-btn" id="globalPlayBtn" onclick="toggleGlobalMusic()">▶️ Play</button>
-      <button class="bg-control-btn" onclick="playNextSong()">⏭️ Next</button>
-      <button class="bg-control-btn" onclick="stopGlobalMusic()">⏹️ Stop</button>
+    
+    <!-- Enhanced Music Selector -->
+    <div class="background-music-selector">
+      <select id="globalMusicSelect" onchange="selectGlobalSong(this.value)">
+        <option value="PARTYNEXTDOOR - Dreamin.mp3">Dreamin' - PARTYNEXTDOOR</option>
+        <option value="PARTYNEXTDOOR - DEEPER.mp3">DEEPER - PARTYNEXTDOOR</option>
+        <option value="PARTYNEXTDOOR - TRAUMA .mp3">TRAUMA - PARTYNEXTDOOR</option>
+        <option value="KEEP IT-Juice WRLD.mp3">KEEP IT - Juice WRLD</option>
+        <option value="Juice WRLD - GRACE.mp3">GRACE - Juice WRLD</option>
+        <option value="Kiss - I Was Made For Lovin You.mp3">Kiss - I Was Made For Lovin' You</option>
+        <option value="Lovers Lane - JuiceWrld.mp3">Lovers Lane - Juice WRLD</option>
+        <option value="PARTYNEXTDOOR - Some Of Your Love.mp3">Some Of Your Love - PARTYNEXTDOOR</option>
+        <option value="PARTYNEXTDOOR - You ve Been Missed.mp3">You've Been Missed - PARTYNEXTDOOR</option>
+        <option value="PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3">BELIEVE IT - PARTYNEXTDOOR & Rihanna</option>
+      </select>
     </div>
-    <div class="bg-now-playing" id="globalNowPlaying">Ready: Dreamin' - PARTYNEXTDOOR</div>
+    
+    <!-- Modern Control Buttons -->
+    <div class="background-controls">
+      <button class="bg-control-btn" onclick="playPreviousSong()">⏮️</button>
+      <button class="bg-control-btn" id="globalPlayBtn" onclick="toggleGlobalMusic()">▶️</button>
+      <button class="bg-control-btn" onclick="playNextSong()">⏭️</button>
+      <button class="bg-control-btn" onclick="stopGlobalMusic()">⏹️</button>
+    </div>
+    
+    <!-- Now Playing Display -->
+    <div class="bg-now-playing" id="globalNowPlaying">Dreamin' - PARTYNEXTDOOR</div>
   </div>
   
   <!-- Stars Background -->
@@ -130,6 +135,7 @@
           <br><br>Just dont treat me like them niggaz I aint those.Basic bros you know. You aint tasted divine yet. Dont run. I never have never will.
         </div>
       </div>
+      <!-- ENHANCED: Photo container with smoother animations -->
       <div class="photo-container">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/Crack.jpg" alt="Memory 1" onclick="enlargePhoto(this, event)" loading="lazy">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst8.jpg" alt="Memory 2" onclick="enlargePhoto(this, event)" loading="lazy">
@@ -153,6 +159,7 @@
           <br><br>Lakini kusema ukweli, 😂...acha tu sitaki kuongezewa block ntakushoo kukitulia
         </div>
       </div>
+      <!-- ENHANCED: Photo container with smoother animations -->
       <div class="photo-container">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst5.jpg" alt="Memory 3" onclick="enlargePhoto(this, event)" loading="lazy">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/expparty.png" alt="Memory 4" onclick="enlargePhoto(this, event)" loading="lazy">
@@ -170,7 +177,7 @@
       <div id="msg3" class="user-message">
         <div class="message-text">
           Can I tell you somethin' Crazy too I never thought you'd be my type too since we met at the beginning Till that day you came from school and I switched school. That was not naive the way we looked at each other we craved for each other. I saw you young at first. I said fuck dat from that day. My first real experience with somebody was with you. No lie
-            <br><br>Izi ndo matime natoka shule boarding narudi nikiski kunamtu anasema lazima nimvalishe pete😂😂 usijali. Ama unasema ilikua utoto mingi tu?
+          <br><br>Izi ndo matime natoka shule boarding narudi nikiski kunamtu anasema lazima nimvalishe pete😂😂 usijali. Ama unasema ilikua utoto mingi tu?
           <br><br>I guess its why I'm still here. Unless I wasnt your first then I am right in everything
           <br><br>If you knew how resentful I tried being from the first about how I felt. It kept slipping each time. I'll explain further dont worry. I'm telling I got a lot to tell you. Before your descision
           <br><br>The song TRAUMA is word for word what I'm trying to say
@@ -180,6 +187,7 @@
           <br><br>This aint love bombing😂 not yet at least😏
         </div>
       </div>
+      <!-- ENHANCED: Photo container with smoother animations -->
       <div class="photo-container">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst12.jpg" alt="Memory 5" onclick="enlargePhoto(this, event)" loading="lazy">
         <img class="photo" src="https://caked-production.up.railway.app/assets/images/sst10.jpg" alt="Memory 6" onclick="enlargePhoto(this, event)" loading="lazy">
@@ -211,15 +219,14 @@
         <br><br>Without this, love and sex are are two seperate things for me😔
         <br><br>Its mostly not Abou you. But also about you. Its mostly about what I'm about to be. Its not gonaabe full without you. Literally.
         <br><br>I also like peaches btw 🍑. Not all types. You gotta be picky with that fruit. Its a delicate one. Thats why expensive. And a rare fruit. It needs good hands. The softer the better. It tends to harvest the juiciest fruits. 
-          <br><br><strong>Tell yo Mama Hi😊</strong>
+        <br><br><strong>Tell yo Mama Hi😊</strong>
         <br><br>CALL ME but dont call me Crazy. YET!! DONT STOP ME NOW
         <br><br>PS: Its a disappearing browser. Will automatically delete in 2wks time.
-  
       </div>
     </div>
   </div>
   
-  <!-- Photo Enlargement Modal -->
+  <!-- ENHANCED: Photo Enlargement Modal with Smooth Animations -->
   <div id="photoModal" class="photo-modal">
     <span class="close" onclick="closePhotoModal()">&times;</span>
     <img id="enlargedPhoto" alt="Enlarged photo">
@@ -246,7 +253,6 @@
         <br><br>If you knew how safe I played not to fumble into you 😔. I have a problem with hot girls that treat me good. Especially after they touch my hair.
         <br><br>Call it whatever you want. You can phrase it how you like. I did mean everyword I said.
         <br><br>This is instinct I guess.
-    
         <br><br>If you live me again I dont think I'm ever recovering again.
         <br><br>Ndo maana nakuuliza, wanaeza kupigania?
         <br><br>Ata ww chukulia venye utachukulia
@@ -259,7 +265,6 @@
         <br><br>If I do then I'm truly not your mans
         <br><br><strong>PS I GOTTA PART II and III one of it got me singing😅</strong> Niliambiwa io itakukunywa mbaya If you like this youll probably love the rest. Kama singeku tech bro ningekua msanii nishakushoo.
       </div>
-         
     </div>
   </footer>
   
