@@ -12,7 +12,6 @@ let animationId = null;
 let crossfadeInterval = null;
 
 // Feature states
-let isDarkMode = true;
 let cachedTracks = new Set();
 let isOffline = false;
 
@@ -137,32 +136,6 @@ function crossfadeToNext(currentElement, nextElement, duration = 2000) {
             currentElement.currentTime = 0;
         }
     }, stepDuration);
-}
-
-// Theme toggle functionality
-function toggleTheme() {
-    isDarkMode = !isDarkMode;
-    document.body.classList.toggle('light-mode', !isDarkMode);
-    
-    const themeBtn = document.getElementById('themeToggle');
-    if (themeBtn) {
-        themeBtn.innerHTML = isDarkMode ? '🌙' : '☀️';
-    }
-    
-    // Save theme preference
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    
-    showTypingMessage(isDarkMode ? 'Switched to dark mode' : 'Switched to light mode');
-}
-
-// Auto theme based on time
-function setAutoTheme() {
-    const hour = new Date().getHours();
-    const shouldBeDark = hour < 6 || hour >= 18;
-    
-    if (shouldBeDark !== isDarkMode) {
-        toggleTheme();
-    }
 }
 
 // Typing effect message
@@ -623,7 +596,7 @@ function preloadAudioOnDemand(audioId) {
 
 // Mobile touch handling
 function addTouchSupport() {
-    const elements = document.querySelectorAll('.music-chaos, #mainHeart, .back-button, .message-icon, #themeToggle');
+    const elements = document.querySelectorAll('.music-chaos, #mainHeart, .back-button, .message-icon');
     
     elements.forEach(element => {
         element.addEventListener('touchstart', function() {
@@ -639,24 +612,6 @@ function addTouchSupport() {
 // Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
-    
-    // Load saved theme preference or set auto theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        isDarkMode = savedTheme === 'dark';
-        document.body.classList.toggle('light-mode', !isDarkMode);
-    } else {
-        setAutoTheme();
-    }
-    
-    // Create theme toggle button
-    const themeToggle = document.createElement('button');
-    themeToggle.className = 'theme-toggle';
-    themeToggle.id = 'themeToggle';
-    themeToggle.innerHTML = isDarkMode ? '🌙' : '☀️';
-    themeToggle.setAttribute('aria-label', 'Toggle theme');
-    themeToggle.addEventListener('click', toggleTheme);
-    document.body.appendChild(themeToggle);
     
     // Check offline status
     checkOfflineStatus();
@@ -773,9 +728,6 @@ document.addEventListener('keydown', function(e) {
     if (e.key === ' ') {
         e.preventDefault();
         stopAllAudio();
-    }
-    if (e.key === 't' || e.key === 'T') {
-        toggleTheme();
     }
 });
 
