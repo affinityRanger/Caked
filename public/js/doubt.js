@@ -275,6 +275,97 @@ function showPlaceholder(num) {
     }
 }
 
+// Check if media source is video
+function isVideoSource(src) {
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv'];
+    return videoExtensions.some(ext => src.toLowerCase().includes(ext));
+}
+
+// Auto-detect and setup video elements
+function autoDetectVideos() {
+    // Get all frames
+    const frames = document.querySelectorAll('.image-frame, .video-frame');
+    
+    frames.forEach((frame, index) => {
+        // Check if frame already has video
+        let video = frame.querySelector('video');
+        if (video) {
+            setupVideoElement(video, frame);
+            return;
+        }
+        
+        // Check if frame has image with video extension
+        const img = frame.querySelector('img');
+        if (img && isVideoSource(img.src)) {
+            convertImageToVideo(img, frame);
+        }
+    });
+}
+
+// Convert image element to video if it's actually a video
+function convertImageToVideo(img, frame) {
+    const video = document.createElement('video');
+    video.src = img.src;
+    video.muted = true;
+    video.loop = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.preload = 'metadata';
+    video.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+    
+    // Add error handling
+    video.onerror = () => {
+        // If video fails to load, keep the image
+        console.log('Video failed to load, keeping image:', img.src);
+    };
+    
+    video.onloadedmetadata = () => {
+        // Video loaded successfully, replace image
+        img.style.display = 'none';
+        frame.insertBefore(video, frame.firstChild);
+        setupVideoElement(video, frame);
+        console.log('Video loaded and replaced image:', video.src);
+    };
+    
+    // Try to load the video
+    video.load();
+}
+
+// Setup video element with proper handling
+function setupVideoElement(video, frame) {
+    if (!video || !frame) return;
+    
+    // Ensure video plays inline and is muted for autoplay
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+    video.preload = 'metadata';
+    
+    // Handle video interactions
+    video.addEventListener('click', (e) => {
+        e.stopPropagation();
+        expandMedia(frame.id);
+    });
+    
+    // Auto-play when video comes into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                video.play().catch(e => console.log('Video autoplay failed:', e));
+            } else {
+                video.pause();
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    observer.observe(video);
+    
+    // Try to start playing immediately
+    setTimeout(() => {
+        video.play().catch(e => console.log('Video autoplay failed:', e));
+    }, 100);
+}
+
 // Expand media (image/video) on click
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
@@ -345,16 +436,16 @@ function expandMedia(frameId) {
     // Create expanded media element
     let expandedElement;
     if (video && video.style.display !== 'none') {
-        // If it's a video, stop all audio first
-        if (video.querySelector('source') || video.src) {
-            stopAllAudio();
-        }
+        // Stop all audio when video is expanded
+        stopAllAudio();
         
         expandedElement = document.createElement('video');
         expandedElement.src = video.src || video.querySelector('source')?.src;
         expandedElement.controls = true;
-        expandedElement.autoplay = false;
+        expandedElement.autoplay = true;
+        expandedElement.loop = video.loop;
         expandedElement.volume = 0.6;
+        expandedElement.muted = false; // Unmute for expanded view
         currentVideo = expandedElement;
         
         // Handle video audio - stop all other audio when video plays
@@ -498,19 +589,13 @@ function expandMedia(frameId) {
     document.addEventListener('keydown', handleEsc);
 }
 
-// Check if media source is video
-function isVideoSource(src) {
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv'];
-    return videoExtensions.some(ext => src.toLowerCase().includes(ext));
-}
-
 // Setup media frame (image or video)
 function setupMediaFrame(frameId, mediaSrc, altText) {
     const frame = document.getElementById(frameId);
     if (!frame || !mediaSrc) return;
     
-    // Clear existing content
-    const existingMedia = frame.querySelectorAll('img, video');
+    // Clear existing content except placeholder
+    const existingMedia = frame.querySelectorAll('img:not(.placeholder), video');
     existingMedia.forEach(el => el.remove());
     
     let mediaElement;
@@ -522,6 +607,7 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         mediaElement.loop = true;
         mediaElement.autoplay = true;
         mediaElement.playsInline = true;
+        mediaElement.preload = 'metadata';
         
         // Add video-specific styling
         mediaElement.style.cssText = `
@@ -532,6 +618,11 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         
         // Handle video loading errors
         mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+        
+        // Setup video when loaded
+        mediaElement.onloadedmetadata = () => {
+            setupVideoElement(mediaElement, frame);
+        };
     } else {
         // Create image element
         mediaElement = document.createElement('img');
@@ -865,7 +956,7 @@ function createMusicExplosion(element) {
 
 // Random glitch effects
 setInterval(() => {
-    const elements = document.querySelectorAll('.chaos-text, .image-frame');
+    const elements = document.querySelectorAll('.chaos-text, .image-frame, .video-frame');
     const randomElement = elements[Math.floor(Math.random() * elements.length)];
     if (randomElement) {
         randomElement.classList.add('glitch');
@@ -911,6 +1002,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add mobile touch support
     addTouchSupport();
+    
+    // Auto-detect and setup videos
+    setTimeout(() => {
+        autoDetectVideos();
+    }, 500);
     
     // Set up event listeners
     const backButton = document.querySelector('.back-button');
@@ -984,13 +1080,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Media frame ${frame.id} click listener added`);
     });
     
-    // Initialize media frames with existing images (you can modify these URLs)
+    // Initialize media frames with existing media sources
     const mediaData = [
         { id: 'imageFrame1', src: 'https://caked-production.up.railway.app/assets/images/sikununuli.png', alt: 'Our memories' },
         { id: 'imageFrame2', src: 'https://caked-production.up.railway.app/assets/images/psychosis.png', alt: 'Our special moment' },
         { id: 'imageFrame3', src: 'https://caked-production.up.railway.app/assets/images/gal.png', alt: 'Missing this' },
         { id: 'imageFrame4', src: 'https://caked-production.up.railway.app/assets/images/lost.png', alt: 'Your beauty' },
-        { id: 'imageFrame5', src: 'https://caked-production.up.railway.app/assets/images/memory5.jpg', alt: 'Lonely times' }
+        { id: 'imageFrame5', src: 'https://caked-production.up.railway.app/assets/videos/tilapia.mp4', alt: 'Lonely times' }
     ];
     
     // Setup each media frame (will auto-detect if it's video or image)

@@ -14,9 +14,9 @@
     <link rel="preconnect" href="https://caked-production.up.railway.app">
 
     <!-- Fixed logo references -->
-  <link rel="icon" type="image/jpeg" href="https://caked-production.up.railway.app/assets/images/logo.jpeg">
-  <link rel="apple-touch-icon" href="https://caked-production.up.railway.app/assets/images/logo.jpeg">
-  <link rel="shortcut icon" href="https://caked-production.up.railway.app/assets/images/logo.jpeg">
+    <link rel="icon" type="image/jpeg" href="https://caked-production.up.railway.app/assets/images/logo.jpeg">
+    <link rel="apple-touch-icon" href="https://caked-production.up.railway.app/assets/images/logo.jpeg">
+    <link rel="shortcut icon" href="https://caked-production.up.railway.app/assets/images/logo.jpeg">
     
     <!-- PWA manifest for offline support -->
     <link rel="manifest" href="manifest.json">
@@ -87,7 +87,7 @@
                 📷<br>Our moment
             </div>
         </div>
-        <div class="video-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
+        <div class="image-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
             <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" loading="lazy" onerror="showPlaceholder(3)">
             <div class="placeholder" style="display: none;">
                 🖼️<br>Missing this
@@ -98,15 +98,17 @@
             <div class="placeholder" style="display: none;">
                 📸<br>Your beauty
             </div>
-        <div class="image-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-    <video src="https://caked-production.up.railway.app/assets/videos/tilapia.mp4" 
-           muted autoplay loop playsinline
-           style="width: 100%; height: 100%; object-fit: cover;">
-    </video>
-    <div class="placeholder" style="display: none;">
-        🎬<br>Lonely times
-    </div>
-</div>
+        </div>
+        <div class="video-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
+            <video muted autoplay loop playsinline preload="metadata" 
+                   style="width: 100%; height: 100%; object-fit: cover;"
+                   onerror="showPlaceholder(5)">
+                <source src="https://caked-production.up.railway.app/assets/videos/tilapia.mp4" type="video/mp4">
+            </video>
+            <div class="placeholder" style="display: none;">
+                🎬<br>Lonely times
+            </div>
+        </div>
         
         <!-- Music chaos buttons - Now only 4 buttons -->
         <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" id="musicBtn1" data-track="1" role="button" aria-label="Play Amy Winehouse - Back To Black" tabindex="0">🎵</div>
