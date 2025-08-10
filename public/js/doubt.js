@@ -16,6 +16,7 @@ let cachedTracks = new Set();
 let isOffline = false;
 let expandedMedia = null;
 let currentVideo = null;
+let audioStateBeforeVideo = null; // Store audio state before video plays
 
 // Initialize audio context
 function initAudioContext() {
@@ -104,6 +105,103 @@ function stopVisualization() {
     }
 }
 
+// Store current audio state
+function storeAudioState() {
+    if (currentAudio && !currentAudio.paused) {
+        audioStateBeforeVideo = {
+            audio: currentAudio,
+            currentTime: currentAudio.currentTime,
+            volume: currentAudio.volume,
+            playingElement: currentPlayingElement
+        };
+        console.log('Audio state stored:', audioStateBeforeVideo);
+    }
+}
+
+// Restore audio state after video stops
+function restoreAudioState() {
+    if (audioStateBeforeVideo) {
+        const { audio, currentTime, volume, playingElement } = audioStateBeforeVideo;
+        
+        // Restore audio playback
+        audio.currentTime = currentTime;
+        audio.volume = volume;
+        currentAudio = audio;
+        currentPlayingElement = playingElement;
+        
+        // Restore visual states
+        if (playingElement) {
+            playingElement.classList.add('playing');
+            if (playingElement.classList.contains('music-chaos')) {
+                playingElement.classList.add('pulsing');
+            }
+            if (playingElement.id === 'mainHeart') {
+                playingElement.classList.add('beating');
+            }
+        }
+        
+        // Resume playback
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                startVisualization();
+                showAudioStatus('🎵 Audio resumed');
+                console.log('Audio resumed successfully');
+            }).catch(error => {
+                console.log('Audio resume failed:', error);
+            });
+        }
+        
+        audioStateBeforeVideo = null;
+    }
+}
+
+// Enhanced stop all audio with state preservation option
+function stopAllAudio(preserveState = false) {
+    // Store state if requested and audio is playing
+    if (preserveState) {
+        storeAudioState();
+    } else {
+        audioStateBeforeVideo = null;
+    }
+    
+    // Stop current audio
+    if (currentAudio) {
+        currentAudio.pause();
+        if (!preserveState) {
+            currentAudio.currentTime = 0;
+        }
+        currentAudio = null;
+    }
+    
+    // Stop next audio if crossfading
+    if (nextAudio) {
+        nextAudio.pause();
+        nextAudio.currentTime = 0;
+        nextAudio = null;
+    }
+    
+    // Clear crossfade interval
+    if (crossfadeInterval) {
+        clearInterval(crossfadeInterval);
+        crossfadeInterval = null;
+    }
+    
+    // Reset visual states
+    document.querySelectorAll('.music-chaos').forEach(btn => {
+        btn.classList.remove('playing', 'pulsing');
+    });
+    
+    const mainHeart = document.getElementById('mainHeart');
+    if (mainHeart) {
+        mainHeart.classList.remove('playing', 'beating');
+    }
+    
+    stopVisualization();
+    hideAudioStatus();
+    currentPlayingElement = null;
+}
+
 // Crossfade between tracks
 function crossfadeToNext(currentElement, nextElement, duration = 2000) {
     if (!currentElement || !nextElement) return;
@@ -186,9 +284,6 @@ function checkOfflineStatus() {
         if (!indicator) {
             createOfflineIndicator();
         }
-        document.getElementById('offlineIndicator')?.classList.add('show');
-        showTypingMessage('You are now offline. Playing cached content...');
-    } else {
         document.getElementById('offlineIndicator')?.classList.remove('show');
     }
 }
@@ -366,7 +461,7 @@ function setupVideoElement(video, frame) {
     }, 100);
 }
 
-// Expand media (image/video) on click
+// Enhanced expand media function with slightly larger video popups
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
     if (!frame || expandedMedia) return; // Prevent multiple expansions
@@ -382,8 +477,19 @@ function expandMedia(frameId) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Calculate popup position (slightly diagonal from original)
-    const popupSize = window.innerWidth <= 768 ? 280 : 350;
+    // Calculate popup size - slightly larger for videos (only +30px difference)
+    const isVideo = video && video.style.display !== 'none';
+    const isMobile = window.innerWidth <= 768;
+    
+    let popupSize;
+    if (isVideo) {
+        // Just slightly larger size for videos
+        popupSize = isMobile ? 350 : 430; // Only 30px larger than images
+    } else {
+        // Regular size for images
+        popupSize = isMobile ? 320 : 400;
+    }
+    
     const offset = 40;
     
     let popupX, popupY;
@@ -435,32 +541,79 @@ function expandMedia(frameId) {
     
     // Create expanded media element
     let expandedElement;
-    if (video && video.style.display !== 'none') {
-        // Stop all audio when video is expanded
-        stopAllAudio();
+    if (isVideo) {
+        // Stop all audio and store state when video starts
+        console.log('Video starting, stopping all audio');
+        stopAllAudio(true);
         
         expandedElement = document.createElement('video');
         expandedElement.src = video.src || video.querySelector('source')?.src;
         expandedElement.controls = true;
         expandedElement.autoplay = true;
         expandedElement.loop = video.loop;
-        expandedElement.volume = 0.6;
+        expandedElement.volume = 0.8; // Higher volume for video
         expandedElement.muted = false; // Unmute for expanded view
+        expandedElement.playsInline = true;
+        expandedElement.preload = 'metadata';
         currentVideo = expandedElement;
         
-        // Handle video audio - stop all other audio when video plays
+        // Enhanced video event handling
+        expandedElement.addEventListener('loadstart', () => {
+            console.log('Video loading started');
+        });
+        
+        expandedElement.addEventListener('loadedmetadata', () => {
+            console.log('Video metadata loaded');
+        });
+        
+        expandedElement.addEventListener('canplay', () => {
+            console.log('Video can start playing');
+        });
+        
         expandedElement.addEventListener('play', () => {
-            stopAllAudio();
+            console.log('Video started playing');
             showTypingMessage('Playing video... 🎬');
         });
         
-        expandedElement.addEventListener('ended', () => {
-            currentVideo = null;
+        expandedElement.addEventListener('pause', () => {
+            console.log('Video paused');
+            // Only restore audio if video was manually paused (not ended)
+            if (expandedElement.currentTime < expandedElement.duration - 0.1) {
+                showTypingMessage('Video paused');
+            }
         });
         
-        expandedElement.addEventListener('pause', () => {
-            if (expandedElement.currentTime === expandedElement.duration) {
-                currentVideo = null;
+        expandedElement.addEventListener('ended', () => {
+            console.log('Video ended, restoring audio');
+            currentVideo = null;
+            showTypingMessage('Video ended, restoring audio...');
+            // Restore audio after video ends
+            setTimeout(() => {
+                restoreAudioState();
+            }, 500);
+        });
+        
+        // Handle video errors
+        expandedElement.addEventListener('error', (e) => {
+            console.log('Video playback error:', e);
+            currentVideo = null;
+            showTypingMessage('Video error, restoring audio...');
+            setTimeout(() => {
+                restoreAudioState();
+            }, 500);
+        });
+        
+        // Handle video loading
+        expandedElement.addEventListener('loadeddata', () => {
+            console.log('Video data loaded, attempting to play');
+            const playPromise = expandedElement.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('Video playing successfully');
+                }).catch(e => {
+                    console.log('Video autoplay failed:', e);
+                    showTypingMessage('Click to play video');
+                });
             }
         });
     } else {
@@ -477,19 +630,19 @@ function expandMedia(frameId) {
         border-radius: 17px;
     `;
     
-    // Close button (smaller for mini popup)
+    // Close button
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '✕';
     closeBtn.style.cssText = `
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 10px;
+        right: 10px;
         background: rgba(255, 23, 68, 0.9);
         border: none;
         color: white;
-        font-size: 1.2rem;
-        width: 30px;
-        height: 30px;
+        font-size: 1.4rem;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
         cursor: pointer;
         z-index: 151;
@@ -545,6 +698,11 @@ function expandMedia(frameId) {
     // Close functionality
     const closeMedia = () => {
         if (currentVideo) {
+            console.log('Closing video, current time:', currentVideo.currentTime);
+            // Always restore audio when closing video manually
+            setTimeout(() => {
+                restoreAudioState();
+            }, 200);
             currentVideo.pause();
             currentVideo = null;
         }
@@ -566,17 +724,19 @@ function expandMedia(frameId) {
     });
     
     popup.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeMedia();
+        // Only close if clicking the popup background, not the video
+        if (e.target === popup) {
+            closeMedia();
+        }
     });
     
-    // Auto-close after 10 seconds if it's an image (not video)
-    if (!video || video.style.display === 'none') {
+    // Auto-close after 20 seconds for images only
+    if (!isVideo) {
         setTimeout(() => {
             if (expandedMedia === popup) {
                 closeMedia();
             }
-        }, 10000);
+        }, 20000);
     }
     
     // ESC key to close
@@ -648,48 +808,6 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
     frame.addEventListener('click', () => expandMedia(frameId));
 }
 
-// Stop all audio
-function stopAllAudio() {
-    // Stop current audio
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        currentAudio = null;
-    }
-    
-    // Stop next audio if crossfading
-    if (nextAudio) {
-        nextAudio.pause();
-        nextAudio.currentTime = 0;
-        nextAudio = null;
-    }
-    
-    // Stop any playing video
-    if (currentVideo) {
-        currentVideo.pause();
-    }
-    
-    // Clear crossfade interval
-    if (crossfadeInterval) {
-        clearInterval(crossfadeInterval);
-        crossfadeInterval = null;
-    }
-    
-    // Reset visual states
-    document.querySelectorAll('.music-chaos').forEach(btn => {
-        btn.classList.remove('playing', 'pulsing');
-    });
-    
-    const mainHeart = document.getElementById('mainHeart');
-    if (mainHeart) {
-        mainHeart.classList.remove('playing', 'beating');
-    }
-    
-    stopVisualization();
-    hideAudioStatus();
-    currentPlayingElement = null;
-}
-
 // Show audio status
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
@@ -710,6 +828,15 @@ function hideAudioStatus() {
     const status = document.getElementById('audioStatus');
     if (status) {
         status.classList.remove('show');
+    }
+}
+
+// Preload audio on demand
+function preloadAudioOnDemand(audioId) {
+    const audio = document.getElementById(audioId);
+    if (audio && audio.preload === 'none') {
+        audio.preload = 'auto';
+        audio.load();
     }
 }
 
@@ -850,44 +977,48 @@ function createHeartExplosion() {
             heart.style.position = 'absolute';
             heart.style.left = '50%';
             heart.style.top = '50%';
-            heart.style.fontSize = window.innerWidth <= 768 ? '2rem' : '3rem';
-            heart.style.zIndex = '15';
+            heart.style.transform = 'translate(-50%, -50%)';
+            heart.style.fontSize = '2rem';
             heart.style.pointerEvents = 'none';
-            heart.style.color = '#ff1744';
-            heart.style.filter = 'drop-shadow(0 0 20px rgba(255, 23, 68, 0.8))';
+            heart.style.zIndex = '100';
+            heart.style.animation = `heartExplode${i} 2s ease-out forwards`;
             
-            const angle = (360 / heartCount) * i;
-            const distance = window.innerWidth <= 768 ? 150 : 200 + Math.random() * 100;
-            const radians = angle * Math.PI / 180;
-            
-            heart.style.animation = `explodeHeart${i} 2s ease-out forwards`;
-            
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes explodeHeart${i} {
-                    0% {
-                        transform: translate(-50%, -50%) rotate(0deg) scale(1);
-                        opacity: 1;
+            // Create unique animation for each heart
+            if (!document.getElementById(`heartExplodeStyle${i}`)) {
+                const style = document.createElement('style');
+                style.id = `heartExplodeStyle${i}`;
+                const angle = (360 / heartCount) * i;
+                const distance = window.innerWidth <= 768 ? 150 : 200;
+                style.textContent = `
+                    @keyframes heartExplode${i} {
+                        0% {
+                            transform: translate(-50%, -50%) scale(0.5);
+                            opacity: 1;
+                        }
+                        50% {
+                            transform: translate(-50%, -50%) 
+                                      translateX(${Math.cos(angle * Math.PI / 180) * distance * 0.7}px)
+                                      translateY(${Math.sin(angle * Math.PI / 180) * distance * 0.7}px)
+                                      scale(1.2);
+                            opacity: 0.8;
+                        }
+                        100% {
+                            transform: translate(-50%, -50%) 
+                                      translateX(${Math.cos(angle * Math.PI / 180) * distance}px)
+                                      translateY(${Math.sin(angle * Math.PI / 180) * distance}px)
+                                      scale(0.3);
+                            opacity: 0;
+                        }
                     }
-                    100% {
-                        transform: translate(-50%, -50%) 
-                                   translate(${Math.cos(radians) * distance}px, 
-                                            ${Math.sin(radians) * distance}px) 
-                                   rotate(720deg) scale(0);
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
+                `;
+                document.head.appendChild(style);
+            }
             
             document.body.appendChild(heart);
             
             setTimeout(() => {
                 if (heart.parentNode) {
                     heart.remove();
-                }
-                if (style.parentNode) {
-                    style.remove();
                 }
             }, 2000);
         }, i * 100);
@@ -901,44 +1032,46 @@ function createMusicExplosion(element) {
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    const noteCount = window.innerWidth <= 768 ? 3 : 5;
+    
+    const noteCount = window.innerWidth <= 768 ? 4 : 6;
+    const notes = ['🎵', '🎶', '🎼', '🎧'];
     
     for (let i = 0; i < noteCount; i++) {
         setTimeout(() => {
             const note = document.createElement('div');
-            const notes = ['🎵', '🎶', '🎼', '🎤', '🎧'];
-            note.innerHTML = notes[Math.floor(Math.random() * notes.length)];
+            note.innerHTML = notes[i % notes.length];
             note.style.position = 'fixed';
             note.style.left = centerX + 'px';
             note.style.top = centerY + 'px';
-            note.style.fontSize = window.innerWidth <= 768 ? '1.5rem' : '2rem';
-            note.style.zIndex = '15';
+            note.style.transform = 'translate(-50%, -50%)';
+            note.style.fontSize = '1.5rem';
             note.style.pointerEvents = 'none';
-            note.style.color = '#ff1744';
+            note.style.zIndex = '100';
+            note.style.animation = `musicExplode${i} 1.5s ease-out forwards`;
             
-            const angle = Math.random() * 360;
-            const distance = window.innerWidth <= 768 ? 80 : 100 + Math.random() * 50;
-            const radians = angle * Math.PI / 180;
-            
-            note.style.animation = `explodeNote${i}-${Date.now()} 1.5s ease-out forwards`;
-            
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes explodeNote${i}-${Date.now()} {
-                    0% {
-                        transform: translate(-50%, -50%) scale(1);
-                        opacity: 1;
+            // Create unique animation for each note
+            if (!document.getElementById(`musicExplodeStyle${i}`)) {
+                const style = document.createElement('style');
+                style.id = `musicExplodeStyle${i}`;
+                const angle = (360 / noteCount) * i;
+                const distance = 80;
+                style.textContent = `
+                    @keyframes musicExplode${i} {
+                        0% {
+                            transform: translate(-50%, -50%) scale(0.8);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: translate(-50%, -50%) 
+                                      translateX(${Math.cos(angle * Math.PI / 180) * distance}px)
+                                      translateY(${Math.sin(angle * Math.PI / 180) * distance}px)
+                                      scale(0.3);
+                            opacity: 0;
+                        }
                     }
-                    100% {
-                        transform: translate(-50%, -50%) 
-                                   translate(${Math.cos(radians) * distance}px, 
-                                            ${Math.sin(radians) * distance}px) 
-                                   scale(0);
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
+                `;
+                document.head.appendChild(style);
+            }
             
             document.body.appendChild(note);
             
@@ -946,234 +1079,113 @@ function createMusicExplosion(element) {
                 if (note.parentNode) {
                     note.remove();
                 }
-                if (style.parentNode) {
-                    style.remove();
-                }
             }, 1500);
-        }, i * 150);
+        }, i * 50);
     }
 }
 
-// Random glitch effects
-setInterval(() => {
-    const elements = document.querySelectorAll('.chaos-text, .image-frame, .video-frame');
-    const randomElement = elements[Math.floor(Math.random() * elements.length)];
-    if (randomElement) {
-        randomElement.classList.add('glitch');
-        
-        setTimeout(() => {
-            randomElement.classList.remove('glitch');
-        }, window.innerWidth <= 768 ? 500 : 1000);
-    }
-}, window.innerWidth <= 768 ? 5000 : 3000);
-
-// Preload audio on demand
-function preloadAudioOnDemand(audioId) {
-    const audio = document.getElementById(audioId);
-    if (audio && audio.preload === 'none') {
-        audio.preload = 'auto';
-        audio.load();
+// Network status handler
+function handleNetworkStatus(isOnline) {
+    if (!isOnline) {
+        document.getElementById('offlineIndicator')?.classList.add('show');
+        showTypingMessage('You are now offline. Playing cached content...');
+    } else {
+        document.getElementById('offlineIndicator')?.classList.remove('show');
+        showTypingMessage('You are back online. Restoring audio...');
     }
 }
 
-// Mobile touch handling
-function addTouchSupport() {
-    const elements = document.querySelectorAll('.music-chaos, #mainHeart, .back-button, .message-icon, .image-frame, .video-frame');
+// Typing message display function
+function showTypingMessage(message) {
+    const messageContainer = document.getElementById('typingMessage') || createTypingMessageElement();
+    messageContainer.textContent = message;
+    messageContainer.classList.add('show');
     
-    elements.forEach(element => {
-        element.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.95)';
-        }, { passive: true });
-        
-        element.addEventListener('touchend', function() {
-            this.style.transform = '';
-        }, { passive: true });
-    });
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        messageContainer.classList.remove('show');
+    }, 3000);
 }
 
-// Initialize everything when DOM is fully loaded
+// Create typing message element if it doesn't exist
+function createTypingMessageElement() {
+    const element = document.createElement('div');
+    element.id = 'typingMessage';
+    element.className = 'typing-message';
+    document.body.appendChild(element);
+    return element;
+}
+
+// Check offline status function
+function checkOfflineStatus() {
+    handleNetworkStatus(navigator.onLine);
+}
+
+// Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing...');
+    // Initialize audio context on first user interaction
+    document.addEventListener('click', initAudioContext, { once: true });
+    document.addEventListener('touchstart', initAudioContext, { once: true });
     
-    // Check offline status
-    checkOfflineStatus();
+    // Setup offline detection
     window.addEventListener('online', checkOfflineStatus);
     window.addEventListener('offline', checkOfflineStatus);
+    checkOfflineStatus();
     
-    // Add mobile touch support
-    addTouchSupport();
+    // Auto-detect videos
+    autoDetectVideos();
     
-    // Auto-detect and setup videos
-    setTimeout(() => {
-        autoDetectVideos();
-    }, 500);
-    
-    // Set up event listeners
+    // Setup event listeners
     const backButton = document.querySelector('.back-button');
     if (backButton) {
-        backButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            goBackToMain();
-        });
-        console.log('Back button listener added');
+        backButton.addEventListener('click', goBackToMain);
     }
     
     const messageIcon = document.querySelector('.message-icon');
     if (messageIcon) {
-        messageIcon.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            showMessage();
-        });
-        console.log('Message icon listener added');
+        messageIcon.addEventListener('click', showMessage);
     }
     
+    const closeMessage = document.querySelector('.close-message');
+    if (closeMessage) {
+        closeMessage.addEventListener('click', hideMessage);
+    }
+    
+    // Setup main heart
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart) {
-        mainHeart.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            playMainMusic();
+        mainHeart.addEventListener('click', playMainMusic);
+        mainHeart.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                playMainMusic();
+            }
         });
-        console.log('Main heart listener added');
     }
     
-    // Set up music buttons
+    // Setup music buttons
     for (let i = 1; i <= 4; i++) {
         const musicBtn = document.getElementById(`musicBtn${i}`);
         if (musicBtn) {
-            musicBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log(`Music button ${i} clicked`);
-                playMusic(i);
+            musicBtn.addEventListener('click', () => playMusic(i));
+            musicBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playMusic(i);
+                }
             });
-            console.log(`Music button ${i} listener added`);
         }
     }
     
-    // Close message modal when clicking outside
+    // Close modal when clicking outside
     const messageModal = document.getElementById('messageModal');
     if (messageModal) {
-        messageModal.addEventListener('click', function(e) {
-            if (e.target === this) {
+        messageModal.addEventListener('click', (e) => {
+            if (e.target === messageModal) {
                 hideMessage();
             }
         });
-        
-        const closeMessage = document.querySelector('.close-message');
-        if (closeMessage) {
-            closeMessage.addEventListener('click', hideMessage);
-        }
     }
     
-    // Set up media frame click handlers
-    const mediaFrames = document.querySelectorAll('.image-frame, .video-frame');
-    mediaFrames.forEach(frame => {
-        frame.style.cursor = 'pointer';
-        frame.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            expandMedia(this.id);
-        });
-        console.log(`Media frame ${frame.id} click listener added`);
-    });
-    
-    // Initialize media frames with existing media sources
-    const mediaData = [
-        { id: 'imageFrame1', src: 'https://caked-production.up.railway.app/assets/images/sikununuli.png', alt: 'Our memories' },
-        { id: 'imageFrame2', src: 'https://caked-production.up.railway.app/assets/images/psychosis.png', alt: 'Our special moment' },
-        { id: 'imageFrame3', src: 'https://caked-production.up.railway.app/assets/images/gal.png', alt: 'Missing this' },
-        { id: 'imageFrame4', src: 'https://caked-production.up.railway.app/assets/images/lost.png', alt: 'Your beauty' },
-        { id: 'imageFrame5', src: 'https://caked-production.up.railway.app/assets/videos/tilapia.mp4', alt: 'Lonely times' }
-    ];
-    
-    // Setup each media frame (will auto-detect if it's video or image)
-    mediaData.forEach(media => {
-        setTimeout(() => setupMediaFrame(media.id, media.src, media.alt), 100);
-    });
-    
-    // Initialize audio context
-    initAudioContext();
-    
-    // Optimize audio loading
-    const mainAudio = document.getElementById('mainHeartAudio');
-    if (mainAudio) {
-        mainAudio.preload = 'auto';
-        cacheAudio('mainHeartAudio');
-    }
-    
-    // Set other audio files to load only when needed
-    for (let i = 1; i <= 4; i++) {
-        const audio = document.getElementById(`musicAudio${i}`);
-        if (audio) {
-            audio.preload = 'none';
-            audio.volume = window.innerWidth <= 768 ? 0.4 : 0.3;
-        }
-    }
-    
-    // Show welcome message
-    setTimeout(() => {
-        showTypingMessage('Welcome to the chaos of doubt... 💔');
-    }, 1000);
-    
-    // Handle orientation changes on mobile
-    window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-            const viewport = document.querySelector('meta[name=viewport]');
-            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
-        }, 500);
-    });
-    
-    console.log('Initialization complete');
+    console.log('Doubt page initialized successfully');
 });
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        hideMessage();
-        stopAllAudio();
-        // Close expanded media if open
-        if (expandedMedia) {
-            const closeBtn = expandedMedia.querySelector('button');
-            if (closeBtn) closeBtn.click();
-        }
-    }
-    if (e.key === 'm' || e.key === 'M') {
-        showMessage();
-    }
-    if (e.key === ' ') {
-        e.preventDefault();
-        stopAllAudio();
-    }
-});
-
-// Handle user interaction to enable audio context
-document.addEventListener('click', function() {
-    if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}, { once: true });
-
-// Prevent right-click context menu
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-});
-
-// Add touch support for mobile devices
-document.addEventListener('touchstart', function() {
-    if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}, { once: true });
-
-// Prevent zoom on double tap for mobile
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(event) {
-    const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);

@@ -168,8 +168,25 @@ body.light-mode .message-content {
 }
 
 /* Offline indicator */
+.offline-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255, 152, 0, 0.2);
+    border: 2px solid #ff9800;
+    color: #ff9800;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 25;
+    opacity: 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
 .offline-indicator.show {
     opacity: 1;
+    transform: translateY(-10px);
 }
 
 /* Typing effect */
@@ -470,7 +487,7 @@ body.light-mode .message-content {
     display: none;
 }
 
-/* Media popup styles */
+/* Media popup styles - Updated for slightly larger video popups */
 .media-popup {
     position: fixed;
     background: rgba(10, 10, 10, 0.95);
@@ -489,6 +506,70 @@ body.light-mode .message-content {
 .media-popup.show {
     opacity: 1;
     transform: scale(1) rotate(0deg);
+}
+
+/* Enhanced video frame indicator */
+.video-frame {
+    position: relative;
+}
+
+.video-frame::before {
+    content: '🎬';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.8rem;
+    background: rgba(255, 23, 68, 0.8);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 10px;
+    z-index: 10;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.video-frame:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced video popup styles */
+.media-popup video {
+    border-radius: 17px;
+    box-shadow: inset 0 0 20px rgba(255, 23, 68, 0.1);
+}
+
+.media-popup video::-webkit-media-controls-panel {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.media-popup video::-webkit-media-controls-play-button,
+.media-popup video::-webkit-media-controls-pause-button {
+    background-color: rgba(255, 23, 68, 0.8);
+    border-radius: 50%;
+}
+
+/* Improved video loading state */
+.media-popup video[preload="metadata"] {
+    background: linear-gradient(45deg, 
+        rgba(255, 23, 68, 0.1) 0%, 
+        rgba(0, 0, 0, 0.9) 50%, 
+        rgba(255, 23, 68, 0.1) 100%);
+}
+
+/* Loading animation for videos */
+@keyframes videoLoading {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+.media-popup video[preload="metadata"]:not([src]) {
+    animation: videoLoading 1.5s ease-in-out infinite;
+}
+
+/* Floating animation for popup */
+@keyframes floatPopup {
+    0%, 100% { transform: scale(1) rotate(0deg) translateY(0px); }
+    50% { transform: scale(1) rotate(1deg) translateY(-5px); }
 }
 
 /* Responsive design */
@@ -537,23 +618,16 @@ body.light-mode .message-content {
         right: 70px;
         top: 80px;
     }
-}indicator {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(255, 152, 0, 0.2);
-    border: 2px solid #ff9800;
-    color: #ff9800;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    z-index: 25;
-    opacity: 0;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-}
-
-.offline-indicator.show {
-    opacity: 1;
-    transform: translateY(-10px);
+    
+    /* Mobile video popup adjustments */
+    .media-popup video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    .video-frame::before {
+        font-size: 0.7rem;
+        padding: 1px 3px;
+    }
 }
