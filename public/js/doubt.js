@@ -10,6 +10,7 @@ let analyser = null;
 let dataArray = null;
 let animationId = null;
 let crossfadeInterval = null;
+let isInitialLoad = true;
 
 // Feature states
 let cachedTracks = new Set();
@@ -490,14 +491,17 @@ function createMusicExplosion(element) {
     }
 }
 
-// Network status handler
+// Network status handler - Updated for initial load
 function handleNetworkStatus(isOnline) {
     if (!isOnline) {
         document.getElementById('offlineIndicator')?.classList.add('show');
         showTypingMessage('You are now offline. Playing cached content...');
     } else {
         document.getElementById('offlineIndicator')?.classList.remove('show');
-        showTypingMessage('You are back online. Restoring audio...');
+        // Only show "you are back online" message if it's not the initial load
+        if (!isInitialLoad) {
+            showTypingMessage('You are back online. Restoring audio...');
+        }
     }
 }
 
@@ -1179,6 +1183,11 @@ function preloadAudioOnDemand(audioId) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
     
+    // Show initial welcome message
+    setTimeout(() => {
+        showTypingMessage('🔪start by 💔', 4000);
+    }, 1000);
+    
     // Initialize audio context on first user interaction
     document.addEventListener('click', initAudioContext, { once: true });
     document.addEventListener('touchstart', initAudioContext, { once: true });
@@ -1186,7 +1195,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup offline detection
     window.addEventListener('online', checkOfflineStatus);
     window.addEventListener('offline', checkOfflineStatus);
-    checkOfflineStatus();
+    
+    // Check initial status without showing online message
+    isOffline = !navigator.onLine;
+    if (!navigator.onLine) {
+        document.getElementById('offlineIndicator')?.classList.add('show');
+    }
+    
+    // Mark that initial load is complete after a short delay
+    setTimeout(() => {
+        isInitialLoad = false;
+    }, 2000);
     
     // Create offline indicator
     createOfflineIndicator();
