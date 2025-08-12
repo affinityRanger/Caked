@@ -669,17 +669,173 @@ body.light-mode .message-content {
 
 /* Sound Visualizer Bar */
 .sound-visualizer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 40, 0.9));
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 23, 68, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    padding: 10px;
+   position: fixed;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   height: 80px;
+   background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 40, 0.9));
+   backdrop-filter: blur(10px);
+   border-top: 1px solid rgba(255, 255, 255, 0.1);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 1;
+   transition: all 0.3s ease;
+   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.sound-visualizer.hidden {
+   transform: translateY(100%);
+   opacity: 0;
+}
+
+.visualizer-content {
+   display: flex;
+   align-items: center;
+   gap: 20px;
+   max-width: 1200px;
+   width: 100%;
+   padding: 0 20px;
+}
+
+.song-info {
+   flex: 1;
+   min-width: 200px;
+}
+
+.song-title {
+   color: #fff;
+   font-size: 16px;
+   font-weight: 500;
+   margin: 0;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.song-artist {
+   color: rgba(255, 255, 255, 0.7);
+   font-size: 12px;
+   margin: 2px 0 0 0;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+}
+
+.audio-visualizer {
+   display: flex;
+   align-items: end;
+   gap: 2px;
+   height: 40px;
+   min-width: 200px;
+   justify-content: center;
+}
+
+.visualizer-bar {
+   width: 4px;
+   background: linear-gradient(to top, #00ff88, #00ccff, #ff6b9d);
+   border-radius: 2px;
+   transition: height 0.1s ease;
+   min-height: 4px;
+   opacity: 0.8;
+}
+
+.visualizer-controls {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   min-width: 150px;
+   justify-content: flex-end;
+}
+
+.visualizer-btn {
+   background: rgba(255, 255, 255, 0.1);
+   border: none;
+   color: white;
+   width: 35px;
+   height: 35px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   transition: all 0.3s ease;
+   font-size: 14px;
+}
+
+.visualizer-btn:hover {
+   background: rgba(255, 255, 255, 0.2);
+   transform: scale(1.1);
+}
+
+.play-btn {
+   font-size: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+   .sound-visualizer {
+       height: 70px;
+   }
+   
+   .visualizer-content {
+       padding: 0 15px;
+       gap: 15px;
+   }
+   
+   .song-title {
+       font-size: 14px;
+   }
+   
+   .song-artist {
+       font-size: 11px;
+   }
+   
+   .audio-visualizer {
+       min-width: 120px;
+       height: 30px;
+   }
+   
+   .visualizer-bar {
+       width: 3px;
+   }
+   
+   .visualizer-btn {
+       width: 30px;
+       height: 30px;
+       font-size: 12px;
+   }
+   
+   .visualizer-controls {
+       min-width: 120px;
+       gap: 8px;
+   }
+}
+
+/* Ensure modals and popups appear above visualizer */
+.modal,
+.popup,
+#photoModal,
+#titlePopup,
+#musicPopup,
+#exclamationPopup {
+   z-index: 1000 !important;
+}
+
+.modal-content,
+.popup-content {
+   z-index: 1001 !important;
+}
+
+/* Add bottom padding to body when visualizer is visible */
+body.visualizer-active {
+   padding-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+   body.visualizer-active {
+       padding-bottom: 70px;
+   }
 }
