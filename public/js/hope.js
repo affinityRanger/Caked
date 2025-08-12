@@ -1,5 +1,6 @@
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
+
 // Audio context for Web Audio API
 let audioContext = null;
 let currentAudio = null;
@@ -9,12 +10,23 @@ let analyser = null;
 let dataArray = null;
 let animationId = null;
 let crossfadeInterval = null;
+
+// Audio visualization variables
+let visualizerAnalyser = null;
+let visualizerDataArray = null;
+let visualizerAnimationId = null;
+let visualizerBars = [];
+let isVisualizerVisible = true;
+let visualizerSource = null;
+
 // Feature states
 let isDarkMode = true;
 let cachedTracks = new Set();
 let isOffline = false;
+
 // Auto-play attempt flag
 let autoPlayAttempted = false;
+
 // Global music player variables
 let globalMusicIndex = 0;
 let globalMusicFiles = [
@@ -29,6 +41,7 @@ let globalMusicFiles = [
     'PARTYNEXTDOOR - You ve Been Missed.mp3',
     'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
+
 let globalMusicTitles = [
     "Dreamin' - PARTYNEXTDOOR",
     "DEEPER - PARTYNEXTDOOR",
@@ -41,6 +54,7 @@ let globalMusicTitles = [
     "You've Been Missed - PARTYNEXTDOOR",
     "BELIEVE IT - PARTYNEXTDOOR & Rihanna"
 ];
+
 // Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
@@ -52,6 +66,178 @@ function initAudioContext() {
     }
     return audioContext;
 }
+
+// Create the HTML structure for the visualizer
+function createSoundVisualizer() {
+    const visualizerHTML = `
+        <div id="soundVisualizer" class="sound-visualizer hidden">
+            <div class="visualizer-content">
+                <div class="song-info">
+                    <h4 class="song-title" id="visualizerSongTitle">No song playing</h4>
+                    <p class="song-artist" id="visualizerSongArtist">Select a track</p>
+                </div>
+                
+                <div class="audio-visualizer" id="audioVisualizer">
+                    ${Array(40).fill().map((_, i) => `<div class="visualizer-bar" id="bar-${i}"></div>`).join('')}
+                </div>
+                
+                <div class="visualizer-controls">
+                    <button class="visualizer-btn" onclick="playPreviousSong()" title="Previous">⏮️</button>
+                    <button class="visualizer-btn play-btn" onclick="toggleGlobalMusic()" id="visualizerPlayBtn" title="Play/Pause">▶️</button>
+                    <button class="visualizer-btn" onclick="playNextSong()" title="Next">⏭️</button>
+                    <button class="visualizer-btn" onclick="toggleVisualizerVisibility()" title="Hide/Show" id="toggleVisualizerBtn">👁️</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insert the visualizer into the page
+    document.body.insertAdjacentHTML('beforeend', visualizerHTML);
+    
+    // Add body class for padding
+    document.body.classList.add('visualizer-active');
+}
+
+// Initialize the audio visualizer
+function initAudioVisualizer() {
+    const audio = document.getElementById('globalAudio');
+    if (!audio || !audioContext) return;
+    
+    try {
+        // Only create source if it doesn't exist
+        if (!visualizerSource) {
+            visualizerSource = audioContext.createMediaElementSource(audio);
+        }
+        
+        // Create analyser
+        visualizerAnalyser = audioContext.createAnalyser();
+        visualizerAnalyser.fftSize = 128;
+        visualizerAnalyser.smoothingTimeConstant = 0.8;
+        
+        const bufferLength = visualizerAnalyser.frequencyBinCount;
+        visualizerDataArray = new Uint8Array(bufferLength);
+        
+        // Connect audio to analyser
+        visualizerSource.connect(visualizerAnalyser);
+        visualizerAnalyser.connect(audioContext.destination);
+        
+        // Get visualizer bars
+        visualizerBars = Array.from(document.querySelectorAll('.visualizer-bar'));
+        
+        console.log('Audio visualizer initialized');
+        
+    } catch (error) {
+        console.log('Error initializing audio visualizer:', error);
+    }
+}
+
+// Animate the visualizer bars
+function animateVisualizer() {
+    if (!visualizerAnalyser || !visualizerDataArray || !visualizerBars.length) return;
+    
+    visualizerAnalyser.getByteFrequencyData(visualizerDataArray);
+    
+    // Update bars based on frequency data
+    for (let i = 0; i < visualizerBars.length && i < visualizerDataArray.length; i++) {
+        const bar = visualizerBars[i];
+        const value = visualizerDataArray[i];
+        
+        // Scale the value to a height between 4px and 40px
+        const height = Math.max(4, (value / 255) * 40);
+        bar.style.height = `${height}px`;
+        
+        // Add color variation based on frequency
+        const hue = (i / visualizerBars.length) * 360;
+        const intensity = value / 255;
+        bar.style.background = `linear-gradient(to top, 
+            hsl(${hue}, 70%, ${50 + intensity * 30}%), 
+            hsl(${(hue + 60) % 360}, 70%, ${60 + intensity * 20}%))`;
+        bar.style.opacity = Math.max(0.3, intensity);
+    }
+    
+    visualizerAnimationId = requestAnimationFrame(animateVisualizer);
+}
+
+// Start visualizer animation
+function startVisualizer() {
+    if (visualizerAnimationId) {
+        cancelAnimationFrame(visualizerAnimationId);
+    }
+    animateVisualizer();
+}
+
+// Stop visualizer animation
+function stopVisualizer() {
+    if (visualizerAnimationId) {
+        cancelAnimationFrame(visualizerAnimationId);
+        visualizerAnimationId = null;
+    }
+    
+    // Reset bars to minimum height
+    visualizerBars.forEach(bar => {
+        bar.style.height = '4px';
+        bar.style.opacity = '0.3';
+    });
+}
+
+// Show/hide visualizer
+function showVisualizer() {
+    const visualizer = document.getElementById('soundVisualizer');
+    if (visualizer) {
+        visualizer.classList.remove('hidden');
+        isVisualizerVisible = true;
+    }
+}
+
+function hideVisualizer() {
+    const visualizer = document.getElementById('soundVisualizer');
+    if (visualizer) {
+        visualizer.classList.add('hidden');
+        isVisualizerVisible = false;
+    }
+}
+
+// Toggle visualizer visibility
+function toggleVisualizerVisibility() {
+    if (isVisualizerVisible) {
+        hideVisualizer();
+    } else {
+        showVisualizer();
+    }
+    
+    const toggleBtn = document.getElementById('toggleVisualizerBtn');
+    if (toggleBtn) {
+        toggleBtn.textContent = isVisualizerVisible ? '👁️' : '🙈';
+    }
+}
+
+// Update visualizer song info
+function updateVisualizerSongInfo() {
+    const titleElement = document.getElementById('visualizerSongTitle');
+    const artistElement = document.getElementById('visualizerSongArtist');
+    
+    if (titleElement && artistElement) {
+        const currentTitle = globalMusicTitles[globalMusicIndex];
+        const parts = currentTitle.split(' - ');
+        
+        if (parts.length >= 2) {
+            titleElement.textContent = parts[0];
+            artistElement.textContent = parts[1];
+        } else {
+            titleElement.textContent = currentTitle;
+            artistElement.textContent = 'Unknown Artist';
+        }
+    }
+}
+
+// Update visualizer play button
+function updateVisualizerPlayButton(isPlaying) {
+    const playBtn = document.getElementById('visualizerPlayBtn');
+    if (playBtn) {
+        playBtn.textContent = isPlaying ? '⏸️' : '▶️';
+    }
+}
+
 // Attempt to start music automatically
 function attemptAutoPlay() {
     if (autoPlayAttempted) return;
@@ -77,6 +263,9 @@ function attemptAutoPlay() {
                 if (musicButton) {
                     musicButton.classList.add('playing');
                 }
+                updateVisualizerPlayButton(true);
+                showVisualizer();
+                startVisualizer();
             }).catch(error => {
                 console.log('Auto-play blocked by browser:', error);
                 // Show a subtle indicator that user can start music
@@ -87,6 +276,7 @@ function attemptAutoPlay() {
         }
     }
 }
+
 // Modal functions
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -96,6 +286,7 @@ function openModal(modalId) {
         modal.classList.add('show');
     }
 }
+
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -104,6 +295,7 @@ function closeModal(modalId) {
         modal.classList.remove('show');
     }
 }
+
 // FIXED: Photo enlargement functionality
 function enlargePhoto(img, event) {
     if (event) {
@@ -133,6 +325,7 @@ function enlargePhoto(img, event) {
         console.log('Photo modal opened with image:', img.src);
     }
 }
+
 function closePhotoModal() {
     const modal = document.getElementById('photoModal');
     const enlargedPhoto = document.getElementById('enlargedPhoto');
@@ -153,6 +346,7 @@ function closePhotoModal() {
         document.body.style.overflow = 'auto';
     }
 }
+
 // Title click functionality
 function titleClick() {
     const popup = document.getElementById('titlePopup');
@@ -167,6 +361,7 @@ function titleClick() {
         }, 8000);
     }
 }
+
 // Message functionality
 function showSavedMessage(messageId) {
     const messageDiv = document.getElementById(messageId);
@@ -179,6 +374,7 @@ function showSavedMessage(messageId) {
         }
     }
 }
+
 // Music popup functionality
 function toggleMusicPopup() {
     const popup = document.getElementById('musicPopup');
@@ -202,6 +398,7 @@ function toggleMusicPopup() {
         }
     }
 }
+
 // Exclamation popup functionality
 function toggleExclamationPopup() {
     const popup = document.getElementById('exclamationPopup');
@@ -219,6 +416,7 @@ function toggleExclamationPopup() {
         }
     }
 }
+
 // Global music functions - FIXED VERSION
 function selectGlobalSong(filename) {
     const audio = document.getElementById('globalAudio');
@@ -247,6 +445,9 @@ function selectGlobalSong(filename) {
         nowPlaying.textContent = globalMusicTitles[globalMusicIndex];
     }
     
+    // Update visualizer song info
+    updateVisualizerSongInfo();
+    
     // Update select dropdown
     const select = document.getElementById('globalMusicSelect');
     if (select) {
@@ -269,10 +470,13 @@ function toggleGlobalMusic() {
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         playBtn.textContent = '⏸️';
+                        updateVisualizerPlayButton(true);
                         if (musicButton) {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
+                        showVisualizer();
+                        startVisualizer();
                     }).catch(error => {
                         console.log('Audio play failed:', error);
                     });
@@ -285,10 +489,13 @@ function toggleGlobalMusic() {
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
                             playBtn.textContent = '⏸️';
+                            updateVisualizerPlayButton(true);
                             if (musicButton) {
                                 musicButton.classList.add('playing');
                                 musicButton.classList.remove('pulse');
                             }
+                            showVisualizer();
+                            startVisualizer();
                         }).catch(error => {
                             console.log('Audio play failed:', error);
                         });
@@ -298,9 +505,11 @@ function toggleGlobalMusic() {
         } else {
             audio.pause();
             playBtn.textContent = '▶️';
+            updateVisualizerPlayButton(false);
             if (musicButton) {
                 musicButton.classList.remove('playing');
             }
+            stopVisualizer();
         }
     }
 }
@@ -320,10 +529,13 @@ function playPreviousSong() {
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     if (playBtn) playBtn.textContent = '⏸️';
+                    updateVisualizerPlayButton(true);
                     if (musicButton) {
                         musicButton.classList.add('playing');
                         musicButton.classList.remove('pulse');
                     }
+                    showVisualizer();
+                    startVisualizer();
                 }).catch(error => {
                     console.log('Audio play failed:', error);
                 });
@@ -336,10 +548,13 @@ function playPreviousSong() {
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         if (playBtn) playBtn.textContent = '⏸️';
+                        updateVisualizerPlayButton(true);
                         if (musicButton) {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
+                        showVisualizer();
+                        startVisualizer();
                     }).catch(error => {
                         console.log('Audio play failed:', error);
                     });
@@ -364,10 +579,13 @@ function playNextSong() {
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     if (playBtn) playBtn.textContent = '⏸️';
+                    updateVisualizerPlayButton(true);
                     if (musicButton) {
                         musicButton.classList.add('playing');
                         musicButton.classList.remove('pulse');
                     }
+                    showVisualizer();
+                    startVisualizer();
                 }).catch(error => {
                     console.log('Audio play failed:', error);
                 });
@@ -380,10 +598,13 @@ function playNextSong() {
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         if (playBtn) playBtn.textContent = '⏸️';
+                        updateVisualizerPlayButton(true);
                         if (musicButton) {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
+                        showVisualizer();
+                        startVisualizer();
                     }).catch(error => {
                         console.log('Audio play failed:', error);
                     });
@@ -404,11 +625,14 @@ function stopGlobalMusic() {
         if (playBtn) {
             playBtn.textContent = '▶️';
         }
+        updateVisualizerPlayButton(false);
         if (musicButton) {
             musicButton.classList.remove('playing');
         }
+        stopVisualizer();
     }
 }
+
 // Create stars background
 function createStars() {
     const starsContainer = document.getElementById('stars');
@@ -438,6 +662,7 @@ function createStars() {
         starsContainer.appendChild(star);
     }
 }
+
 // Initialize loading screen
 function initLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -455,6 +680,7 @@ function initLoadingScreen() {
         }, 3000);
     }
 }
+
 // Image loading optimization
 function optimizeImageLoading() {
     const images = document.querySelectorAll('img');
@@ -470,6 +696,7 @@ function optimizeImageLoading() {
         }
     });
 }
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing hope page...');
@@ -482,6 +709,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize audio context
     initAudioContext();
+    
+    // Create sound visualizer
+    createSoundVisualizer();
     
     // Optimize image loading
     optimizeImageLoading();
@@ -508,6 +738,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Handle audio errors
         globalAudio.addEventListener('error', function(e) {
             console.log('Audio error:', e);
+        });
+        
+        // Initialize audio visualizer when audio can play
+        globalAudio.addEventListener('canplay', function() {
+            if (!visualizerAnalyser) {
+                initAudioVisualizer();
+            }
         });
     }
     
@@ -607,6 +844,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!autoPlayAttempted) {
             attemptAutoPlay();
         }
+        // Initialize visualizer if not already done
+        if (!visualizerAnalyser && audioContext) {
+            setTimeout(() => {
+                initAudioVisualizer();
+            }, 100);
+        }
     }
     
     // Add event listeners for user interaction
@@ -636,12 +879,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Hope page initialization complete');
 });
+
 // Handle orientation change
 window.addEventListener('orientationchange', function() {
     setTimeout(() => {
         createStars(); // Recreate stars for new viewport
     }, 500);
 });
+
 // Handle resize
 window.addEventListener('resize', function() {
     // Recreate stars on significant size changes
@@ -650,6 +895,7 @@ window.addEventListener('resize', function() {
         createStars();
     }, 250);
 });
+
 // Prevent right-click context menu
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
