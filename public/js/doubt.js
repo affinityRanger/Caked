@@ -38,8 +38,7 @@ function setupAudioAnalyser() {
     
     try {
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256; // Increased for better visualization
-        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 128;
         const bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         
@@ -50,7 +49,7 @@ function setupAudioAnalyser() {
     }
 }
 
-// Create audio visualizer with enhanced bars
+// Create audio visualizer
 function createVisualizer() {
     // Check if visualizer already exists
     if (document.getElementById('audioVisualizer')) return;
@@ -59,19 +58,18 @@ function createVisualizer() {
     visualizer.className = 'audio-visualizer';
     visualizer.id = 'audioVisualizer';
     
-    // Create 64 bars for better visualization
-    for (let i = 0; i < 64; i++) {
+    // Create 32 bars for visualization
+    for (let i = 0; i < 32; i++) {
         const bar = document.createElement('div');
         bar.className = 'visualizer-bar';
         bar.style.height = '2px';
-        bar.style.backgroundColor = `hsl(${340 + (i * 2)}, 100%, ${50 + (i % 20)}%)`;
         visualizer.appendChild(bar);
     }
     
     document.body.appendChild(visualizer);
 }
 
-// Update audio visualization with enhanced effects
+// Update audio visualization
 function updateVisualization() {
     if (!analyser || !dataArray) return;
     
@@ -81,9 +79,7 @@ function updateVisualization() {
     
     if (bars) {
         bars.forEach((bar, index) => {
-            // Use multiple frequency bins for smoother animation
-            const dataIndex = Math.floor((index / bars.length) * dataArray.length);
-            const value = dataArray[dataIndex] || 0;
+            const value = dataArray[index * 2] || 0;
             
             // Enhanced height calculation with dynamic range
             const minHeight = 3;
@@ -425,14 +421,16 @@ function createHeartExplosion() {
         setTimeout(() => {
             const heart = document.createElement('div');
             heart.innerHTML = '💔';
-            heart.style.position = 'absolute';
-            heart.style.left = '50%';
-            heart.style.top = '50%';
-            heart.style.transform = 'translate(-50%, -50%)';
-            heart.style.fontSize = '2rem';
-            heart.style.pointerEvents = 'none';
-            heart.style.zIndex = '100';
-            heart.style.animation = `heartExplode${i} 2s ease-out forwards`;
+            heart.style.cssText = `
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 2rem;
+                pointer-events: none;
+                z-index: 100;
+                animation: heartExplode${i} 2s ease-out forwards;
+            `;
             
             // Create unique animation for each heart
             if (!document.getElementById(`heartExplodeStyle${i}`)) {
@@ -491,14 +489,16 @@ function createMusicExplosion(element) {
         setTimeout(() => {
             const note = document.createElement('div');
             note.innerHTML = notes[i % notes.length];
-            note.style.position = 'fixed';
-            note.style.left = centerX + 'px';
-            note.style.top = centerY + 'px';
-            note.style.transform = 'translate(-50%, -50%)';
-            note.style.fontSize = '1.5rem';
-            note.style.pointerEvents = 'none';
-            note.style.zIndex = '100';
-            note.style.animation = `musicExplode${i} 1.5s ease-out forwards`;
+            note.style.cssText = `
+                position: fixed;
+                left: ${centerX}px;
+                top: ${centerY}px;
+                transform: translate(-50%, -50%);
+                font-size: 1.5rem;
+                pointer-events: none;
+                z-index: 100;
+                animation: musicExplode${i} 1.5s ease-out forwards;
+            `;
             
             // Create unique animation for each note
             if (!document.getElementById(`musicExplodeStyle${i}`)) {
@@ -535,13 +535,14 @@ function createMusicExplosion(element) {
     }
 }
 
-// Network status handler - Updated for initial load
+// Network status handler
 function handleNetworkStatus(isOnline) {
+    const indicator = document.getElementById('offlineIndicator');
     if (!isOnline) {
-        document.getElementById('offlineIndicator')?.classList.add('show');
+        indicator?.classList.add('show');
         showTypingMessage('You are now offline. Playing cached content...');
     } else {
-        document.getElementById('offlineIndicator')?.classList.remove('show');
+        indicator?.classList.remove('show');
         // Only show "you are back online" message if it's not the initial load
         if (!isInitialLoad) {
             showTypingMessage('You are back online. Restoring audio...');
@@ -609,20 +610,19 @@ function initializeMediaFrames() {
         const video = frame.querySelector('video');
         
         if (video) {
-            // Ensure video is properly styled and set up
             setupVideoElement(video, frame);
         } else if (img) {
-            // Set up image click handling
             frame.style.cursor = 'pointer';
             
-            // Remove existing listeners
-            frame.onclick = null;
+            // Remove existing listeners by cloning
+            const newFrame = frame.cloneNode(true);
+            frame.parentNode.replaceChild(newFrame, frame);
             
             // Add click handler for images
-            frame.addEventListener('click', (e) => {
+            newFrame.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                expandMedia(frame.id);
+                expandMedia(newFrame.id);
             });
         }
     });
@@ -645,7 +645,6 @@ function createOfflineIndicator() {
 function cacheAudio(audioId) {
     const audio = document.getElementById(audioId);
     if (audio && !cachedTracks.has(audioId)) {
-        // Simulate caching by preloading
         audio.preload = 'auto';
         audio.load();
         cachedTracks.add(audioId);
@@ -658,8 +657,10 @@ function createTear() {
     const tear = document.createElement('div');
     tear.className = 'tear';
     tear.innerHTML = '💧';
-    tear.style.left = Math.random() * 100 + '%';
-    tear.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    tear.style.cssText = `
+        left: ${Math.random() * 100}%;
+        animation-duration: ${(Math.random() * 2 + 2)}s;
+    `;
     document.body.appendChild(tear);
     
     setTimeout(() => {
@@ -701,7 +702,7 @@ function hideMessage() {
 function showPlaceholder(num) {
     const frame = document.getElementById(`imageFrame${num}`);
     if (frame) {
-        const img = frame.querySelector('img');
+        const img = frame.querySelector('img:not(.placeholder)');
         const video = frame.querySelector('video');
         const placeholder = frame.querySelector('.placeholder');
         
@@ -719,19 +720,16 @@ function isVideoSource(src) {
 
 // Auto-detect and setup video elements
 function autoDetectVideos() {
-    // Get all frames
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
-    frames.forEach((frame, index) => {
-        // Check if frame already has video
+    frames.forEach(frame => {
         let video = frame.querySelector('video');
         if (video) {
             setupVideoElement(video, frame);
             return;
         }
         
-        // Check if frame has image with video extension
-        const img = frame.querySelector('img');
+        const img = frame.querySelector('img:not(.placeholder)');
         if (img && isVideoSource(img.src)) {
             convertImageToVideo(img, frame);
         }
@@ -748,30 +746,28 @@ function convertImageToVideo(img, frame) {
     video.playsInline = true;
     video.preload = 'metadata';
     
-    // Ensure video takes full frame space
     video.style.cssText = `
         width: 100%;
         height: 100%;
         object-fit: cover;
         border-radius: 12px;
         display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
     `;
     
-    // Add error handling
     video.onerror = () => {
-        // If video fails to load, keep the image
         console.log('Video failed to load, keeping image:', img.src);
     };
     
     video.onloadedmetadata = () => {
-        // Video loaded successfully, replace image
         img.style.display = 'none';
         frame.insertBefore(video, frame.firstChild);
         setupVideoElement(video, frame);
         console.log('Video loaded and replaced image:', video.src);
     };
     
-    // Try to load the video
     video.load();
 }
 
@@ -779,13 +775,11 @@ function convertImageToVideo(img, frame) {
 function setupVideoElement(video, frame) {
     if (!video || !frame) return;
     
-    // Ensure video displays properly with full styling
     video.muted = true;
     video.playsInline = true;
     video.loop = true;
     video.preload = 'metadata';
     
-    // Apply proper styling to ensure full display
     video.style.cssText = `
         width: 100% !important;
         height: 100% !important;
@@ -797,14 +791,12 @@ function setupVideoElement(video, frame) {
         left: 0;
     `;
     
-    // Handle video interactions
     video.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         expandMedia(frame.id);
     });
     
-    // Auto-play when video comes into view
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -820,7 +812,6 @@ function setupVideoElement(video, frame) {
     
     observer.observe(video);
     
-    // Try to start playing immediately with better error handling
     setTimeout(() => {
         const playPromise = video.play();
         if (playPromise) {
@@ -831,16 +822,14 @@ function setupVideoElement(video, frame) {
     }, 100);
 }
 
-// Enhanced expand media function with better detection and popup handling
+// Enhanced expand media function
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
-    if (!frame || expandedMedia) return; // Prevent multiple expansions
+    if (!frame || expandedMedia) return;
     
-    // Better media element detection
     const video = frame.querySelector('video');
     const img = frame.querySelector('img:not(.placeholder)');
     
-    // Determine which element to use - prioritize video if it exists and is visible
     let mediaElement = null;
     let isVideo = false;
     
@@ -859,26 +848,17 @@ function expandMedia(frameId) {
     
     console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId);
     
-    // Get frame position and decide popup position
     const frameRect = frame.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Calculate popup size - slightly larger for videos
     const isMobile = window.innerWidth <= 768;
-    
-    let popupSize;
-    if (isVideo) {
-        popupSize = isMobile ? 350 : 430;
-    } else {
-        popupSize = isMobile ? 320 : 400;
-    }
-    
+    let popupSize = isVideo ? (isMobile ? 350 : 430) : (isMobile ? 320 : 400);
     const offset = 40;
     
     let popupX, popupY;
     
-    // Determine best position based on frame location
+    // Position calculation
     if (frameRect.right + popupSize + offset < viewportWidth) {
         popupX = frameRect.right + offset;
         popupY = frameRect.top + offset;
@@ -893,11 +873,9 @@ function expandMedia(frameId) {
         popupY = frameRect.top - popupSize - offset;
     }
     
-    // Ensure popup stays within viewport
     popupX = Math.max(20, Math.min(popupX, viewportWidth - popupSize - 20));
     popupY = Math.max(20, Math.min(popupY, viewportHeight - popupSize - 20));
     
-    // Create popup container
     const popup = document.createElement('div');
     popup.className = 'media-popup';
     popup.style.cssText = `
@@ -919,10 +897,8 @@ function expandMedia(frameId) {
         cursor: pointer;
     `;
     
-    // Create expanded media element
     let expandedElement;
     if (isVideo) {
-        // Stop all audio and store state when video starts
         console.log('Video starting, stopping all audio');
         stopAllAudio(true);
         
@@ -968,12 +944,10 @@ function expandMedia(frameId) {
             }, 500);
         });
     } else {
-        // Better image handling
         expandedElement = document.createElement('img');
         expandedElement.src = mediaElement.src;
         expandedElement.alt = mediaElement.alt || 'Memory';
         
-        // Add loading state
         expandedElement.onload = () => {
             console.log('Image loaded in popup');
         };
@@ -984,7 +958,6 @@ function expandMedia(frameId) {
         };
     }
     
-    // Consistent styling for both images and videos
     expandedElement.style.cssText = `
         width: 100%;
         height: 100%;
@@ -1025,7 +998,6 @@ function expandMedia(frameId) {
         closeBtn.style.transform = 'scale(1)';
     });
     
-    // Add elements to popup
     popup.appendChild(expandedElement);
     popup.appendChild(closeBtn);
     document.body.appendChild(popup);
@@ -1087,7 +1059,6 @@ function expandMedia(frameId) {
     });
     
     popup.addEventListener('click', (e) => {
-        // Only close if clicking the popup background, not the media
         if (e.target === popup) {
             closeMedia();
         }
@@ -1123,7 +1094,6 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
     
     let mediaElement;
     if (isVideoSource(mediaSrc)) {
-        // Create video element
         mediaElement = document.createElement('video');
         mediaElement.src = mediaSrc;
         mediaElement.muted = true;
@@ -1132,7 +1102,6 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         mediaElement.playsInline = true;
         mediaElement.preload = 'metadata';
         
-        // Proper video styling
         mediaElement.style.cssText = `
             width: 100% !important;
             height: 100% !important;
@@ -1144,21 +1113,14 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
             left: 0;
         `;
         
-        // Handle video loading errors
         mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
-        
-        // Setup video when loaded
-        mediaElement.onloadedmetadata = () => {
-            setupVideoElement(mediaElement, frame);
-        };
+        mediaElement.onloadedmetadata = () => setupVideoElement(mediaElement, frame);
     } else {
-        // Create image element
         mediaElement = document.createElement('img');
         mediaElement.src = mediaSrc;
         mediaElement.alt = altText || 'Memory';
         mediaElement.loading = 'lazy';
         
-        // Proper image styling
         mediaElement.style.cssText = `
             width: 100%;
             height: 100%;
@@ -1167,16 +1129,14 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
             display: block;
         `;
         
-        // Handle image loading errors
         mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
     }
     
     frame.appendChild(mediaElement);
     
-    // Enhanced frame click handling
     frame.style.cursor = 'pointer';
     
-    // Remove existing click listeners to prevent duplicates
+    // Remove existing click listeners by cloning
     const newFrame = frame.cloneNode(true);
     frame.parentNode.replaceChild(newFrame, frame);
     
@@ -1233,8 +1193,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
     
     // Initialize audio context on first user interaction
-    document.addEventListener('click', initAudioContext, { once: true });
-    document.addEventListener('touchstart', initAudioContext, { once: true });
+    const initAudioOnInteraction = () => {
+        initAudioContext();
+        document.removeEventListener('click', initAudioOnInteraction);
+        document.removeEventListener('touchstart', initAudioOnInteraction);
+    };
+    
+    document.addEventListener('click', initAudioOnInteraction);
+    document.addEventListener('touchstart', initAudioOnInteraction);
     
     // Setup offline detection
     window.addEventListener('online', checkOfflineStatus);
@@ -1243,7 +1209,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check initial status without showing online message
     isOffline = !navigator.onLine;
     if (!navigator.onLine) {
-        document.getElementById('offlineIndicator')?.classList.add('show');
+        const indicator = document.getElementById('offlineIndicator');
+        indicator?.classList.add('show');
     }
     
     // Mark that initial load is complete after a short delay
