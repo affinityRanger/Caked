@@ -72,16 +72,16 @@ function createSoundVisualizer() {
     const visualizerHTML = `
         <div id="backgroundVisualizer" class="background-visualizer">
             <div class="visualizer-grid" id="visualizerGrid">
-                ${Array(60).fill().map((_, i) => `<div class="bg-visualizer-bar" id="bg-bar-${i}"></div>`).join('')}
+                ${Array(80).fill().map((_, i) => `<div class="bg-visualizer-bar" id="bg-bar-${i}"></div>`).join('')}
             </div>
             <div class="song-display" id="songDisplay">
-                <h2 class="bg-song-title" id="bgSongTitle">No song playing</h2>
-                <p class="bg-song-artist" id="bgSongArtist">Select a track to begin</p>
+                <h2 class="bg-song-title" id="bgSongTitle">♪ No song playing ♪</h2>
+                <p class="bg-song-artist" id="bgSongArtist">Select a track to begin the visual experience</p>
             </div>
         </div>
     `;
     
-    // Insert the visualizer into the page
+    // Insert the visualizer into the page as the first child
     document.body.insertAdjacentHTML('afterbegin', visualizerHTML);
 }
 
