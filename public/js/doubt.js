@@ -81,8 +81,8 @@ function createIntegratedVisualizer() {
         const bar = document.createElement('div');
         bar.className = 'integrated-bar';
         bar.style.cssText = `
-            width: 3px;
-            height: 1px;
+            width: 6px;
+            height: 3px;
             background: linear-gradient(to top, #ff1744, #ff4569);
             border-radius: 1.5px;
             transform-origin: bottom;
