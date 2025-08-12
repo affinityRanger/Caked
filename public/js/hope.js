@@ -1,6 +1,5 @@
 // Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
-
 // Audio context for Web Audio API
 let audioContext = null;
 let currentAudio = null;
@@ -11,22 +10,19 @@ let dataArray = null;
 let animationId = null;
 let crossfadeInterval = null;
 
-// Audio visualization variables
+// Audio visualization variables - ADDED
 let visualizerAnalyser = null;
 let visualizerDataArray = null;
 let visualizerAnimationId = null;
 let visualizerBars = [];
-let isVisualizerVisible = true;
 let visualizerSource = null;
 
 // Feature states
 let isDarkMode = true;
 let cachedTracks = new Set();
 let isOffline = false;
-
 // Auto-play attempt flag
 let autoPlayAttempted = false;
-
 // Global music player variables
 let globalMusicIndex = 0;
 let globalMusicFiles = [
@@ -41,7 +37,6 @@ let globalMusicFiles = [
     'PARTYNEXTDOOR - You ve Been Missed.mp3',
     'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
-
 let globalMusicTitles = [
     "Dreamin' - PARTYNEXTDOOR",
     "DEEPER - PARTYNEXTDOOR",
@@ -67,139 +62,105 @@ function initAudioContext() {
     return audioContext;
 }
 
-// Create the HTML structure for the background visualizer
-function createSoundVisualizer() {
+// ADDED: Create background visualizer
+function createBackgroundVisualizer() {
     const visualizerHTML = `
         <div id="backgroundVisualizer" class="background-visualizer">
-            <div class="visualizer-grid" id="visualizerGrid">
-                ${Array(80).fill().map((_, i) => `<div class="bg-visualizer-bar" id="bg-bar-${i}"></div>`).join('')}
+            <div class="visualizer-bars">
+                ${Array(50).fill().map((_, i) => `<div class="bg-bar" id="bgBar-${i}"></div>`).join('')}
             </div>
-            <div class="song-display" id="songDisplay">
-                <h2 class="bg-song-title" id="bgSongTitle">♪ No song playing ♪</h2>
-                <p class="bg-song-artist" id="bgSongArtist">Select a track to begin the visual experience</p>
+            <div class="bg-song-info">
+                <div class="bg-song-title" id="bgSongTitle">♪ No Music Playing ♪</div>
+                <div class="bg-song-artist" id="bgSongArtist">Start your music to see the visualizer</div>
             </div>
         </div>
     `;
-    
-    // Insert the visualizer into the page as the first child
     document.body.insertAdjacentHTML('afterbegin', visualizerHTML);
 }
 
-// Initialize the audio visualizer
-function initAudioVisualizer() {
+// ADDED: Initialize background visualizer
+function initBackgroundVisualizer() {
     const audio = document.getElementById('globalAudio');
     if (!audio || !audioContext) return;
     
     try {
-        // Only create source if it doesn't exist
         if (!visualizerSource) {
             visualizerSource = audioContext.createMediaElementSource(audio);
         }
         
-        // Create analyser
         visualizerAnalyser = audioContext.createAnalyser();
-        visualizerAnalyser.fftSize = 256;
-        visualizerAnalyser.smoothingTimeConstant = 0.7;
+        visualizerAnalyser.fftSize = 128;
+        visualizerAnalyser.smoothingTimeConstant = 0.8;
         
         const bufferLength = visualizerAnalyser.frequencyBinCount;
         visualizerDataArray = new Uint8Array(bufferLength);
         
-        // Connect audio to analyser
         visualizerSource.connect(visualizerAnalyser);
         visualizerAnalyser.connect(audioContext.destination);
         
-        // Get visualizer bars
-        visualizerBars = Array.from(document.querySelectorAll('.bg-visualizer-bar'));
+        visualizerBars = Array.from(document.querySelectorAll('.bg-bar'));
         
-        console.log('Background audio visualizer initialized');
-        
+        console.log('Background visualizer initialized');
     } catch (error) {
-        console.log('Error initializing audio visualizer:', error);
+        console.log('Error initializing background visualizer:', error);
     }
 }
 
-// Animate the background visualizer bars
-function animateVisualizer() {
+// ADDED: Animate background visualizer
+function animateBackgroundVisualizer() {
     if (!visualizerAnalyser || !visualizerDataArray || !visualizerBars.length) return;
     
     visualizerAnalyser.getByteFrequencyData(visualizerDataArray);
     
-    // Update bars based on frequency data
-    for (let i = 0; i < visualizerBars.length; i++) {
+    for (let i = 0; i < visualizerBars.length && i < visualizerDataArray.length; i++) {
         const bar = visualizerBars[i];
-        const dataIndex = Math.floor((i / visualizerBars.length) * visualizerDataArray.length);
-        const value = visualizerDataArray[dataIndex] || 0;
+        const value = visualizerDataArray[i] || 0;
+        const height = Math.max(10, (value / 255) * 150);
         
-        // Scale the value to a height between 20px and 200px
-        const height = Math.max(20, (value / 255) * 200);
         bar.style.height = `${height}px`;
         
-        // Add color variation based on frequency and position
         const hue = (i / visualizerBars.length) * 360;
         const intensity = value / 255;
-        const saturation = 60 + intensity * 40;
-        const lightness = 40 + intensity * 30;
-        
         bar.style.background = `linear-gradient(to top, 
-            hsla(${hue}, ${saturation}%, ${lightness}%, 0.6), 
-            hsla(${(hue + 60) % 360}, ${saturation}%, ${lightness + 10}%, 0.4))`;
-        
-        bar.style.opacity = Math.max(0.2, intensity * 0.8);
-        
-        // Add subtle animation delay for wave effect
-        bar.style.transitionDelay = `${i * 2}ms`;
+            hsla(${hue}, 70%, ${40 + intensity * 30}%, 0.6), 
+            hsla(${(hue + 60) % 360}, 70%, ${50 + intensity * 20}%, 0.4))`;
+        bar.style.opacity = Math.max(0.3, intensity * 0.8);
     }
     
-    visualizerAnimationId = requestAnimationFrame(animateVisualizer);
+    visualizerAnimationId = requestAnimationFrame(animateBackgroundVisualizer);
 }
 
-// Start visualizer animation
-function startVisualizer() {
+// ADDED: Start/Stop background visualizer
+function startBackgroundVisualizer() {
+    const visualizer = document.getElementById('backgroundVisualizer');
+    if (visualizer) {
+        visualizer.classList.add('active');
+    }
     if (visualizerAnimationId) {
         cancelAnimationFrame(visualizerAnimationId);
     }
-    showBackgroundVisualizer();
-    animateVisualizer();
+    animateBackgroundVisualizer();
 }
 
-// Stop visualizer animation
-function stopVisualizer() {
+function stopBackgroundVisualizer() {
+    const visualizer = document.getElementById('backgroundVisualizer');
+    if (visualizer) {
+        visualizer.classList.remove('active');
+    }
     if (visualizerAnimationId) {
         cancelAnimationFrame(visualizerAnimationId);
         visualizerAnimationId = null;
     }
     
-    // Reset bars to minimum height
-    visualizerBars.forEach((bar, i) => {
-        bar.style.height = '20px';
-        bar.style.opacity = '0.2';
-        bar.style.background = 'linear-gradient(to top, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))';
+    visualizerBars.forEach(bar => {
+        bar.style.height = '10px';
+        bar.style.opacity = '0.3';
+        bar.style.background = 'rgba(255, 255, 255, 0.2)';
     });
-    
-    hideBackgroundVisualizer();
 }
 
-// Show/hide background visualizer
-function showBackgroundVisualizer() {
-    const visualizer = document.getElementById('backgroundVisualizer');
-    if (visualizer) {
-        visualizer.classList.remove('hidden');
-        visualizer.classList.add('active');
-        isVisualizerVisible = true;
-    }
-}
-
-function hideBackgroundVisualizer() {
-    const visualizer = document.getElementById('backgroundVisualizer');
-    if (visualizer) {
-        visualizer.classList.add('hidden');
-        visualizer.classList.remove('active');
-        isVisualizerVisible = false;
-    }
-}
-
-// Update background visualizer song info
-function updateVisualizerSongInfo() {
+// ADDED: Update background song info
+function updateBackgroundSongInfo() {
     const titleElement = document.getElementById('bgSongTitle');
     const artistElement = document.getElementById('bgSongArtist');
     
@@ -242,7 +203,7 @@ function attemptAutoPlay() {
                 if (musicButton) {
                     musicButton.classList.add('playing');
                 }
-                startVisualizer();
+                startBackgroundVisualizer(); // ADDED
             }).catch(error => {
                 console.log('Auto-play blocked by browser:', error);
                 // Show a subtle indicator that user can start music
@@ -253,7 +214,6 @@ function attemptAutoPlay() {
         }
     }
 }
-
 // Modal functions
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -263,7 +223,6 @@ function openModal(modalId) {
         modal.classList.add('show');
     }
 }
-
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -272,7 +231,6 @@ function closeModal(modalId) {
         modal.classList.remove('show');
     }
 }
-
 // FIXED: Photo enlargement functionality
 function enlargePhoto(img, event) {
     if (event) {
@@ -302,7 +260,6 @@ function enlargePhoto(img, event) {
         console.log('Photo modal opened with image:', img.src);
     }
 }
-
 function closePhotoModal() {
     const modal = document.getElementById('photoModal');
     const enlargedPhoto = document.getElementById('enlargedPhoto');
@@ -323,7 +280,6 @@ function closePhotoModal() {
         document.body.style.overflow = 'auto';
     }
 }
-
 // Title click functionality
 function titleClick() {
     const popup = document.getElementById('titlePopup');
@@ -338,7 +294,6 @@ function titleClick() {
         }, 8000);
     }
 }
-
 // Message functionality
 function showSavedMessage(messageId) {
     const messageDiv = document.getElementById(messageId);
@@ -351,7 +306,6 @@ function showSavedMessage(messageId) {
         }
     }
 }
-
 // Music popup functionality
 function toggleMusicPopup() {
     const popup = document.getElementById('musicPopup');
@@ -375,7 +329,6 @@ function toggleMusicPopup() {
         }
     }
 }
-
 // Exclamation popup functionality
 function toggleExclamationPopup() {
     const popup = document.getElementById('exclamationPopup');
@@ -393,7 +346,6 @@ function toggleExclamationPopup() {
         }
     }
 }
-
 // Global music functions - FIXED VERSION
 function selectGlobalSong(filename) {
     const audio = document.getElementById('globalAudio');
@@ -422,8 +374,7 @@ function selectGlobalSong(filename) {
         nowPlaying.textContent = globalMusicTitles[globalMusicIndex];
     }
     
-    // Update background visualizer song info
-    updateVisualizerSongInfo();
+    updateBackgroundSongInfo(); // ADDED
     
     // Update select dropdown
     const select = document.getElementById('globalMusicSelect');
@@ -451,7 +402,7 @@ function toggleGlobalMusic() {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
-                        startVisualizer();
+                        startBackgroundVisualizer(); // ADDED
                     }).catch(error => {
                         console.log('Audio play failed:', error);
                     });
@@ -468,7 +419,7 @@ function toggleGlobalMusic() {
                                 musicButton.classList.add('playing');
                                 musicButton.classList.remove('pulse');
                             }
-                            startVisualizer();
+                            startBackgroundVisualizer(); // ADDED
                         }).catch(error => {
                             console.log('Audio play failed:', error);
                         });
@@ -481,7 +432,7 @@ function toggleGlobalMusic() {
             if (musicButton) {
                 musicButton.classList.remove('playing');
             }
-            stopVisualizer();
+            stopBackgroundVisualizer(); // ADDED
         }
     }
 }
@@ -505,7 +456,7 @@ function playPreviousSong() {
                         musicButton.classList.add('playing');
                         musicButton.classList.remove('pulse');
                     }
-                    startVisualizer();
+                    startBackgroundVisualizer(); // ADDED
                 }).catch(error => {
                     console.log('Audio play failed:', error);
                 });
@@ -522,7 +473,7 @@ function playPreviousSong() {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
-                        startVisualizer();
+                        startBackgroundVisualizer(); // ADDED
                     }).catch(error => {
                         console.log('Audio play failed:', error);
                     });
@@ -551,7 +502,7 @@ function playNextSong() {
                         musicButton.classList.add('playing');
                         musicButton.classList.remove('pulse');
                     }
-                    startVisualizer();
+                    startBackgroundVisualizer(); // ADDED
                 }).catch(error => {
                     console.log('Audio play failed:', error);
                 });
@@ -568,7 +519,7 @@ function playNextSong() {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
-                        startVisualizer();
+                        startBackgroundVisualizer(); // ADDED
                     }).catch(error => {
                         console.log('Audio play failed:', error);
                     });
@@ -592,10 +543,9 @@ function stopGlobalMusic() {
         if (musicButton) {
             musicButton.classList.remove('playing');
         }
-        stopVisualizer();
+        stopBackgroundVisualizer(); // ADDED
     }
 }
-
 // Create stars background
 function createStars() {
     const starsContainer = document.getElementById('stars');
@@ -625,7 +575,6 @@ function createStars() {
         starsContainer.appendChild(star);
     }
 }
-
 // Initialize loading screen
 function initLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -643,7 +592,6 @@ function initLoadingScreen() {
         }, 3000);
     }
 }
-
 // Image loading optimization
 function optimizeImageLoading() {
     const images = document.querySelectorAll('img');
@@ -659,7 +607,6 @@ function optimizeImageLoading() {
         }
     });
 }
-
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing hope page...');
@@ -673,8 +620,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize audio context
     initAudioContext();
     
-    // Create background sound visualizer
-    createSoundVisualizer();
+    // Create background visualizer - ADDED
+    createBackgroundVisualizer();
     
     // Optimize image loading
     optimizeImageLoading();
@@ -703,10 +650,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Audio error:', e);
         });
         
-        // Initialize audio visualizer when audio can play
+        // Initialize background visualizer when audio can play - ADDED
         globalAudio.addEventListener('canplay', function() {
             if (!visualizerAnalyser) {
-                initAudioVisualizer();
+                initBackgroundVisualizer();
             }
         });
     }
@@ -807,10 +754,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!autoPlayAttempted) {
             attemptAutoPlay();
         }
-        // Initialize visualizer if not already done
+        // Initialize visualizer if not already done - ADDED
         if (!visualizerAnalyser && audioContext) {
             setTimeout(() => {
-                initAudioVisualizer();
+                initBackgroundVisualizer();
             }, 100);
         }
     }
@@ -842,14 +789,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Hope page initialization complete');
 });
-
 // Handle orientation change
 window.addEventListener('orientationchange', function() {
     setTimeout(() => {
         createStars(); // Recreate stars for new viewport
     }, 500);
 });
-
 // Handle resize
 window.addEventListener('resize', function() {
     // Recreate stars on significant size changes
@@ -858,7 +803,6 @@ window.addEventListener('resize', function() {
         createStars();
     }, 250);
 });
-
 // Prevent right-click context menu
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();

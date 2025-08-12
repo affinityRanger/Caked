@@ -1476,178 +1476,79 @@ img.loaded {
   -moz-user-select: none;
   -ms-user-select: none;
 }
-/* Background Sound Visualizer - Completely Non-Intrusive */
+
+/* Background Music Visualizer */
 .background-visualizer {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     height: 50vh;
-    z-index: -10;
+    z-index: -1;
     pointer-events: none;
-    overflow: hidden;
-    transition: opacity 0.8s ease;
-    background: transparent;
-}
-
-.background-visualizer.hidden {
     opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
 .background-visualizer.active {
     opacity: 1;
 }
 
-.visualizer-grid {
+.visualizer-bars {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 70%;
+    height: 60%;
     display: flex;
     align-items: flex-end;
     justify-content: space-evenly;
-    padding: 0 2%;
-    gap: 2px;
+    padding: 0 20px;
 }
 
-.bg-visualizer-bar {
-    flex: 1;
-    max-width: 6px;
-    min-width: 2px;
-    height: 15px;
-    background: linear-gradient(to top, 
-        rgba(100, 200, 255, 0.3),
-        rgba(200, 100, 255, 0.2),
-        rgba(255, 100, 200, 0.1));
-    border-radius: 3px 3px 0 0;
-    transition: height 0.1s ease, opacity 0.1s ease;
-    opacity: 0.4;
-    transform-origin: bottom;
+.bg-bar {
+    width: 4px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 1px;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.1s ease;
 }
 
-.song-display {
+.bg-song-info {
     position: absolute;
-    bottom: 75%;
+    bottom: 70%;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    pointer-events: none;
-    z-index: -5;
-    max-width: 80vw;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .bg-song-title {
-    font-size: 2rem;
-    font-weight: 200;
-    margin: 0 0 8px 0;
-    letter-spacing: 3px;
-    opacity: 0.6;
-    color: rgba(255, 255, 255, 0.7);
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    font-family: 'Arial', sans-serif;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.8rem;
+    margin: 0 0 5px 0;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .bg-song-artist {
     font-size: 1rem;
-    font-weight: 100;
     margin: 0;
-    letter-spacing: 2px;
-    opacity: 0.5;
-    color: rgba(255, 255, 255, 0.5);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    opacity: 0.8;
+    font-weight: 200;
 }
 
-/* Responsive design for background visualizer */
 @media (max-width: 768px) {
-    .background-visualizer {
-        height: 40vh;
-    }
-    
-    .visualizer-grid {
-        height: 60%;
-        padding: 0 3%;
-    }
-    
-    .bg-visualizer-bar {
-        max-width: 4px;
-        min-width: 2px;
-        height: 12px;
-    }
-    
-    .song-display {
-        bottom: 70%;
-        max-width: 90vw;
-    }
-    
     .bg-song-title {
-        font-size: 1.4rem;
-        letter-spacing: 2px;
+        font-size: 1.3rem;
     }
-    
     .bg-song-artist {
-        font-size: 0.8rem;
-        letter-spacing: 1px;
+        font-size: 0.9rem;
     }
-}
-
-@media (max-width: 480px) {
-    .background-visualizer {
-        height: 30vh;
+    .visualizer-bars {
+        padding: 0 10px;
     }
-    
-    .bg-song-title {
-        font-size: 1.1rem;
-        letter-spacing: 1px;
+    .bg-bar {
+        width: 3px;
     }
-    
-    .bg-song-artist {
-        font-size: 0.7rem;
-    }
-    
-    .song-display {
-        bottom: 65%;
-    }
-    
-    .visualizer-grid {
-        height: 50%;
-    }
-    
-    .bg-visualizer-bar {
-        height: 10px;
-    }
-}
-
-/* Make sure all content has proper z-index to appear above background */
-.container,
-.content,
-.main,
-.header,
-.nav,
-section,
-article,
-div:not(.background-visualizer):not(.visualizer-grid):not(.bg-visualizer-bar):not(.song-display),
-.modal,
-.popup,
-button,
-input,
-img {
-    position: relative;
-    z-index: 1;
-}
-
-/* Special z-index for critical UI elements */
-.modal,
-.popup,
-#photoModal,
-#titlePopup,
-#musicPopup,
-#exclamationPopup {
-    z-index: 1000 !important;
 }
