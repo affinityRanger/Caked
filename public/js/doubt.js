@@ -49,7 +49,7 @@ function setupAudioAnalyser() {
     }
 }
 
-// Create integrated visualizer on top of the text
+// Create integrated visualizer with enhanced bar animation
 function createIntegratedVisualizer() {
     const audioStatus = document.getElementById('audioStatus');
     if (!audioStatus) return;
@@ -61,40 +61,71 @@ function createIntegratedVisualizer() {
     visualizer.className = 'integrated-visualizer';
     visualizer.style.cssText = `
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 12px;
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
-        gap: 2px;
+        gap: 1px;
         opacity: 0;
         transition: opacity 0.3s ease;
         pointer-events: none;
         z-index: 2;
     `;
     
-    // Create 20 compact bars for visualization overlaying the text
-    for (let i = 0; i < 20; i++) {
+    // Create 25 compact bars for a fuller visualization
+    for (let i = 0; i < 25; i++) {
         const bar = document.createElement('div');
         bar.className = 'integrated-bar';
         bar.style.cssText = `
-            width: 2px;
-            height: 2px;
-            background: rgba(255, 23, 68, 0.8);
-            border-radius: 1px;
+            width: 3px;
+            height: 1px;
+            background: linear-gradient(to top, #ff1744, #ff4569);
+            border-radius: 1.5px;
             transform-origin: bottom;
-            transition: height 0.08s ease;
-            box-shadow: 0 0 2px rgba(255, 23, 68, 0.4);
+            transition: height 0.1s ease-out;
+            box-shadow: 0 0 3px rgba(255, 23, 68, 0.6);
+            animation: barPulse 2s ease-in-out infinite;
+            animation-delay: ${i * 0.05}s;
         `;
         visualizer.appendChild(bar);
+    }
+    
+    // Add pulsing animation keyframes if not exists
+    if (!document.getElementById('barPulseStyle')) {
+        const style = document.createElement('style');
+        style.id = 'barPulseStyle';
+        style.textContent = `
+            @keyframes barPulse {
+                0%, 100% {
+                    transform: scaleY(1);
+                    opacity: 0.8;
+                }
+                50% {
+                    transform: scaleY(1.2);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes barBeat {
+                0%, 100% {
+                    transform: scaleY(1) scaleX(1);
+                }
+                50% {
+                    transform: scaleY(1.8) scaleX(1.1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
     
     audioStatus.appendChild(visualizer);
 }
 
-// Update integrated visualization
+// Enhanced update visualization with more dynamic animation
 function updateIntegratedVisualization() {
     if (!analyser || !dataArray) return;
     
@@ -104,67 +135,158 @@ function updateIntegratedVisualization() {
     const bars = visualizer?.querySelectorAll('.integrated-bar');
     
     if (bars) {
+        // Calculate average volume for global effects
+        const avgVolume = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
+        const normalizedAvg = avgVolume / 255;
+        
         bars.forEach((bar, index) => {
-            const value = dataArray[index * 4] || 0; // Sample every 4th frequency bin
+            // Sample frequency data with some overlap for smoother visualization
+            const dataIndex = Math.floor((index / bars.length) * dataArray.length);
+            const value = dataArray[dataIndex] || 0;
             
-            // Enhanced height calculation with dynamic range
-            const minHeight = 2;
-            const maxHeight = 18;
-            const height = Math.max(minHeight, (value / 255) * maxHeight);
+            // Enhanced height calculation with better responsiveness
+            const minHeight = 1;
+            const maxHeight = 12;
+            const sensitivity = 2.5; // Increased sensitivity
+            const height = Math.max(minHeight, (value / 255) * maxHeight * sensitivity);
             
-            // Smooth transitions
-            const currentHeight = parseInt(bar.style.height) || minHeight;
+            // Smooth transitions with variable speed based on intensity
+            const currentHeight = parseFloat(bar.style.height) || minHeight;
             const targetHeight = height;
-            const smoothedHeight = currentHeight + (targetHeight - currentHeight) * 0.4;
+            const transitionSpeed = 0.3 + (normalizedAvg * 0.4); // Faster transitions for louder music
+            const smoothedHeight = currentHeight + (targetHeight - currentHeight) * transitionSpeed;
             
             bar.style.height = smoothedHeight + 'px';
             
-            // Dynamic color based on intensity
+            // Enhanced color system with beat detection
             const intensity = value / 255;
-            const hue = 340 + (intensity * 40); // Red to pink spectrum
-            const saturation = 80 + (intensity * 20);
-            const lightness = 50 + (intensity * 20);
+            const beatDetected = intensity > 0.7;
             
-            bar.style.background = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-            
-            // Add glow effect for high frequencies
-            if (intensity > 0.6) {
-                bar.style.boxShadow = `0 0 6px hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            // Dynamic color gradients
+            let gradient;
+            if (beatDetected) {
+                // Bright flash colors for beats
+                gradient = `linear-gradient(to top, #ff1744, #ff6b9d, #ffffff)`;
+                bar.style.animation = 'barBeat 0.2s ease-out';
             } else {
-                bar.style.boxShadow = `0 0 3px rgba(255, 23, 68, 0.3)`;
+                // Standard gradient with intensity-based colors
+                const hue = 340 + (intensity * 30); // Red to pink-red spectrum
+                const saturation = 85 + (intensity * 15);
+                const lightness1 = 45 + (intensity * 15);
+                const lightness2 = 60 + (intensity * 25);
+                gradient = `linear-gradient(to top, hsl(${hue}, ${saturation}%, ${lightness1}%), hsl(${hue}, ${saturation}%, ${lightness2}%))`;
+                bar.style.animation = `barPulse ${2 - normalizedAvg}s ease-in-out infinite`;
+                bar.style.animationDelay = `${index * 0.05}s`;
+            }
+            
+            bar.style.background = gradient;
+            
+            // Dynamic glow effects
+            const glowIntensity = Math.max(0.3, intensity);
+            const glowSize = 2 + (intensity * 4);
+            const glowColor = `rgba(255, 23, 68, ${glowIntensity})`;
+            
+            if (beatDetected) {
+                bar.style.boxShadow = `
+                    0 0 ${glowSize * 2}px ${glowColor},
+                    0 0 ${glowSize}px rgba(255, 107, 157, 0.6),
+                    inset 0 0 2px rgba(255, 255, 255, 0.3)
+                `;
+            } else {
+                bar.style.boxShadow = `
+                    0 0 ${glowSize}px ${glowColor},
+                    0 -1px 2px rgba(255, 23, 68, 0.2)
+                `;
+            }
+            
+            // Add subtle width variation for high frequencies
+            if (index > bars.length * 0.7 && intensity > 0.6) {
+                bar.style.width = `${3 + intensity}px`;
+            } else {
+                bar.style.width = '3px';
             }
         });
+        
+        // Add global visualizer effects based on average volume
+        if (normalizedAvg > 0.6) {
+            visualizer.style.filter = `brightness(${1 + normalizedAvg * 0.3}) saturate(${1 + normalizedAvg * 0.2})`;
+        } else {
+            visualizer.style.filter = 'brightness(1) saturate(1)';
+        }
     }
     
     animationId = requestAnimationFrame(updateIntegratedVisualization);
 }
 
-// Start integrated visualization
+// Enhanced start visualization with intro animation
 function startIntegratedVisualization() {
     const audioStatus = document.getElementById('audioStatus');
     const visualizer = audioStatus?.querySelector('.integrated-visualizer');
     
     if (visualizer) {
+        // Animate bars appearing one by one
+        const bars = visualizer.querySelectorAll('.integrated-bar');
+        bars.forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.transform = 'scaleY(1)';
+                bar.style.opacity = '1';
+            }, index * 20);
+        });
+        
         visualizer.style.opacity = '1';
+        
+        // Add a subtle bounce effect to the whole visualizer
+        visualizer.style.animation = 'visualizerIntro 0.6s ease-out';
+        
+        // Create intro animation if not exists
+        if (!document.getElementById('visualizerIntroStyle')) {
+            const style = document.createElement('style');
+            style.id = 'visualizerIntroStyle';
+            style.textContent = `
+                @keyframes visualizerIntro {
+                    0% {
+                        transform: translateX(-50%) scale(0.8) translateY(5px);
+                        opacity: 0;
+                    }
+                    60% {
+                        transform: translateX(-50%) scale(1.05) translateY(-2px);
+                    }
+                    100% {
+                        transform: translateX(-50%) scale(1) translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         updateIntegratedVisualization();
     }
 }
 
-// Stop integrated visualization
+// Enhanced stop visualization with outro animation
 function stopIntegratedVisualization() {
     const audioStatus = document.getElementById('audioStatus');
     const visualizer = audioStatus?.querySelector('.integrated-visualizer');
     
     if (visualizer) {
-        visualizer.style.opacity = '0';
-        
-        // Reset all bars
+        // Animate bars disappearing
         const bars = visualizer.querySelectorAll('.integrated-bar');
-        bars.forEach(bar => {
-            bar.style.height = '2px';
-            bar.style.background = '#ff1744';
-            bar.style.boxShadow = '0 0 3px rgba(255, 23, 68, 0.3)';
+        bars.forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.height = '1px';
+                bar.style.background = '#ff1744';
+                bar.style.boxShadow = '0 0 2px rgba(255, 23, 68, 0.3)';
+                bar.style.animation = 'none';
+                bar.style.width = '3px';
+            }, index * 15);
         });
+        
+        // Fade out the whole visualizer
+        setTimeout(() => {
+            visualizer.style.opacity = '0';
+            visualizer.style.filter = 'brightness(1) saturate(1)';
+        }, bars.length * 15 + 200);
     }
     
     if (animationId) {
