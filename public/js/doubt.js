@@ -38,7 +38,8 @@ function setupAudioAnalyser() {
     
     try {
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 128;
+        analyser.fftSize = 256; // Increased for better visualization
+        analyser.smoothingTimeConstant = 0.8;
         const bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         
@@ -49,7 +50,7 @@ function setupAudioAnalyser() {
     }
 }
 
-// Create audio visualizer
+// Create audio visualizer with enhanced bars
 function createVisualizer() {
     // Check if visualizer already exists
     if (document.getElementById('audioVisualizer')) return;
@@ -58,18 +59,19 @@ function createVisualizer() {
     visualizer.className = 'audio-visualizer';
     visualizer.id = 'audioVisualizer';
     
-    // Create 32 bars for visualization
-    for (let i = 0; i < 32; i++) {
+    // Create 64 bars for better visualization
+    for (let i = 0; i < 64; i++) {
         const bar = document.createElement('div');
         bar.className = 'visualizer-bar';
         bar.style.height = '2px';
+        bar.style.backgroundColor = `hsl(${340 + (i * 2)}, 100%, ${50 + (i % 20)}%)`;
         visualizer.appendChild(bar);
     }
     
     document.body.appendChild(visualizer);
 }
 
-// Update audio visualization
+// Update audio visualization with enhanced effects
 function updateVisualization() {
     if (!analyser || !dataArray) return;
     
@@ -79,20 +81,53 @@ function updateVisualization() {
     
     if (bars) {
         bars.forEach((bar, index) => {
-            const value = dataArray[index * 2] || 0;
-            const height = Math.max(2, (value / 255) * 60);
-            bar.style.height = height + 'px';
+            // Use multiple frequency bins for smoother animation
+            const dataIndex = Math.floor((index / bars.length) * dataArray.length);
+            const value = dataArray[dataIndex] || 0;
+            
+            // Enhanced height calculation with dynamic range
+            const minHeight = 3;
+            const maxHeight = 80;
+            const height = Math.max(minHeight, (value / 255) * maxHeight);
+            
+            // Smooth transitions
+            const currentHeight = parseInt(bar.style.height) || minHeight;
+            const targetHeight = height;
+            const smoothedHeight = currentHeight + (targetHeight - currentHeight) * 0.3;
+            
+            bar.style.height = smoothedHeight + 'px';
+            
+            // Dynamic color based on intensity
+            const intensity = value / 255;
+            const hue = 340 + (intensity * 40); // Red to pink spectrum
+            const saturation = 80 + (intensity * 20);
+            const lightness = 40 + (intensity * 30);
+            
+            bar.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            
+            // Add glow effect for high frequencies
+            if (intensity > 0.7) {
+                bar.style.boxShadow = `0 0 10px hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            } else {
+                bar.style.boxShadow = 'none';
+            }
         });
     }
     
     animationId = requestAnimationFrame(updateVisualization);
 }
 
-// Start visualization
+// Start visualization with enhanced effects
 function startVisualization() {
     const visualizer = document.getElementById('audioVisualizer');
     if (visualizer) {
         visualizer.classList.add('active');
+        
+        // Add pulsing background effect
+        visualizer.style.background = 'linear-gradient(90deg, rgba(255,23,68,0.1), rgba(255,23,68,0.2), rgba(255,23,68,0.1))';
+        visualizer.style.backgroundSize = '200% 100%';
+        visualizer.style.animation = 'visualizerPulse 2s ease-in-out infinite';
+        
         updateVisualization();
     }
 }
@@ -102,6 +137,15 @@ function stopVisualization() {
     const visualizer = document.getElementById('audioVisualizer');
     if (visualizer) {
         visualizer.classList.remove('active');
+        visualizer.style.background = 'none';
+        visualizer.style.animation = 'none';
+        
+        // Reset all bars
+        const bars = visualizer.querySelectorAll('.visualizer-bar');
+        bars.forEach(bar => {
+            bar.style.height = '2px';
+            bar.style.boxShadow = 'none';
+        });
     }
     if (animationId) {
         cancelAnimationFrame(animationId);
