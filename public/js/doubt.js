@@ -42,54 +42,80 @@ function setupAudioAnalyser() {
         const bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         
-        // Create visualizer bars
-        createVisualizer();
+        // Create visualizer bars inside audio status
+        createIntegratedVisualizer();
     } catch (error) {
         console.log('Audio analyser setup failed:', error);
     }
 }
 
-// Create audio visualizer
-function createVisualizer() {
+// Create integrated visualizer on top of the text
+function createIntegratedVisualizer() {
+    const audioStatus = document.getElementById('audioStatus');
+    if (!audioStatus) return;
+    
     // Check if visualizer already exists
-    if (document.getElementById('audioVisualizer')) return;
+    if (audioStatus.querySelector('.integrated-visualizer')) return;
     
     const visualizer = document.createElement('div');
-    visualizer.className = 'audio-visualizer';
-    visualizer.id = 'audioVisualizer';
+    visualizer.className = 'integrated-visualizer';
+    visualizer.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 2;
+    `;
     
-    // Create 32 bars for visualization
-    for (let i = 0; i < 32; i++) {
+    // Create 20 compact bars for visualization overlaying the text
+    for (let i = 0; i < 20; i++) {
         const bar = document.createElement('div');
-        bar.className = 'visualizer-bar';
-        bar.style.height = '2px';
+        bar.className = 'integrated-bar';
+        bar.style.cssText = `
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 23, 68, 0.8);
+            border-radius: 1px;
+            transform-origin: bottom;
+            transition: height 0.08s ease;
+            box-shadow: 0 0 2px rgba(255, 23, 68, 0.4);
+        `;
         visualizer.appendChild(bar);
     }
     
-    document.body.appendChild(visualizer);
+    audioStatus.appendChild(visualizer);
 }
 
-// Update audio visualization
-function updateVisualization() {
+// Update integrated visualization
+function updateIntegratedVisualization() {
     if (!analyser || !dataArray) return;
     
     analyser.getByteFrequencyData(dataArray);
-    const visualizer = document.getElementById('audioVisualizer');
-    const bars = visualizer?.querySelectorAll('.visualizer-bar');
+    const audioStatus = document.getElementById('audioStatus');
+    const visualizer = audioStatus?.querySelector('.integrated-visualizer');
+    const bars = visualizer?.querySelectorAll('.integrated-bar');
     
     if (bars) {
         bars.forEach((bar, index) => {
-            const value = dataArray[index * 2] || 0;
+            const value = dataArray[index * 4] || 0; // Sample every 4th frequency bin
             
             // Enhanced height calculation with dynamic range
-            const minHeight = 3;
-            const maxHeight = 80;
+            const minHeight = 2;
+            const maxHeight = 18;
             const height = Math.max(minHeight, (value / 255) * maxHeight);
             
             // Smooth transitions
             const currentHeight = parseInt(bar.style.height) || minHeight;
             const targetHeight = height;
-            const smoothedHeight = currentHeight + (targetHeight - currentHeight) * 0.3;
+            const smoothedHeight = currentHeight + (targetHeight - currentHeight) * 0.4;
             
             bar.style.height = smoothedHeight + 'px';
             
@@ -97,52 +123,50 @@ function updateVisualization() {
             const intensity = value / 255;
             const hue = 340 + (intensity * 40); // Red to pink spectrum
             const saturation = 80 + (intensity * 20);
-            const lightness = 40 + (intensity * 30);
+            const lightness = 50 + (intensity * 20);
             
-            bar.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            bar.style.background = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
             
             // Add glow effect for high frequencies
-            if (intensity > 0.7) {
-                bar.style.boxShadow = `0 0 10px hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            if (intensity > 0.6) {
+                bar.style.boxShadow = `0 0 6px hsl(${hue}, ${saturation}%, ${lightness}%)`;
             } else {
-                bar.style.boxShadow = 'none';
+                bar.style.boxShadow = `0 0 3px rgba(255, 23, 68, 0.3)`;
             }
         });
     }
     
-    animationId = requestAnimationFrame(updateVisualization);
+    animationId = requestAnimationFrame(updateIntegratedVisualization);
 }
 
-// Start visualization with enhanced effects
-function startVisualization() {
-    const visualizer = document.getElementById('audioVisualizer');
+// Start integrated visualization
+function startIntegratedVisualization() {
+    const audioStatus = document.getElementById('audioStatus');
+    const visualizer = audioStatus?.querySelector('.integrated-visualizer');
+    
     if (visualizer) {
-        visualizer.classList.add('active');
-        
-        // Add pulsing background effect
-        visualizer.style.background = 'linear-gradient(90deg, rgba(255,23,68,0.1), rgba(255,23,68,0.2), rgba(255,23,68,0.1))';
-        visualizer.style.backgroundSize = '200% 100%';
-        visualizer.style.animation = 'visualizerPulse 2s ease-in-out infinite';
-        
-        updateVisualization();
+        visualizer.style.opacity = '1';
+        updateIntegratedVisualization();
     }
 }
 
-// Stop visualization
-function stopVisualization() {
-    const visualizer = document.getElementById('audioVisualizer');
+// Stop integrated visualization
+function stopIntegratedVisualization() {
+    const audioStatus = document.getElementById('audioStatus');
+    const visualizer = audioStatus?.querySelector('.integrated-visualizer');
+    
     if (visualizer) {
-        visualizer.classList.remove('active');
-        visualizer.style.background = 'none';
-        visualizer.style.animation = 'none';
+        visualizer.style.opacity = '0';
         
         // Reset all bars
-        const bars = visualizer.querySelectorAll('.visualizer-bar');
+        const bars = visualizer.querySelectorAll('.integrated-bar');
         bars.forEach(bar => {
             bar.style.height = '2px';
-            bar.style.boxShadow = 'none';
+            bar.style.background = '#ff1744';
+            bar.style.boxShadow = '0 0 3px rgba(255, 23, 68, 0.3)';
         });
     }
+    
     if (animationId) {
         cancelAnimationFrame(animationId);
         animationId = null;
@@ -191,7 +215,7 @@ function restoreAudioState() {
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    startVisualization();
+                    startIntegratedVisualization();
                     showAudioStatus('🎵 Audio resumed');
                     console.log('Audio resumed successfully');
                 }).catch(error => {
@@ -245,7 +269,7 @@ function stopAllAudio(preserveState = false) {
         mainHeart.classList.remove('playing', 'beating');
     }
     
-    stopVisualization();
+    stopIntegratedVisualization();
     hideAudioStatus();
     currentPlayingElement = null;
 }
@@ -337,7 +361,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     }
     
     showAudioStatus(`🎵 ${title}`);
-    startVisualization();
+    startIntegratedVisualization();
     
     const isMobile = window.innerWidth <= 768;
     audioElement.volume = isMobile ? 0.4 : 0.3;
@@ -367,7 +391,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         if (visualElement) {
             visualElement.classList.remove('playing', 'pulsing', 'beating');
         }
-        stopVisualization();
+        stopIntegratedVisualization();
         hideAudioStatus();
         currentAudio = null;
         currentPlayingElement = null;
@@ -382,7 +406,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
                 visualElement.classList.remove('playing', 'pulsing', 'beating');
             }
             hideAudioStatus();
-            stopVisualization();
+            stopIntegratedVisualization();
         }, 2000);
     };
 }
@@ -1151,11 +1175,27 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
     newFrame.addEventListener('click', clickHandler);
 }
 
-// Show audio status
+// Show audio status with integrated visualizer
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
     if (status) {
-        status.textContent = message;
+        // Clear existing content
+        status.innerHTML = '';
+        
+        // Create text container
+        const textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        textSpan.style.cssText = `
+            display: flex;
+            align-items: center;
+            flex: 1;
+        `;
+        
+        status.appendChild(textSpan);
+        
+        // Create integrated visualizer if it doesn't exist
+        createIntegratedVisualizer();
+        
         status.classList.add('show');
         
         if (window.innerWidth <= 768) {
