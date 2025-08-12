@@ -67,35 +67,22 @@ function initAudioContext() {
     return audioContext;
 }
 
-// Create the HTML structure for the visualizer
+// Create the HTML structure for the background visualizer
 function createSoundVisualizer() {
     const visualizerHTML = `
-        <div id="soundVisualizer" class="sound-visualizer hidden">
-            <div class="visualizer-content">
-                <div class="song-info">
-                    <h4 class="song-title" id="visualizerSongTitle">No song playing</h4>
-                    <p class="song-artist" id="visualizerSongArtist">Select a track</p>
-                </div>
-                
-                <div class="audio-visualizer" id="audioVisualizer">
-                    ${Array(40).fill().map((_, i) => `<div class="visualizer-bar" id="bar-${i}"></div>`).join('')}
-                </div>
-                
-                <div class="visualizer-controls">
-                    <button class="visualizer-btn" onclick="playPreviousSong()" title="Previous">⏮️</button>
-                    <button class="visualizer-btn play-btn" onclick="toggleGlobalMusic()" id="visualizerPlayBtn" title="Play/Pause">▶️</button>
-                    <button class="visualizer-btn" onclick="playNextSong()" title="Next">⏭️</button>
-                    <button class="visualizer-btn" onclick="toggleVisualizerVisibility()" title="Hide/Show" id="toggleVisualizerBtn">👁️</button>
-                </div>
+        <div id="backgroundVisualizer" class="background-visualizer">
+            <div class="visualizer-grid" id="visualizerGrid">
+                ${Array(60).fill().map((_, i) => `<div class="bg-visualizer-bar" id="bg-bar-${i}"></div>`).join('')}
+            </div>
+            <div class="song-display" id="songDisplay">
+                <h2 class="bg-song-title" id="bgSongTitle">No song playing</h2>
+                <p class="bg-song-artist" id="bgSongArtist">Select a track to begin</p>
             </div>
         </div>
     `;
     
     // Insert the visualizer into the page
-    document.body.insertAdjacentHTML('beforeend', visualizerHTML);
-    
-    // Add body class for padding
-    document.body.classList.add('visualizer-active');
+    document.body.insertAdjacentHTML('afterbegin', visualizerHTML);
 }
 
 // Initialize the audio visualizer
@@ -111,8 +98,8 @@ function initAudioVisualizer() {
         
         // Create analyser
         visualizerAnalyser = audioContext.createAnalyser();
-        visualizerAnalyser.fftSize = 128;
-        visualizerAnalyser.smoothingTimeConstant = 0.8;
+        visualizerAnalyser.fftSize = 256;
+        visualizerAnalyser.smoothingTimeConstant = 0.7;
         
         const bufferLength = visualizerAnalyser.frequencyBinCount;
         visualizerDataArray = new Uint8Array(bufferLength);
@@ -122,37 +109,45 @@ function initAudioVisualizer() {
         visualizerAnalyser.connect(audioContext.destination);
         
         // Get visualizer bars
-        visualizerBars = Array.from(document.querySelectorAll('.visualizer-bar'));
+        visualizerBars = Array.from(document.querySelectorAll('.bg-visualizer-bar'));
         
-        console.log('Audio visualizer initialized');
+        console.log('Background audio visualizer initialized');
         
     } catch (error) {
         console.log('Error initializing audio visualizer:', error);
     }
 }
 
-// Animate the visualizer bars
+// Animate the background visualizer bars
 function animateVisualizer() {
     if (!visualizerAnalyser || !visualizerDataArray || !visualizerBars.length) return;
     
     visualizerAnalyser.getByteFrequencyData(visualizerDataArray);
     
     // Update bars based on frequency data
-    for (let i = 0; i < visualizerBars.length && i < visualizerDataArray.length; i++) {
+    for (let i = 0; i < visualizerBars.length; i++) {
         const bar = visualizerBars[i];
-        const value = visualizerDataArray[i];
+        const dataIndex = Math.floor((i / visualizerBars.length) * visualizerDataArray.length);
+        const value = visualizerDataArray[dataIndex] || 0;
         
-        // Scale the value to a height between 4px and 40px
-        const height = Math.max(4, (value / 255) * 40);
+        // Scale the value to a height between 20px and 200px
+        const height = Math.max(20, (value / 255) * 200);
         bar.style.height = `${height}px`;
         
-        // Add color variation based on frequency
+        // Add color variation based on frequency and position
         const hue = (i / visualizerBars.length) * 360;
         const intensity = value / 255;
+        const saturation = 60 + intensity * 40;
+        const lightness = 40 + intensity * 30;
+        
         bar.style.background = `linear-gradient(to top, 
-            hsl(${hue}, 70%, ${50 + intensity * 30}%), 
-            hsl(${(hue + 60) % 360}, 70%, ${60 + intensity * 20}%))`;
-        bar.style.opacity = Math.max(0.3, intensity);
+            hsla(${hue}, ${saturation}%, ${lightness}%, 0.6), 
+            hsla(${(hue + 60) % 360}, ${saturation}%, ${lightness + 10}%, 0.4))`;
+        
+        bar.style.opacity = Math.max(0.2, intensity * 0.8);
+        
+        // Add subtle animation delay for wave effect
+        bar.style.transitionDelay = `${i * 2}ms`;
     }
     
     visualizerAnimationId = requestAnimationFrame(animateVisualizer);
@@ -163,6 +158,7 @@ function startVisualizer() {
     if (visualizerAnimationId) {
         cancelAnimationFrame(visualizerAnimationId);
     }
+    showBackgroundVisualizer();
     animateVisualizer();
 }
 
@@ -174,47 +170,38 @@ function stopVisualizer() {
     }
     
     // Reset bars to minimum height
-    visualizerBars.forEach(bar => {
-        bar.style.height = '4px';
-        bar.style.opacity = '0.3';
+    visualizerBars.forEach((bar, i) => {
+        bar.style.height = '20px';
+        bar.style.opacity = '0.2';
+        bar.style.background = 'linear-gradient(to top, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))';
     });
+    
+    hideBackgroundVisualizer();
 }
 
-// Show/hide visualizer
-function showVisualizer() {
-    const visualizer = document.getElementById('soundVisualizer');
+// Show/hide background visualizer
+function showBackgroundVisualizer() {
+    const visualizer = document.getElementById('backgroundVisualizer');
     if (visualizer) {
         visualizer.classList.remove('hidden');
+        visualizer.classList.add('active');
         isVisualizerVisible = true;
     }
 }
 
-function hideVisualizer() {
-    const visualizer = document.getElementById('soundVisualizer');
+function hideBackgroundVisualizer() {
+    const visualizer = document.getElementById('backgroundVisualizer');
     if (visualizer) {
         visualizer.classList.add('hidden');
+        visualizer.classList.remove('active');
         isVisualizerVisible = false;
     }
 }
 
-// Toggle visualizer visibility
-function toggleVisualizerVisibility() {
-    if (isVisualizerVisible) {
-        hideVisualizer();
-    } else {
-        showVisualizer();
-    }
-    
-    const toggleBtn = document.getElementById('toggleVisualizerBtn');
-    if (toggleBtn) {
-        toggleBtn.textContent = isVisualizerVisible ? '👁️' : '🙈';
-    }
-}
-
-// Update visualizer song info
+// Update background visualizer song info
 function updateVisualizerSongInfo() {
-    const titleElement = document.getElementById('visualizerSongTitle');
-    const artistElement = document.getElementById('visualizerSongArtist');
+    const titleElement = document.getElementById('bgSongTitle');
+    const artistElement = document.getElementById('bgSongArtist');
     
     if (titleElement && artistElement) {
         const currentTitle = globalMusicTitles[globalMusicIndex];
@@ -227,14 +214,6 @@ function updateVisualizerSongInfo() {
             titleElement.textContent = currentTitle;
             artistElement.textContent = 'Unknown Artist';
         }
-    }
-}
-
-// Update visualizer play button
-function updateVisualizerPlayButton(isPlaying) {
-    const playBtn = document.getElementById('visualizerPlayBtn');
-    if (playBtn) {
-        playBtn.textContent = isPlaying ? '⏸️' : '▶️';
     }
 }
 
@@ -263,8 +242,6 @@ function attemptAutoPlay() {
                 if (musicButton) {
                     musicButton.classList.add('playing');
                 }
-                updateVisualizerPlayButton(true);
-                showVisualizer();
                 startVisualizer();
             }).catch(error => {
                 console.log('Auto-play blocked by browser:', error);
@@ -445,7 +422,7 @@ function selectGlobalSong(filename) {
         nowPlaying.textContent = globalMusicTitles[globalMusicIndex];
     }
     
-    // Update visualizer song info
+    // Update background visualizer song info
     updateVisualizerSongInfo();
     
     // Update select dropdown
@@ -470,12 +447,10 @@ function toggleGlobalMusic() {
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         playBtn.textContent = '⏸️';
-                        updateVisualizerPlayButton(true);
                         if (musicButton) {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
-                        showVisualizer();
                         startVisualizer();
                     }).catch(error => {
                         console.log('Audio play failed:', error);
@@ -489,12 +464,10 @@ function toggleGlobalMusic() {
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
                             playBtn.textContent = '⏸️';
-                            updateVisualizerPlayButton(true);
                             if (musicButton) {
                                 musicButton.classList.add('playing');
                                 musicButton.classList.remove('pulse');
                             }
-                            showVisualizer();
                             startVisualizer();
                         }).catch(error => {
                             console.log('Audio play failed:', error);
@@ -505,7 +478,6 @@ function toggleGlobalMusic() {
         } else {
             audio.pause();
             playBtn.textContent = '▶️';
-            updateVisualizerPlayButton(false);
             if (musicButton) {
                 musicButton.classList.remove('playing');
             }
@@ -529,12 +501,10 @@ function playPreviousSong() {
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     if (playBtn) playBtn.textContent = '⏸️';
-                    updateVisualizerPlayButton(true);
                     if (musicButton) {
                         musicButton.classList.add('playing');
                         musicButton.classList.remove('pulse');
                     }
-                    showVisualizer();
                     startVisualizer();
                 }).catch(error => {
                     console.log('Audio play failed:', error);
@@ -548,12 +518,10 @@ function playPreviousSong() {
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         if (playBtn) playBtn.textContent = '⏸️';
-                        updateVisualizerPlayButton(true);
                         if (musicButton) {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
-                        showVisualizer();
                         startVisualizer();
                     }).catch(error => {
                         console.log('Audio play failed:', error);
@@ -579,12 +547,10 @@ function playNextSong() {
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     if (playBtn) playBtn.textContent = '⏸️';
-                    updateVisualizerPlayButton(true);
                     if (musicButton) {
                         musicButton.classList.add('playing');
                         musicButton.classList.remove('pulse');
                     }
-                    showVisualizer();
                     startVisualizer();
                 }).catch(error => {
                     console.log('Audio play failed:', error);
@@ -598,12 +564,10 @@ function playNextSong() {
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         if (playBtn) playBtn.textContent = '⏸️';
-                        updateVisualizerPlayButton(true);
                         if (musicButton) {
                             musicButton.classList.add('playing');
                             musicButton.classList.remove('pulse');
                         }
-                        showVisualizer();
                         startVisualizer();
                     }).catch(error => {
                         console.log('Audio play failed:', error);
@@ -625,7 +589,6 @@ function stopGlobalMusic() {
         if (playBtn) {
             playBtn.textContent = '▶️';
         }
-        updateVisualizerPlayButton(false);
         if (musicButton) {
             musicButton.classList.remove('playing');
         }
@@ -710,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize audio context
     initAudioContext();
     
-    // Create sound visualizer
+    // Create background sound visualizer
     createSoundVisualizer();
     
     // Optimize image loading
