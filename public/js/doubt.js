@@ -746,34 +746,567 @@ function checkOfflineStatus() {
     handleNetworkStatus(navigator.onLine);
 }
 
-// Enhanced frame initialization for better media handling
-function initializeMediaFrames() {
-    // Get all image and video frames
-    const frames = document.querySelectorAll('.image-frame, .video-frame');
+// Setup video element with improved mobile compatibility
+function setupVideoElement(video, frame) {
+    if (!video || !frame) return;
     
-    frames.forEach(frame => {
-        const img = frame.querySelector('img:not(.placeholder)');
-        const video = frame.querySelector('video');
+    const isMobile = window.innerWidth <= 768;
+    
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+    video.preload = 'metadata';
+    video.setAttribute('webkit-playsinline', 'true'); // iOS compatibility
+    video.setAttribute('playsinline', 'true');
+    
+    // Mobile-optimized video styling
+    video.style.cssText = `
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 12px;
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        ${isMobile ? 'touch-action: manipulation;' : ''}
+    `;
+    
+    // Enhanced click handling for mobile
+    const handleVideoClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         
-        if (video) {
-            setupVideoElement(video, frame);
-        } else if (img) {
-            frame.style.cursor = 'pointer';
+        // Add haptic feedback on mobile
+        if (isMobile && navigator.vibrate) {
+            navigator.vibrate(25);
+        }
+        
+        expandMedia(frame.id);
+    };
+    
+    video.addEventListener('click', handleVideoClick);
+    video.addEventListener('touchend', handleVideoClick);
+    
+    // Improved intersection observer for mobile
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Delay autoplay slightly on mobile to ensure proper loading
+                setTimeout(() => {
+                    const playPromise = video.play();
+                    if (playPromise) {
+                        playPromise
+                            .then(() => console.log(`Video autoplay successful: ${frame.id}`))
+                            .catch(e => console.log(`Video autoplay failed: ${frame.id}`, e));
+                    }
+                }, isMobile ? 200 : 100);
+            } else {
+                video.pause();
+            }
+        });
+    }, { 
+        threshold: isMobile ? 0.3 : 0.5, // Lower threshold for mobile
+        rootMargin: isMobile ? '20px' : '10px'
+    });
+    
+    observer.observe(video);
+    
+    // Force initial play attempt with better error handling
+    setTimeout(() => {
+        if (video.closest('.image-frame, .video-frame')) {
+            const rect = video.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
             
-            // Remove existing listeners by cloning
-            const newFrame = frame.cloneNode(true);
-            frame.parentNode.replaceChild(newFrame, frame);
+            if (isVisible) {
+                const playPromise = video.play();
+                if (playPromise) {
+                    playPromise
+                        .then(() => console.log(`Initial video play successful: ${frame.id}`))
+                        .catch(e => {
+                            console.log(`Initial video play failed: ${frame.id}`, e);
+                            // Try again with user interaction
+                            video.addEventListener('touchstart', () => {
+                                video.play().catch(e => console.log('Touch play failed:', e));
+                            }, { once: true });
+                        });
+                }
+            }
+        }
+    }, isMobile ? 500 : 200);
+}
+
+// Enhanced responsive media frame setup
+function setupResponsiveMediaFrames() {
+    const frames = document.querySelectorAll('.image-frame, .video-frame');
+    const isMobile = window.innerWidth <= 768;
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    frames.forEach((frame, index) => {
+        // Reset any existing styles
+        frame.style.position = 'relative';
+        frame.style.overflow = 'hidden';
+        frame.style.cursor = 'pointer';
+        
+        if (isMobile) {
+            // Mobile-specific adjustments
+            frame.style.cssText += `
+                margin: 15px auto;
+                width: calc(100% - 20px);
+                max-width: 350px;
+                min-height: 180px;
+                max-height: 280px;
+                aspect-ratio: 4/3;
+                border-radius: 15px;
+                box-shadow: 0 8px 25px rgba(255, 23, 68, 0.15);
+                transform: translateZ(0); /* Force hardware acceleration */
+                -webkit-transform: translateZ(0);
+                touch-action: manipulation;
+                -webkit-touch-callout: none;
+                user-select: none;
+            `;
             
-            // Add click handler for images
-            newFrame.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                expandMedia(newFrame.id);
-            });
+            // Add spacing between frames on mobile
+            if (index > 0) {
+                frame.style.marginTop = '25px';
+            }
+        } else if (isTablet) {
+            // Tablet adjustments
+            frame.style.cssText += `
+                margin: 12px;
+                min-height: 200px;
+                max-height: 320px;
+                aspect-ratio: 4/3;
+                border-radius: 12px;
+            `;
+        } else {
+            // Desktop - maintain original styling
+            frame.style.cssText += `
+                border-radius: 12px;
+            `;
+        }
+        
+        // Ensure proper z-index stacking
+        frame.style.zIndex = '1';
+        
+        // Add loading states for better UX
+        if (!frame.querySelector('.loading-indicator')) {
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading-indicator';
+            loadingIndicator.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #ff1744;
+                font-size: 1.2rem;
+                z-index: 2;
+                display: none;
+            `;
+            loadingIndicator.textContent = '⏳';
+            frame.appendChild(loadingIndicator);
+        }
+    });
+}
+
+// Enhanced media expansion with better mobile support
+function expandMedia(frameId) {
+    const frame = document.getElementById(frameId);
+    if (!frame || expandedMedia) return;
+    
+    const video = frame.querySelector('video');
+    const img = frame.querySelector('img:not(.placeholder)');
+    
+    let mediaElement = null;
+    let isVideo = false;
+    
+    if (video && video.style.display !== 'none') {
+        mediaElement = video;
+        isVideo = true;
+    } else if (img && img.style.display !== 'none') {
+        mediaElement = img;
+        isVideo = false;
+    }
+    
+    if (!mediaElement) {
+        console.log('No media element found in frame:', frameId);
+        return;
+    }
+    
+    const isMobile = window.innerWidth <= 768;
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId, 'Mobile:', isMobile);
+    
+    let popupWidth, popupHeight, popupX, popupY;
+    
+    if (isMobile) {
+        // Mobile: Full-screen approach with safe areas
+        const safeMargin = 20;
+        const statusBarHeight = 44; // Account for status bar
+        const bottomSafeArea = 34; // Account for home indicator on newer iPhones
+        
+        popupWidth = Math.min(viewportWidth - (safeMargin * 2), 400);
+        
+        if (isVideo) {
+            // Videos need more vertical space for controls
+            popupHeight = Math.min(
+                viewportHeight - statusBarHeight - bottomSafeArea - (safeMargin * 2),
+                popupWidth * (9/16) + 60 // 16:9 aspect ratio + controls
+            );
+        } else {
+            popupHeight = Math.min(
+                viewportHeight - statusBarHeight - bottomSafeArea - (safeMargin * 2),
+                popupWidth
+            );
+        }
+        
+        // Center positioning with safe area considerations
+        popupX = (viewportWidth - popupWidth) / 2;
+        popupY = statusBarHeight + ((viewportHeight - statusBarHeight - bottomSafeArea - popupHeight) / 2);
+        
+    } else if (isTablet) {
+        // Tablet: Larger but not full screen
+        popupWidth = isVideo ? 500 : 450;
+        popupHeight = isVideo ? 400 : 450;
+        
+        popupX = (viewportWidth - popupWidth) / 2;
+        popupY = Math.max(40, (viewportHeight - popupHeight) / 2);
+        
+    } else {
+        // Desktop: Original logic with improvements
+        const frameRect = frame.getBoundingClientRect();
+        popupWidth = isVideo ? 480 : 450;
+        popupHeight = isVideo ? 380 : 450;
+        
+        // Smart positioning to avoid viewport edges
+        const margin = 50;
+        
+        if (frameRect.right + popupWidth + margin < viewportWidth) {
+            popupX = frameRect.right + margin;
+            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupHeight - 20));
+        } else if (frameRect.left - popupWidth - margin > 0) {
+            popupX = frameRect.left - popupWidth - margin;
+            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupHeight - 20));
+        } else {
+            popupX = (viewportWidth - popupWidth) / 2;
+            popupY = Math.max(20, (viewportHeight - popupHeight) / 2);
+        }
+    }
+    
+    // Ensure popup stays within viewport
+    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupWidth - 10));
+    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupHeight - 10));
+    
+    const popup = document.createElement('div');
+    popup.className = 'media-popup';
+    popup.style.cssText = `
+        position: fixed;
+        top: ${popupY}px;
+        left: ${popupX}px;
+        width: ${popupWidth}px;
+        height: ${popupHeight}px;
+        background: ${isMobile ? 'rgba(0, 0, 0, 0.98)' : 'rgba(10, 10, 10, 0.95)'};
+        border: ${isMobile ? '1px' : '3px'} solid #ff1744;
+        border-radius: ${isMobile ? '20px' : '20px'};
+        backdrop-filter: blur(${isMobile ? '20px' : '15px'});
+        box-shadow: 0 ${isMobile ? '25px' : '15px'} ${isMobile ? '50px' : '35px'} rgba(255, 23, 68, 0.4);
+        z-index: 200;
+        opacity: 0;
+        transform: scale(0.3) ${isMobile ? 'translateY(50px)' : 'rotate(-5deg)'};
+        transition: all ${isMobile ? '0.5s' : '0.4s'} cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+        max-width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+        ${isMobile ? 'touch-action: manipulation;' : 'cursor: pointer;'}
+    `;
+    
+    let expandedElement;
+    
+    if (isVideo) {
+        console.log('Video starting, stopping all audio');
+        stopAllAudio(true);
+        
+        expandedElement = document.createElement('video');
+        expandedElement.src = mediaElement.src || mediaElement.querySelector('source')?.src;
+        expandedElement.controls = true;
+        expandedElement.autoplay = false; // Don't autoplay in popup to avoid issues
+        expandedElement.loop = mediaElement.loop;
+        expandedElement.volume = isMobile ? 0.7 : 0.8;
+        expandedElement.muted = false;
+        expandedElement.playsInline = true;
+        expandedElement.preload = 'metadata';
+        expandedElement.setAttribute('webkit-playsinline', 'true');
+        expandedElement.setAttribute('playsinline', 'true');
+        
+        currentVideo = expandedElement;
+        
+        // Enhanced video styling for mobile
+        expandedElement.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Use contain for better mobile experience */
+            border-radius: ${isMobile ? '18px' : '17px'};
+            display: block;
+            background: #000;
+        `;
+        
+        // Video event handling with better mobile support
+        expandedElement.addEventListener('loadeddata', () => {
+            console.log('Video loaded, attempting to play');
+            // Auto-play after loading on mobile
+            if (isMobile) {
+                setTimeout(() => {
+                    expandedElement.play().catch(e => {
+                        console.log('Auto-play failed, user interaction required');
+                        showTypingMessage('Tap video to play 🎬');
+                    });
+                }, 300);
+            } else {
+                expandedElement.play().catch(e => console.log('Video play failed:', e));
+            }
+        });
+        
+        expandedElement.addEventListener('play', () => {
+            console.log('Video started playing');
+            showTypingMessage('Playing video... 🎬');
+        });
+        
+        expandedElement.addEventListener('pause', () => {
+            if (expandedElement.currentTime < expandedElement.duration - 0.1) {
+                showTypingMessage('Video paused');
+            }
+        });
+        
+        expandedElement.addEventListener('ended', () => {
+            console.log('Video ended, restoring audio');
+            currentVideo = null;
+            showTypingMessage('Video ended, restoring audio...');
+            setTimeout(restoreAudioState, 500);
+        });
+        
+        expandedElement.addEventListener('error', (e) => {
+            console.log('Video playback error:', e);
+            currentVideo = null;
+            showTypingMessage('Video error, restoring audio...');
+            setTimeout(restoreAudioState, 500);
+        });
+        
+    } else {
+        expandedElement = document.createElement('img');
+        expandedElement.src = mediaElement.src;
+        expandedElement.alt = mediaElement.alt || 'Memory';
+        
+        expandedElement.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: ${isMobile ? '18px' : '17px'};
+            display: block;
+        `;
+        
+        expandedElement.onload = () => console.log('Image loaded in popup');
+        expandedElement.onerror = () => {
+            console.log('Image failed to load in popup');
+            showTypingMessage('Image failed to load');
+        };
+    }
+    
+    // Enhanced close button for mobile
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    const closeBtnSize = isMobile ? 48 : 35;
+    const closeBtnOffset = isMobile ? 15 : 10;
+    
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: ${closeBtnOffset}px;
+        right: ${closeBtnOffset}px;
+        background: rgba(255, 23, 68, 0.9);
+        border: none;
+        color: white;
+        font-size: ${isMobile ? '1.8rem' : '1.4rem'};
+        font-weight: bold;
+        width: ${closeBtnSize}px;
+        height: ${closeBtnSize}px;
+        border-radius: 50%;
+        z-index: 201;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        user-select: none;
+        ${isMobile ? 'cursor: pointer;' : 'cursor: pointer;'}
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    `;
+    
+    // Enhanced button interactions
+    const handleButtonHover = () => {
+        closeBtn.style.background = 'rgba(255, 23, 68, 1)';
+        closeBtn.style.transform = 'scale(1.1)';
+        closeBtn.style.boxShadow = '0 6px 20px rgba(255, 23, 68, 0.4)';
+    };
+    
+    const handleButtonLeave = () => {
+        closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
+        closeBtn.style.transform = 'scale(1)';
+        closeBtn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+    };
+    
+    if (!isMobile) {
+        closeBtn.addEventListener('mouseenter', handleButtonHover);
+        closeBtn.addEventListener('mouseleave', handleButtonLeave);
+    }
+    
+    // Touch feedback
+    closeBtn.addEventListener('touchstart', () => {
+        closeBtn.style.background = 'rgba(255, 23, 68, 1)';
+        closeBtn.style.transform = 'scale(0.95)';
+        if (navigator.vibrate) navigator.vibrate(25);
+    });
+    
+    closeBtn.addEventListener('touchend', handleButtonLeave);
+    
+    popup.appendChild(expandedElement);
+    popup.appendChild(closeBtn);
+    document.body.appendChild(popup);
+    
+    expandedMedia = popup;
+    
+    // Show with smooth animation
+    requestAnimationFrame(() => {
+        popup.style.opacity = '1';
+        popup.style.transform = 'scale(1) translateY(0) rotate(0deg)';
+    });
+    
+    // Close functionality with improved mobile handling
+    const closeMedia = () => {
+        if (currentVideo) {
+            console.log('Closing video');
+            setTimeout(restoreAudioState, 200);
+            currentVideo.pause();
+            currentVideo = null;
+        }
+        
+        popup.style.opacity = '0';
+        popup.style.transform = `scale(0.3) ${isMobile ? 'translateY(50px)' : 'rotate(-5deg)'}`;
+        
+        setTimeout(() => {
+            if (popup.parentNode) {
+                popup.remove();
+            }
+            expandedMedia = null;
+        }, isMobile ? 500 : 400);
+    };
+    
+    // Close button events
+    closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMedia();
+    });
+    
+    closeBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMedia();
+    });
+    
+    // Background click to close (with better mobile support)
+    let touchStartTime = 0;
+    
+    popup.addEventListener('touchstart', (e) => {
+        touchStartTime = Date.now();
+    });
+    
+    popup.addEventListener('touchend', (e) => {
+        const touchDuration = Date.now() - touchStartTime;
+        if (e.target === popup && touchDuration < 300) { // Quick tap
+            closeMedia();
         }
     });
     
-    console.log('Media frames initialized:', frames.length);
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            closeMedia();
+        }
+    });
+    
+    // ESC key to close
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            closeMedia();
+            document.removeEventListener('keydown', handleEsc);
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+    
+    // Auto-close for images (longer on mobile)
+    if (!isVideo) {
+        const autoCloseDelay = isMobile ? 20000 : 15000;
+        setTimeout(() => {
+            if (expandedMedia === popup) {
+                closeMedia();
+            }
+        }, autoCloseDelay);
+    }
+    
+    console.log('Media popup created successfully');
+}
+
+// Enhanced media frame initialization
+function initializeMediaFrames() {
+    const frames = document.querySelectorAll('.image-frame, .video-frame');
+    const isMobile = window.innerWidth <= 768;
+    
+    console.log('Initializing media frames:', frames.length, 'Mobile:', isMobile);
+    
+    frames.forEach((frame, index) => {
+        const img = frame.querySelector('img:not(.placeholder)');
+        const video = frame.querySelector('video');
+        
+        // Add frame index for debugging
+        frame.setAttribute('data-frame-index', index);
+        
+        if (video) {
+            console.log(`Setting up video for frame ${index}:`, frame.id);
+            setupVideoElement(video, frame);
+        } else if (img) {
+            console.log(`Setting up image for frame ${index}:`, frame.id);
+            frame.style.cursor = 'pointer';
+            
+            // Enhanced click handling for images
+            const handleImageClick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (isMobile && navigator.vibrate) {
+                    navigator.vibrate(25);
+                }
+                
+                console.log('Image frame clicked:', frame.id);
+                expandMedia(frame.id);
+            };
+            
+            // Remove existing listeners
+            const newFrame = frame.cloneNode(true);
+            frame.parentNode.replaceChild(newFrame, frame);
+            
+            // Add new listeners
+            newFrame.addEventListener('click', handleImageClick);
+            newFrame.addEventListener('touchend', handleImageClick);
+        }
+    });
+    
+    // Setup responsive frames
+    setupResponsiveMediaFrames();
+    
+    console.log('Media frames initialization complete');
 }
 
 // Create offline indicator
@@ -891,6 +1424,8 @@ function convertImageToVideo(img, frame) {
     video.autoplay = true;
     video.playsInline = true;
     video.preload = 'metadata';
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('playsinline', 'true');
     
     video.style.cssText = `
         width: 100%;
@@ -917,403 +1452,6 @@ function convertImageToVideo(img, frame) {
     video.load();
 }
 
-// Setup video element with proper handling
-function setupVideoElement(video, frame) {
-    if (!video || !frame) return;
-    
-    video.muted = true;
-    video.playsInline = true;
-    video.loop = true;
-    video.preload = 'metadata';
-    
-    video.style.cssText = `
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover;
-        border-radius: 12px;
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-    `;
-    
-    video.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        expandMedia(frame.id);
-    });
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const playPromise = video.play();
-                if (playPromise) {
-                    playPromise.catch(e => console.log('Video autoplay failed:', e));
-                }
-            } else {
-                video.pause();
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    observer.observe(video);
-    
-    setTimeout(() => {
-        const playPromise = video.play();
-        if (playPromise) {
-            playPromise
-                .then(() => console.log('Video autoplay successful'))
-                .catch(e => console.log('Video autoplay failed:', e));
-        }
-    }, 100);
-}
-
-// Enhanced expand media function with better mobile support
-function expandMedia(frameId) {
-    const frame = document.getElementById(frameId);
-    if (!frame || expandedMedia) return;
-    
-    const video = frame.querySelector('video');
-    const img = frame.querySelector('img:not(.placeholder)');
-    
-    let mediaElement = null;
-    let isVideo = false;
-    
-    if (video && video.style.display !== 'none') {
-        mediaElement = video;
-        isVideo = true;
-    } else if (img && img.style.display !== 'none') {
-        mediaElement = img;
-        isVideo = false;
-    }
-    
-    if (!mediaElement) {
-        console.log('No media element found in frame:', frameId);
-        return;
-    }
-    
-    console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId);
-    
-    const frameRect = frame.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const isMobile = window.innerWidth <= 768;
-    
-    let popupSize, popupX, popupY;
-    
-    if (isMobile) {
-        // Mobile: Use responsive sizing with safe margins
-        const safeMargin = 20;
-        const maxSize = Math.min(viewportWidth, viewportHeight) - (safeMargin * 2);
-        
-        if (isVideo) {
-            // Videos get more space on mobile for better controls
-            popupSize = Math.min(maxSize, viewportWidth * 0.9, viewportHeight * 0.7);
-        } else {
-            // Images use slightly less space
-            popupSize = Math.min(maxSize, viewportWidth * 0.85, viewportHeight * 0.6);
-        }
-        
-        // Center on mobile for better UX
-        popupX = (viewportWidth - popupSize) / 2;
-        popupY = (viewportHeight - popupSize) / 2;
-        
-        // Adjust Y position to avoid status bars and keyboard
-        if (popupY < 40) popupY = 40;
-        if (popupY + popupSize > viewportHeight - 40) {
-            popupY = viewportHeight - popupSize - 40;
-        }
-        
-    } else {
-        // Desktop: Original positioning logic with improvements
-        popupSize = isVideo ? 430 : 400;
-        const offset = 40;
-        
-        // Smart positioning to avoid edges
-        if (frameRect.right + popupSize + offset < viewportWidth) {
-            // Position to the right
-            popupX = frameRect.right + offset;
-            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupSize - 20));
-        } else if (frameRect.left - popupSize - offset > 0) {
-            // Position to the left
-            popupX = frameRect.left - popupSize - offset;
-            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupSize - 20));
-        } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
-            // Position below
-            popupX = Math.max(20, Math.min(frameRect.left, viewportWidth - popupSize - 20));
-            popupY = frameRect.bottom + offset;
-        } else {
-            // Position above
-            popupX = Math.max(20, Math.min(frameRect.left, viewportWidth - popupSize - 20));
-            popupY = Math.max(20, frameRect.top - popupSize - offset);
-        }
-    }
-    
-    // Ensure popup stays within viewport bounds
-    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupSize - 10));
-    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupSize - 10));
-    
-    const popup = document.createElement('div');
-    popup.className = 'media-popup';
-    popup.style.cssText = `
-        position: fixed;
-        top: ${popupY}px;
-        left: ${popupX}px;
-        width: ${popupSize}px;
-        height: ${popupSize}px;
-        background: rgba(10, 10, 10, 0.95);
-        border: ${isMobile ? '2px' : '3px'} solid #ff1744;
-        border-radius: ${isMobile ? '15px' : '20px'};
-        backdrop-filter: blur(15px);
-        box-shadow: 0 15px 35px rgba(255, 23, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
-        z-index: 150;
-        opacity: 0;
-        transform: scale(0.3) rotate(-5deg);
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        overflow: hidden;
-        cursor: pointer;
-        max-width: calc(100vw - 20px);
-        max-height: calc(100vh - 20px);
-    `;
-    
-    let expandedElement;
-    if (isVideo) {
-        console.log('Video starting, stopping all audio');
-        stopAllAudio(true);
-        
-        expandedElement = document.createElement('video');
-        expandedElement.src = mediaElement.src || mediaElement.querySelector('source')?.src;
-        expandedElement.controls = true;
-        expandedElement.autoplay = true;
-        expandedElement.loop = mediaElement.loop;
-        expandedElement.volume = isMobile ? 0.6 : 0.8; // Lower volume on mobile
-        expandedElement.muted = false;
-        expandedElement.playsInline = true;
-        expandedElement.preload = 'metadata';
-        currentVideo = expandedElement;
-        
-        // Video event handling
-        expandedElement.addEventListener('play', () => {
-            console.log('Video started playing');
-            showTypingMessage('Playing video... 🎬');
-        });
-        
-        expandedElement.addEventListener('pause', () => {
-            console.log('Video paused');
-            if (expandedElement.currentTime < expandedElement.duration - 0.1) {
-                showTypingMessage('Video paused');
-            }
-        });
-        
-        expandedElement.addEventListener('ended', () => {
-            console.log('Video ended, restoring audio');
-            currentVideo = null;
-            showTypingMessage('Video ended, restoring audio...');
-            setTimeout(() => {
-                restoreAudioState();
-            }, 500);
-        });
-        
-        expandedElement.addEventListener('error', (e) => {
-            console.log('Video playback error:', e);
-            currentVideo = null;
-            showTypingMessage('Video error, restoring audio...');
-            setTimeout(() => {
-                restoreAudioState();
-            }, 500);
-        });
-    } else {
-        expandedElement = document.createElement('img');
-        expandedElement.src = mediaElement.src;
-        expandedElement.alt = mediaElement.alt || 'Memory';
-        
-        expandedElement.onload = () => {
-            console.log('Image loaded in popup');
-        };
-        
-        expandedElement.onerror = () => {
-            console.log('Image failed to load in popup');
-            showTypingMessage('Image failed to load');
-        };
-    }
-    
-    expandedElement.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: ${isMobile ? '13px' : '17px'};
-        display: block;
-    `;
-    
-    // Mobile-optimized close button
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '✕';
-    const closeBtnSize = isMobile ? 40 : 35;
-    const closeBtnOffset = isMobile ? 8 : 10;
-    
-    closeBtn.style.cssText = `
-        position: absolute;
-        top: ${closeBtnOffset}px;
-        right: ${closeBtnOffset}px;
-        background: rgba(255, 23, 68, 0.9);
-        border: none;
-        color: white;
-        font-size: ${isMobile ? '1.6rem' : '1.4rem'};
-        width: ${closeBtnSize}px;
-        height: ${closeBtnSize}px;
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 151;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        touch-action: manipulation;
-        -webkit-touch-callout: none;
-        user-select: none;
-    `;
-    
-    closeBtn.addEventListener('mouseenter', () => {
-        closeBtn.style.background = 'rgba(255, 23, 68, 1)';
-        closeBtn.style.transform = 'scale(1.1)';
-    });
-    
-    closeBtn.addEventListener('mouseleave', () => {
-        closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
-        closeBtn.style.transform = 'scale(1)';
-    });
-    
-    // Touch feedback for mobile
-    if (isMobile) {
-        closeBtn.addEventListener('touchstart', () => {
-            closeBtn.style.background = 'rgba(255, 23, 68, 1)';
-            closeBtn.style.transform = 'scale(0.95)';
-        });
-        
-        closeBtn.addEventListener('touchend', () => {
-            closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
-            closeBtn.style.transform = 'scale(1)';
-        });
-    }
-    
-    popup.appendChild(expandedElement);
-    popup.appendChild(closeBtn);
-    document.body.appendChild(popup);
-    
-    expandedMedia = popup;
-    
-    // Show with smooth animation
-    requestAnimationFrame(() => {
-        popup.style.opacity = '1';
-        popup.style.transform = 'scale(1) rotate(0deg)';
-    });
-    
-    // Reduced floating animation on mobile to save battery
-    if (!isMobile) {
-        setTimeout(() => {
-            if (popup.parentNode) {
-                popup.style.animation = 'floatPopup 3s ease-in-out infinite';
-            }
-        }, 400);
-    }
-    
-    // Create floating animation style if not exists
-    if (!document.getElementById('floatPopupStyle')) {
-        const style = document.createElement('style');
-        style.id = 'floatPopupStyle';
-        style.textContent = `
-            @keyframes floatPopup {
-                0%, 100% { transform: scale(1) rotate(0deg) translateY(0px); }
-                50% { transform: scale(1) rotate(1deg) translateY(-5px); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // Close functionality
-    const closeMedia = () => {
-        if (currentVideo) {
-            console.log('Closing video, current time:', currentVideo.currentTime);
-            setTimeout(() => {
-                restoreAudioState();
-            }, 200);
-            currentVideo.pause();
-            currentVideo = null;
-        }
-        
-        popup.style.opacity = '0';
-        popup.style.transform = 'scale(0.3) rotate(-5deg)';
-        
-        setTimeout(() => {
-            if (popup.parentNode) {
-                popup.remove();
-            }
-            expandedMedia = null;
-        }, 400);
-    };
-    
-    closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMedia();
-    });
-    
-    closeBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMedia();
-    });
-    
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            closeMedia();
-        }
-    });
-    
-    // Mobile-specific touch handling
-    if (isMobile) {
-        let startX, startY;
-        
-        popup.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-        
-        popup.addEventListener('touchend', (e) => {
-            if (!e.touches.length) {
-                const endX = e.changedTouches[0].clientX;
-                const endY = e.changedTouches[0].clientY;
-                const deltaX = Math.abs(endX - startX);
-                const deltaY = Math.abs(endY - startY);
-                
-                // Close if tap (not swipe) on background
-                if (deltaX < 10 && deltaY < 10 && e.target === popup) {
-                    closeMedia();
-                }
-            }
-        });
-    }
-    
-    // Auto-close timing adjustment
-    if (!isVideo) {
-        const autoCloseDelay = isMobile ? 15000 : 20000; // Shorter on mobile
-        setTimeout(() => {
-            if (expandedMedia === popup) {
-                closeMedia();
-            }
-        }, autoCloseDelay);
-    }
-    
-    // ESC key to close
-    const handleEsc = (e) => {
-        if (e.key === 'Escape') {
-            closeMedia();
-            document.removeEventListener('keydown', handleEsc);
-        }
-    };
-    document.addEventListener('keydown', handleEsc);
-}
-
 // Enhanced setup media frame function
 function setupMediaFrame(frameId, mediaSrc, altText) {
     const frame = document.getElementById(frameId);
@@ -1332,6 +1470,8 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         mediaElement.autoplay = true;
         mediaElement.playsInline = true;
         mediaElement.preload = 'metadata';
+        mediaElement.setAttribute('webkit-playsinline', 'true');
+        mediaElement.setAttribute('playsinline', 'true');
         
         mediaElement.style.cssText = `
             width: 100% !important;
@@ -1430,29 +1570,6 @@ function preloadAudioOnDemand(audioId) {
     }
 }
 
-// Enhanced responsive setup for media frames
-function setupResponsiveMediaFrames() {
-    const frames = document.querySelectorAll('.image-frame, .video-frame');
-    
-    frames.forEach((frame, index) => {
-        // Add responsive classes based on position
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-            // Ensure frames have proper spacing on mobile
-            frame.style.margin = '10px 0';
-            frame.style.minHeight = '150px';
-            frame.style.maxHeight = '250px';
-        }
-        
-        // Ensure proper touch targets on mobile
-        if (isMobile) {
-            frame.style.minHeight = '44px'; // iOS recommended touch target
-            frame.style.position = 'relative';
-        }
-    });
-}
-
 // Add viewport meta tag check for mobile optimization
 function ensureViewportMeta() {
     let viewportMeta = document.querySelector('meta[name="viewport"]');
@@ -1465,25 +1582,38 @@ function ensureViewportMeta() {
     }
 }
 
-// Handle orientation change
+// Handle orientation change with better mobile support
 function handleOrientationChange() {
+    console.log('Orientation changed');
+    
+    // Close expanded media on orientation change
     if (expandedMedia) {
-        // Close expanded media on orientation change to prevent layout issues
         const closeBtn = expandedMedia.querySelector('button');
         if (closeBtn) {
             closeBtn.click();
         }
     }
     
-    // Re-setup responsive frames after orientation change
+    // Re-setup frames after orientation stabilizes
     setTimeout(() => {
         setupResponsiveMediaFrames();
-    }, 100);
+        
+        // Re-initialize videos if needed
+        const videos = document.querySelectorAll('.image-frame video, .video-frame video');
+        videos.forEach(video => {
+            if (video.paused) {
+                const playPromise = video.play();
+                if (playPromise) {
+                    playPromise.catch(e => console.log('Video restart after orientation failed:', e));
+                }
+            }
+        });
+    }, 300); // Longer delay for orientation to stabilize
 }
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing...');
+    console.log('DOM loaded, initializing mobile-optimized media...');
     
     // Show initial welcome message
     setTimeout(() => {
@@ -1523,13 +1653,16 @@ document.addEventListener('DOMContentLoaded', function() {
     ensureViewportMeta();
     setupResponsiveMediaFrames();
     
-    // Handle orientation changes
+    // Handle orientation and resize events
     window.addEventListener('orientationchange', handleOrientationChange);
     window.addEventListener('resize', () => {
-        setTimeout(setupResponsiveMediaFrames, 100);
+        clearTimeout(window.resizeTimer);
+        window.resizeTimer = setTimeout(() => {
+            setupResponsiveMediaFrames();
+        }, 150);
     });
     
-    // Initialize media frames first, then auto-detect videos
+    // Initialize media frames with mobile optimizations
     setTimeout(() => {
         initializeMediaFrames();
         autoDetectVideos();
@@ -1587,7 +1720,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    console.log('Initialization complete');
+    console.log('Mobile-optimized initialization complete');
 });
 
 // Create tears periodically
