@@ -968,7 +968,7 @@ function setupVideoElement(video, frame) {
     }, 100);
 }
 
-// Enhanced expand media function
+// Enhanced expand media function with better mobile support
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
     if (!frame || expandedMedia) return;
@@ -997,30 +997,61 @@ function expandMedia(frameId) {
     const frameRect = frame.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    
     const isMobile = window.innerWidth <= 768;
-    let popupSize = isVideo ? (isMobile ? 350 : 430) : (isMobile ? 320 : 400);
-    const offset = 40;
     
-    let popupX, popupY;
+    let popupSize, popupX, popupY;
     
-    // Position calculation
-    if (frameRect.right + popupSize + offset < viewportWidth) {
-        popupX = frameRect.right + offset;
-        popupY = frameRect.top + offset;
-    } else if (frameRect.left - popupSize - offset > 0) {
-        popupX = frameRect.left - popupSize - offset;
-        popupY = frameRect.top + offset;
-    } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
-        popupX = frameRect.left + offset;
-        popupY = frameRect.bottom + offset;
+    if (isMobile) {
+        // Mobile: Use responsive sizing with safe margins
+        const safeMargin = 20;
+        const maxSize = Math.min(viewportWidth, viewportHeight) - (safeMargin * 2);
+        
+        if (isVideo) {
+            // Videos get more space on mobile for better controls
+            popupSize = Math.min(maxSize, viewportWidth * 0.9, viewportHeight * 0.7);
+        } else {
+            // Images use slightly less space
+            popupSize = Math.min(maxSize, viewportWidth * 0.85, viewportHeight * 0.6);
+        }
+        
+        // Center on mobile for better UX
+        popupX = (viewportWidth - popupSize) / 2;
+        popupY = (viewportHeight - popupSize) / 2;
+        
+        // Adjust Y position to avoid status bars and keyboard
+        if (popupY < 40) popupY = 40;
+        if (popupY + popupSize > viewportHeight - 40) {
+            popupY = viewportHeight - popupSize - 40;
+        }
+        
     } else {
-        popupX = frameRect.left + offset;
-        popupY = frameRect.top - popupSize - offset;
+        // Desktop: Original positioning logic with improvements
+        popupSize = isVideo ? 430 : 400;
+        const offset = 40;
+        
+        // Smart positioning to avoid edges
+        if (frameRect.right + popupSize + offset < viewportWidth) {
+            // Position to the right
+            popupX = frameRect.right + offset;
+            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupSize - 20));
+        } else if (frameRect.left - popupSize - offset > 0) {
+            // Position to the left
+            popupX = frameRect.left - popupSize - offset;
+            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupSize - 20));
+        } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
+            // Position below
+            popupX = Math.max(20, Math.min(frameRect.left, viewportWidth - popupSize - 20));
+            popupY = frameRect.bottom + offset;
+        } else {
+            // Position above
+            popupX = Math.max(20, Math.min(frameRect.left, viewportWidth - popupSize - 20));
+            popupY = Math.max(20, frameRect.top - popupSize - offset);
+        }
     }
     
-    popupX = Math.max(20, Math.min(popupX, viewportWidth - popupSize - 20));
-    popupY = Math.max(20, Math.min(popupY, viewportHeight - popupSize - 20));
+    // Ensure popup stays within viewport bounds
+    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupSize - 10));
+    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupSize - 10));
     
     const popup = document.createElement('div');
     popup.className = 'media-popup';
@@ -1031,8 +1062,8 @@ function expandMedia(frameId) {
         width: ${popupSize}px;
         height: ${popupSize}px;
         background: rgba(10, 10, 10, 0.95);
-        border: 3px solid #ff1744;
-        border-radius: 20px;
+        border: ${isMobile ? '2px' : '3px'} solid #ff1744;
+        border-radius: ${isMobile ? '15px' : '20px'};
         backdrop-filter: blur(15px);
         box-shadow: 0 15px 35px rgba(255, 23, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
         z-index: 150;
@@ -1041,6 +1072,8 @@ function expandMedia(frameId) {
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         overflow: hidden;
         cursor: pointer;
+        max-width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
     `;
     
     let expandedElement;
@@ -1053,7 +1086,7 @@ function expandMedia(frameId) {
         expandedElement.controls = true;
         expandedElement.autoplay = true;
         expandedElement.loop = mediaElement.loop;
-        expandedElement.volume = 0.8;
+        expandedElement.volume = isMobile ? 0.6 : 0.8; // Lower volume on mobile
         expandedElement.muted = false;
         expandedElement.playsInline = true;
         expandedElement.preload = 'metadata';
@@ -1108,23 +1141,26 @@ function expandMedia(frameId) {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 17px;
+        border-radius: ${isMobile ? '13px' : '17px'};
         display: block;
     `;
     
-    // Close button
+    // Mobile-optimized close button
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '✕';
+    const closeBtnSize = isMobile ? 40 : 35;
+    const closeBtnOffset = isMobile ? 8 : 10;
+    
     closeBtn.style.cssText = `
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: ${closeBtnOffset}px;
+        right: ${closeBtnOffset}px;
         background: rgba(255, 23, 68, 0.9);
         border: none;
         color: white;
-        font-size: 1.4rem;
-        width: 35px;
-        height: 35px;
+        font-size: ${isMobile ? '1.6rem' : '1.4rem'};
+        width: ${closeBtnSize}px;
+        height: ${closeBtnSize}px;
         border-radius: 50%;
         cursor: pointer;
         z-index: 151;
@@ -1132,6 +1168,9 @@ function expandMedia(frameId) {
         display: flex;
         align-items: center;
         justify-content: center;
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        user-select: none;
     `;
     
     closeBtn.addEventListener('mouseenter', () => {
@@ -1143,6 +1182,19 @@ function expandMedia(frameId) {
         closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
         closeBtn.style.transform = 'scale(1)';
     });
+    
+    // Touch feedback for mobile
+    if (isMobile) {
+        closeBtn.addEventListener('touchstart', () => {
+            closeBtn.style.background = 'rgba(255, 23, 68, 1)';
+            closeBtn.style.transform = 'scale(0.95)';
+        });
+        
+        closeBtn.addEventListener('touchend', () => {
+            closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
+            closeBtn.style.transform = 'scale(1)';
+        });
+    }
     
     popup.appendChild(expandedElement);
     popup.appendChild(closeBtn);
@@ -1156,12 +1208,14 @@ function expandMedia(frameId) {
         popup.style.transform = 'scale(1) rotate(0deg)';
     });
     
-    // Add subtle floating animation
-    setTimeout(() => {
-        if (popup.parentNode) {
-            popup.style.animation = 'floatPopup 3s ease-in-out infinite';
-        }
-    }, 400);
+    // Reduced floating animation on mobile to save battery
+    if (!isMobile) {
+        setTimeout(() => {
+            if (popup.parentNode) {
+                popup.style.animation = 'floatPopup 3s ease-in-out infinite';
+            }
+        }, 400);
+    }
     
     // Create floating animation style if not exists
     if (!document.getElementById('floatPopupStyle')) {
@@ -1204,19 +1258,50 @@ function expandMedia(frameId) {
         closeMedia();
     });
     
+    closeBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMedia();
+    });
+    
     popup.addEventListener('click', (e) => {
         if (e.target === popup) {
             closeMedia();
         }
     });
     
-    // Auto-close after 20 seconds for images only
+    // Mobile-specific touch handling
+    if (isMobile) {
+        let startX, startY;
+        
+        popup.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        
+        popup.addEventListener('touchend', (e) => {
+            if (!e.touches.length) {
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                const deltaX = Math.abs(endX - startX);
+                const deltaY = Math.abs(endY - startY);
+                
+                // Close if tap (not swipe) on background
+                if (deltaX < 10 && deltaY < 10 && e.target === popup) {
+                    closeMedia();
+                }
+            }
+        });
+    }
+    
+    // Auto-close timing adjustment
     if (!isVideo) {
+        const autoCloseDelay = isMobile ? 15000 : 20000; // Shorter on mobile
         setTimeout(() => {
             if (expandedMedia === popup) {
                 closeMedia();
             }
-        }, 20000);
+        }, autoCloseDelay);
     }
     
     // ESC key to close
@@ -1345,6 +1430,57 @@ function preloadAudioOnDemand(audioId) {
     }
 }
 
+// Enhanced responsive setup for media frames
+function setupResponsiveMediaFrames() {
+    const frames = document.querySelectorAll('.image-frame, .video-frame');
+    
+    frames.forEach((frame, index) => {
+        // Add responsive classes based on position
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Ensure frames have proper spacing on mobile
+            frame.style.margin = '10px 0';
+            frame.style.minHeight = '150px';
+            frame.style.maxHeight = '250px';
+        }
+        
+        // Ensure proper touch targets on mobile
+        if (isMobile) {
+            frame.style.minHeight = '44px'; // iOS recommended touch target
+            frame.style.position = 'relative';
+        }
+    });
+}
+
+// Add viewport meta tag check for mobile optimization
+function ensureViewportMeta() {
+    let viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (!viewportMeta) {
+        viewportMeta = document.createElement('meta');
+        viewportMeta.name = 'viewport';
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        document.head.appendChild(viewportMeta);
+        console.log('Added viewport meta tag for mobile optimization');
+    }
+}
+
+// Handle orientation change
+function handleOrientationChange() {
+    if (expandedMedia) {
+        // Close expanded media on orientation change to prevent layout issues
+        const closeBtn = expandedMedia.querySelector('button');
+        if (closeBtn) {
+            closeBtn.click();
+        }
+    }
+    
+    // Re-setup responsive frames after orientation change
+    setTimeout(() => {
+        setupResponsiveMediaFrames();
+    }, 100);
+}
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
@@ -1382,6 +1518,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create offline indicator
     createOfflineIndicator();
+    
+    // Add mobile optimizations
+    ensureViewportMeta();
+    setupResponsiveMediaFrames();
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', () => {
+        setTimeout(setupResponsiveMediaFrames, 100);
+    });
     
     // Initialize media frames first, then auto-detect videos
     setTimeout(() => {
