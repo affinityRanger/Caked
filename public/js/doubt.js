@@ -19,6 +19,14 @@ let expandedMedia = null;
 let currentVideo = null;
 let audioStateBeforeVideo = null;
 
+// Device detection
+const isMobile = () => window.innerWidth <= 768;
+const isTablet = () => window.innerWidth > 768 && window.innerWidth <= 1024;
+const getViewport = () => ({
+    width: window.innerWidth,
+    height: window.innerHeight
+});
+
 // Initialize audio context
 function initAudioContext() {
     if (!audioContext) {
@@ -485,8 +493,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     showAudioStatus(`🎵 ${title}`);
     startIntegratedVisualization();
     
-    const isMobile = window.innerWidth <= 768;
-    audioElement.volume = isMobile ? 0.4 : 0.3;
+    audioElement.volume = isMobile() ? 0.4 : 0.3;
     
     // Try to play the audio
     const playPromise = audioElement.play();
@@ -496,7 +503,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
             console.log('Audio playing:', title);
             
             // Add haptic feedback on mobile if available
-            if (isMobile && navigator.vibrate) {
+            if (isMobile() && navigator.vibrate) {
                 navigator.vibrate(50);
             }
             
@@ -561,7 +568,7 @@ function playMainMusic() {
 
 // Create heart explosion effect
 function createHeartExplosion() {
-    const heartCount = window.innerWidth <= 768 ? 6 : 10;
+    const heartCount = isMobile() ? 6 : 10;
     
     for (let i = 0; i < heartCount; i++) {
         setTimeout(() => {
@@ -583,7 +590,7 @@ function createHeartExplosion() {
                 const style = document.createElement('style');
                 style.id = `heartExplodeStyle${i}`;
                 const angle = (360 / heartCount) * i;
-                const distance = window.innerWidth <= 768 ? 150 : 200;
+                const distance = isMobile() ? 150 : 200;
                 style.textContent = `
                     @keyframes heartExplode${i} {
                         0% {
@@ -628,7 +635,7 @@ function createMusicExplosion(element) {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
-    const noteCount = window.innerWidth <= 768 ? 4 : 6;
+    const noteCount = isMobile() ? 4 : 6;
     const notes = ['🎵', '🎶', '🎼', '🎧'];
     
     for (let i = 0; i < noteCount; i++) {
@@ -746,151 +753,87 @@ function checkOfflineStatus() {
     handleNetworkStatus(navigator.onLine);
 }
 
-// Setup video element with improved mobile compatibility
-function setupVideoElement(video, frame) {
-    if (!video || !frame) return;
-    
-    const isMobile = window.innerWidth <= 768;
-    
-    video.muted = true;
-    video.playsInline = true;
-    video.loop = true;
-    video.preload = 'metadata';
-    video.setAttribute('webkit-playsinline', 'true'); // iOS compatibility
-    video.setAttribute('playsinline', 'true');
-    
-    // Mobile-optimized video styling
-    video.style.cssText = `
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover;
-        border-radius: 12px;
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 1;
-        ${isMobile ? 'touch-action: manipulation;' : ''}
-    `;
-    
-    // Enhanced click handling for mobile
-    const handleVideoClick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Add haptic feedback on mobile
-        if (isMobile && navigator.vibrate) {
-            navigator.vibrate(25);
-        }
-        
-        expandMedia(frame.id);
-    };
-    
-    video.addEventListener('click', handleVideoClick);
-    video.addEventListener('touchend', handleVideoClick);
-    
-    // Improved intersection observer for mobile
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Delay autoplay slightly on mobile to ensure proper loading
-                setTimeout(() => {
-                    const playPromise = video.play();
-                    if (playPromise) {
-                        playPromise
-                            .then(() => console.log(`Video autoplay successful: ${frame.id}`))
-                            .catch(e => console.log(`Video autoplay failed: ${frame.id}`, e));
-                    }
-                }, isMobile ? 200 : 100);
-            } else {
-                video.pause();
-            }
-        });
-    }, { 
-        threshold: isMobile ? 0.3 : 0.5, // Lower threshold for mobile
-        rootMargin: isMobile ? '20px' : '10px'
-    });
-    
-    observer.observe(video);
-    
-    // Force initial play attempt with better error handling
-    setTimeout(() => {
-        if (video.closest('.image-frame, .video-frame')) {
-            const rect = video.getBoundingClientRect();
-            const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-            
-            if (isVisible) {
-                const playPromise = video.play();
-                if (playPromise) {
-                    playPromise
-                        .then(() => console.log(`Initial video play successful: ${frame.id}`))
-                        .catch(e => {
-                            console.log(`Initial video play failed: ${frame.id}`, e);
-                            // Try again with user interaction
-                            video.addEventListener('touchstart', () => {
-                                video.play().catch(e => console.log('Touch play failed:', e));
-                            }, { once: true });
-                        });
-                }
-            }
-        }
-    }, isMobile ? 500 : 200);
-}
-
-// Enhanced responsive media frame setup
+// Optimized responsive media frame setup
 function setupResponsiveMediaFrames() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
-    const isMobile = window.innerWidth <= 768;
-    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    const viewport = getViewport();
+    const mobile = isMobile();
+    const tablet = isTablet();
+    
+    console.log('Setting up responsive frames:', { mobile, tablet, viewport });
     
     frames.forEach((frame, index) => {
-        // Reset any existing styles
+        // Reset positioning
         frame.style.position = 'relative';
         frame.style.overflow = 'hidden';
         frame.style.cursor = 'pointer';
+        frame.style.display = 'block';
+        frame.style.margin = '0 auto';
+        frame.style.borderRadius = '12px';
+        frame.style.border = '3px solid #ff1744';
+        frame.style.boxShadow = '0 8px 25px rgba(255, 23, 68, 0.15)';
+        frame.style.transition = 'all 0.3s ease';
+        frame.style.zIndex = '12';
+        frame.style.pointerEvents = 'auto';
         
-        if (isMobile) {
-            // Mobile-specific adjustments
+        if (mobile) {
+            // Mobile: Stack vertically with optimal spacing
+            const frameWidth = Math.min(viewport.width - 40, 350); // Max 350px, 20px margins each side
+            const frameHeight = Math.min(frameWidth * 0.75, 280); // 4:3 aspect ratio, max 280px
+            
             frame.style.cssText += `
-                margin: 15px auto;
-                width: calc(100% - 20px);
-                max-width: 350px;
-                min-height: 180px;
-                max-height: 280px;
-                aspect-ratio: 4/3;
+                width: ${frameWidth}px;
+                height: ${frameHeight}px;
+                margin: ${index === 0 ? '20px' : '25px'} auto;
+                max-width: calc(100vw - 40px);
                 border-radius: 15px;
-                box-shadow: 0 8px 25px rgba(255, 23, 68, 0.15);
-                transform: translateZ(0); /* Force hardware acceleration */
+                transform: translateZ(0);
                 -webkit-transform: translateZ(0);
                 touch-action: manipulation;
                 -webkit-touch-callout: none;
                 user-select: none;
             `;
             
-            // Add spacing between frames on mobile
-            if (index > 0) {
-                frame.style.marginTop = '25px';
-            }
-        } else if (isTablet) {
-            // Tablet adjustments
+        } else if (tablet) {
+            // Tablet: Responsive grid
+            const frameSize = Math.min(220, (viewport.width - 80) / 3); // 3 columns with spacing
+            
             frame.style.cssText += `
-                margin: 12px;
-                min-height: 200px;
-                max-height: 320px;
-                aspect-ratio: 4/3;
-                border-radius: 12px;
+                width: ${frameSize}px;
+                height: ${frameSize}px;
+                margin: 15px;
+                display: inline-block;
+                vertical-align: top;
             `;
+            
         } else {
-            // Desktop - maintain original styling
+            // Desktop: Original floating layout with better sizing
+            const baseSize = Math.min(180, viewport.width / 8); // Scale with viewport
+            
             frame.style.cssText += `
-                border-radius: 12px;
+                width: ${baseSize}px;
+                height: ${baseSize}px;
+                position: absolute;
+                animation: frameFloat 6s ease-in-out infinite;
+                animation-delay: ${index * 0.5}s;
             `;
         }
         
-        // Ensure proper z-index stacking
-        frame.style.zIndex = '1';
+        // Ensure media elements fill the frame properly
+        const mediaElements = frame.querySelectorAll('img, video');
+        mediaElements.forEach(media => {
+            media.style.cssText = `
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover;
+                border-radius: ${mobile ? '12px' : '9px'};
+                display: block;
+                position: relative;
+                z-index: 1;
+            `;
+        });
         
-        // Add loading states for better UX
+        // Add loading indicator if not present
         if (!frame.querySelector('.loading-indicator')) {
             const loadingIndicator = document.createElement('div');
             loadingIndicator.className = 'loading-indicator';
@@ -908,9 +851,115 @@ function setupResponsiveMediaFrames() {
             frame.appendChild(loadingIndicator);
         }
     });
+    
+    // Arrange frames in a responsive container on mobile/tablet
+    if (mobile || tablet) {
+        const container = document.querySelector('.chaos-container');
+        if (container) {
+            container.style.display = 'flex';
+            container.style.flexDirection = mobile ? 'column' : 'row';
+            container.style.flexWrap = 'wrap';
+            container.style.justifyContent = 'center';
+            container.style.alignItems = mobile ? 'center' : 'flex-start';
+            container.style.padding = mobile ? '100px 20px 120px' : '80px 40px 100px';
+            container.style.overflowY = 'auto';
+            container.style.overflowX = 'hidden';
+            container.style.height = '100vh';
+            container.style.boxSizing = 'border-box';
+        }
+    }
 }
 
-// Enhanced media expansion with better mobile support
+// Enhanced video element setup with better mobile compatibility
+function setupVideoElement(video, frame) {
+    if (!video || !frame) return;
+    
+    const mobile = isMobile();
+    
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+    video.preload = 'metadata';
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('playsinline', 'true');
+    
+    // Optimized video styling
+    video.style.cssText = `
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: ${mobile ? '12px' : '9px'};
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        ${mobile ? 'touch-action: manipulation;' : ''}
+        background: #000;
+    `;
+    
+    // Enhanced click handling
+    const handleVideoClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (mobile && navigator.vibrate) {
+            navigator.vibrate(25);
+        }
+        
+        expandMedia(frame.id);
+    };
+    
+    video.addEventListener('click', handleVideoClick);
+    video.addEventListener('touchend', handleVideoClick);
+    
+    // Optimized intersection observer
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    const playPromise = video.play();
+                    if (playPromise) {
+                        playPromise
+                            .then(() => console.log(`Video autoplay successful: ${frame.id}`))
+                            .catch(e => console.log(`Video autoplay failed: ${frame.id}`, e));
+                    }
+                }, mobile ? 300 : 150);
+            } else {
+                video.pause();
+            }
+        });
+    }, { 
+        threshold: mobile ? 0.4 : 0.6,
+        rootMargin: mobile ? '50px' : '20px'
+    });
+    
+    observer.observe(video);
+    
+    // Initial play attempt
+    setTimeout(() => {
+        if (video.closest('.image-frame, .video-frame')) {
+            const rect = video.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+            
+            if (isVisible) {
+                const playPromise = video.play();
+                if (playPromise) {
+                    playPromise
+                        .then(() => console.log(`Initial video play successful: ${frame.id}`))
+                        .catch(e => {
+                            console.log(`Initial video play failed: ${frame.id}`, e);
+                            video.addEventListener('touchstart', () => {
+                                video.play().catch(e => console.log('Touch play failed:', e));
+                            }, { once: true });
+                        });
+                }
+            }
+        }
+    }, mobile ? 600 : 300);
+}
+
+// Optimized media expansion with better responsive support
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
     if (!frame || expandedMedia) return;
@@ -934,72 +983,67 @@ function expandMedia(frameId) {
         return;
     }
     
-    const isMobile = window.innerWidth <= 768;
-    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const mobile = isMobile();
+    const tablet = isTablet();
+    const viewport = getViewport();
     
-    console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId, 'Mobile:', isMobile);
+    console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId);
     
     let popupWidth, popupHeight, popupX, popupY;
     
-    if (isMobile) {
-        // Mobile: Full-screen approach with safe areas
-        const safeMargin = 20;
-        const statusBarHeight = 44; // Account for status bar
-        const bottomSafeArea = 34; // Account for home indicator on newer iPhones
+    if (mobile) {
+        // Mobile: Optimized full-screen approach
+        const margin = 15;
+        const statusBarHeight = 50;
+        const bottomSafeArea = 40;
         
-        popupWidth = Math.min(viewportWidth - (safeMargin * 2), 400);
+        popupWidth = Math.min(viewport.width - (margin * 2), 380);
         
         if (isVideo) {
-            // Videos need more vertical space for controls
             popupHeight = Math.min(
-                viewportHeight - statusBarHeight - bottomSafeArea - (safeMargin * 2),
-                popupWidth * (9/16) + 60 // 16:9 aspect ratio + controls
+                viewport.height - statusBarHeight - bottomSafeArea - (margin * 2),
+                (popupWidth * 9/16) + 80
             );
         } else {
             popupHeight = Math.min(
-                viewportHeight - statusBarHeight - bottomSafeArea - (safeMargin * 2),
-                popupWidth
+                viewport.height - statusBarHeight - bottomSafeArea - (margin * 2),
+                popupWidth * 1.2
             );
         }
         
-        // Center positioning with safe area considerations
-        popupX = (viewportWidth - popupWidth) / 2;
-        popupY = statusBarHeight + ((viewportHeight - statusBarHeight - bottomSafeArea - popupHeight) / 2);
+        popupX = (viewport.width - popupWidth) / 2;
+        popupY = statusBarHeight + ((viewport.height - statusBarHeight - bottomSafeArea - popupHeight) / 2);
         
-    } else if (isTablet) {
-        // Tablet: Larger but not full screen
-        popupWidth = isVideo ? 500 : 450;
-        popupHeight = isVideo ? 400 : 450;
+    } else if (tablet) {
+        popupWidth = isVideo ? 520 : 480;
+        popupHeight = isVideo ? 420 : 480;
         
-        popupX = (viewportWidth - popupWidth) / 2;
-        popupY = Math.max(40, (viewportHeight - popupHeight) / 2);
+        popupX = (viewport.width - popupWidth) / 2;
+        popupY = Math.max(50, (viewport.height - popupHeight) / 2);
         
     } else {
-        // Desktop: Original logic with improvements
+        // Desktop: Smart positioning
         const frameRect = frame.getBoundingClientRect();
-        popupWidth = isVideo ? 480 : 450;
-        popupHeight = isVideo ? 380 : 450;
+        popupWidth = isVideo ? 500 : 460;
+        popupHeight = isVideo ? 400 : 460;
         
-        // Smart positioning to avoid viewport edges
-        const margin = 50;
+        const margin = 60;
         
-        if (frameRect.right + popupWidth + margin < viewportWidth) {
+        if (frameRect.right + popupWidth + margin < viewport.width) {
             popupX = frameRect.right + margin;
-            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupHeight - 20));
+            popupY = Math.max(30, Math.min(frameRect.top, viewport.height - popupHeight - 30));
         } else if (frameRect.left - popupWidth - margin > 0) {
             popupX = frameRect.left - popupWidth - margin;
-            popupY = Math.max(20, Math.min(frameRect.top, viewportHeight - popupHeight - 20));
+            popupY = Math.max(30, Math.min(frameRect.top, viewport.height - popupHeight - 30));
         } else {
-            popupX = (viewportWidth - popupWidth) / 2;
-            popupY = Math.max(20, (viewportHeight - popupHeight) / 2);
+            popupX = (viewport.width - popupWidth) / 2;
+            popupY = Math.max(30, (viewport.height - popupHeight) / 2);
         }
     }
     
     // Ensure popup stays within viewport
-    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupWidth - 10));
-    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupHeight - 10));
+    popupX = Math.max(10, Math.min(popupX, viewport.width - popupWidth - 10));
+    popupY = Math.max(10, Math.min(popupY, viewport.height - popupHeight - 10));
     
     const popup = document.createElement('div');
     popup.className = 'media-popup';
@@ -1009,19 +1053,19 @@ function expandMedia(frameId) {
         left: ${popupX}px;
         width: ${popupWidth}px;
         height: ${popupHeight}px;
-        background: ${isMobile ? 'rgba(0, 0, 0, 0.98)' : 'rgba(10, 10, 10, 0.95)'};
-        border: ${isMobile ? '1px' : '3px'} solid #ff1744;
-        border-radius: ${isMobile ? '20px' : '20px'};
-        backdrop-filter: blur(${isMobile ? '20px' : '15px'});
-        box-shadow: 0 ${isMobile ? '25px' : '15px'} ${isMobile ? '50px' : '35px'} rgba(255, 23, 68, 0.4);
+        background: ${mobile ? 'rgba(0, 0, 0, 0.98)' : 'rgba(10, 10, 10, 0.95)'};
+        border: ${mobile ? '2px' : '3px'} solid #ff1744;
+        border-radius: ${mobile ? '20px' : '20px'};
+        backdrop-filter: blur(${mobile ? '25px' : '15px'});
+        box-shadow: 0 ${mobile ? '30px' : '20px'} ${mobile ? '60px' : '40px'} rgba(255, 23, 68, 0.4);
         z-index: 200;
         opacity: 0;
-        transform: scale(0.3) ${isMobile ? 'translateY(50px)' : 'rotate(-5deg)'};
-        transition: all ${isMobile ? '0.5s' : '0.4s'} cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform: scale(0.3) ${mobile ? 'translateY(50px)' : 'rotate(-5deg)'};
+        transition: all ${mobile ? '0.6s' : '0.4s'} cubic-bezier(0.34, 1.56, 0.64, 1);
         overflow: hidden;
         max-width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
-        ${isMobile ? 'touch-action: manipulation;' : 'cursor: pointer;'}
+        ${mobile ? 'touch-action: manipulation;' : 'cursor: pointer;'}
     `;
     
     let expandedElement;
@@ -1033,9 +1077,9 @@ function expandMedia(frameId) {
         expandedElement = document.createElement('video');
         expandedElement.src = mediaElement.src || mediaElement.querySelector('source')?.src;
         expandedElement.controls = true;
-        expandedElement.autoplay = false; // Don't autoplay in popup to avoid issues
+        expandedElement.autoplay = false;
         expandedElement.loop = mediaElement.loop;
-        expandedElement.volume = isMobile ? 0.7 : 0.8;
+        expandedElement.volume = mobile ? 0.7 : 0.8;
         expandedElement.muted = false;
         expandedElement.playsInline = true;
         expandedElement.preload = 'metadata';
@@ -1044,27 +1088,25 @@ function expandMedia(frameId) {
         
         currentVideo = expandedElement;
         
-        // Enhanced video styling for mobile
         expandedElement.style.cssText = `
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Use contain for better mobile experience */
-            border-radius: ${isMobile ? '18px' : '17px'};
+            object-fit: contain;
+            border-radius: ${mobile ? '18px' : '17px'};
             display: block;
             background: #000;
         `;
         
-        // Video event handling with better mobile support
+        // Enhanced video event handling
         expandedElement.addEventListener('loadeddata', () => {
             console.log('Video loaded, attempting to play');
-            // Auto-play after loading on mobile
-            if (isMobile) {
+            if (mobile) {
                 setTimeout(() => {
                     expandedElement.play().catch(e => {
                         console.log('Auto-play failed, user interaction required');
                         showTypingMessage('Tap video to play 🎬');
                     });
-                }, 300);
+                }, 400);
             } else {
                 expandedElement.play().catch(e => console.log('Video play failed:', e));
             }
@@ -1085,14 +1127,14 @@ function expandMedia(frameId) {
             console.log('Video ended, restoring audio');
             currentVideo = null;
             showTypingMessage('Video ended, restoring audio...');
-            setTimeout(restoreAudioState, 500);
+            setTimeout(restoreAudioState, 600);
         });
         
         expandedElement.addEventListener('error', (e) => {
             console.log('Video playback error:', e);
             currentVideo = null;
             showTypingMessage('Video error, restoring audio...');
-            setTimeout(restoreAudioState, 500);
+            setTimeout(restoreAudioState, 600);
         });
         
     } else {
@@ -1104,7 +1146,7 @@ function expandMedia(frameId) {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            border-radius: ${isMobile ? '18px' : '17px'};
+            border-radius: ${mobile ? '18px' : '17px'};
             display: block;
         `;
         
@@ -1115,11 +1157,11 @@ function expandMedia(frameId) {
         };
     }
     
-    // Enhanced close button for mobile
+    // Enhanced close button
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '✕';
-    const closeBtnSize = isMobile ? 48 : 35;
-    const closeBtnOffset = isMobile ? 15 : 10;
+    const closeBtnSize = mobile ? 50 : 38;
+    const closeBtnOffset = mobile ? 18 : 12;
     
     closeBtn.style.cssText = `
         position: absolute;
@@ -1128,7 +1170,7 @@ function expandMedia(frameId) {
         background: rgba(255, 23, 68, 0.9);
         border: none;
         color: white;
-        font-size: ${isMobile ? '1.8rem' : '1.4rem'};
+        font-size: ${mobile ? '2rem' : '1.5rem'};
         font-weight: bold;
         width: ${closeBtnSize}px;
         height: ${closeBtnSize}px;
@@ -1141,33 +1183,32 @@ function expandMedia(frameId) {
         touch-action: manipulation;
         -webkit-touch-callout: none;
         user-select: none;
-        ${isMobile ? 'cursor: pointer;' : 'cursor: pointer;'}
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     `;
     
     // Enhanced button interactions
     const handleButtonHover = () => {
         closeBtn.style.background = 'rgba(255, 23, 68, 1)';
         closeBtn.style.transform = 'scale(1.1)';
-        closeBtn.style.boxShadow = '0 6px 20px rgba(255, 23, 68, 0.4)';
+        closeBtn.style.boxShadow = '0 8px 25px rgba(255, 23, 68, 0.4)';
     };
     
     const handleButtonLeave = () => {
         closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
         closeBtn.style.transform = 'scale(1)';
-        closeBtn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+        closeBtn.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.3)';
     };
     
-    if (!isMobile) {
+    if (!mobile) {
         closeBtn.addEventListener('mouseenter', handleButtonHover);
         closeBtn.addEventListener('mouseleave', handleButtonLeave);
     }
     
-    // Touch feedback
     closeBtn.addEventListener('touchstart', () => {
         closeBtn.style.background = 'rgba(255, 23, 68, 1)';
         closeBtn.style.transform = 'scale(0.95)';
-        if (navigator.vibrate) navigator.vibrate(25);
+        if (navigator.vibrate) navigator.vibrate(30);
     });
     
     closeBtn.addEventListener('touchend', handleButtonLeave);
@@ -1184,24 +1225,24 @@ function expandMedia(frameId) {
         popup.style.transform = 'scale(1) translateY(0) rotate(0deg)';
     });
     
-    // Close functionality with improved mobile handling
+    // Close functionality
     const closeMedia = () => {
         if (currentVideo) {
             console.log('Closing video');
-            setTimeout(restoreAudioState, 200);
+            setTimeout(restoreAudioState, 300);
             currentVideo.pause();
             currentVideo = null;
         }
         
         popup.style.opacity = '0';
-        popup.style.transform = `scale(0.3) ${isMobile ? 'translateY(50px)' : 'rotate(-5deg)'}`;
+        popup.style.transform = `scale(0.3) ${mobile ? 'translateY(50px)' : 'rotate(-5deg)'}`;
         
         setTimeout(() => {
             if (popup.parentNode) {
                 popup.remove();
             }
             expandedMedia = null;
-        }, isMobile ? 500 : 400);
+        }, mobile ? 600 : 400);
     };
     
     // Close button events
@@ -1217,7 +1258,7 @@ function expandMedia(frameId) {
         closeMedia();
     });
     
-    // Background click to close (with better mobile support)
+    // Background click to close
     let touchStartTime = 0;
     
     popup.addEventListener('touchstart', (e) => {
@@ -1226,7 +1267,7 @@ function expandMedia(frameId) {
     
     popup.addEventListener('touchend', (e) => {
         const touchDuration = Date.now() - touchStartTime;
-        if (e.target === popup && touchDuration < 300) { // Quick tap
+        if (e.target === popup && touchDuration < 300) {
             closeMedia();
         }
     });
@@ -1246,9 +1287,9 @@ function expandMedia(frameId) {
     };
     document.addEventListener('keydown', handleEsc);
     
-    // Auto-close for images (longer on mobile)
+    // Auto-close for images
     if (!isVideo) {
-        const autoCloseDelay = isMobile ? 20000 : 15000;
+        const autoCloseDelay = mobile ? 25000 : 18000;
         setTimeout(() => {
             if (expandedMedia === popup) {
                 closeMedia();
@@ -1262,15 +1303,14 @@ function expandMedia(frameId) {
 // Enhanced media frame initialization
 function initializeMediaFrames() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
-    const isMobile = window.innerWidth <= 768;
+    const mobile = isMobile();
     
-    console.log('Initializing media frames:', frames.length, 'Mobile:', isMobile);
+    console.log('Initializing media frames:', frames.length, 'Mobile:', mobile);
     
     frames.forEach((frame, index) => {
         const img = frame.querySelector('img:not(.placeholder)');
         const video = frame.querySelector('video');
         
-        // Add frame index for debugging
         frame.setAttribute('data-frame-index', index);
         
         if (video) {
@@ -1280,13 +1320,12 @@ function initializeMediaFrames() {
             console.log(`Setting up image for frame ${index}:`, frame.id);
             frame.style.cursor = 'pointer';
             
-            // Enhanced click handling for images
             const handleImageClick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                if (isMobile && navigator.vibrate) {
-                    navigator.vibrate(25);
+                if (mobile && navigator.vibrate) {
+                    navigator.vibrate(30);
                 }
                 
                 console.log('Image frame clicked:', frame.id);
@@ -1545,7 +1584,7 @@ function showAudioStatus(message) {
         
         status.classList.add('show');
         
-        if (window.innerWidth <= 768) {
+        if (isMobile()) {
             setTimeout(() => {
                 hideAudioStatus();
             }, 3000);
@@ -1608,12 +1647,12 @@ function handleOrientationChange() {
                 }
             }
         });
-    }, 300); // Longer delay for orientation to stabilize
+    }, 500);
 }
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing mobile-optimized media...');
+    console.log('DOM loaded, initializing optimized media system...');
     
     // Show initial welcome message
     setTimeout(() => {
@@ -1659,14 +1698,14 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(window.resizeTimer);
         window.resizeTimer = setTimeout(() => {
             setupResponsiveMediaFrames();
-        }, 150);
+        }, 200);
     });
     
-    // Initialize media frames with mobile optimizations
+    // Initialize media frames with optimizations
     setTimeout(() => {
         initializeMediaFrames();
         autoDetectVideos();
-    }, 100);
+    }, 150);
     
     // Setup event listeners
     const backButton = document.querySelector('.back-button');
@@ -1720,7 +1759,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    console.log('Mobile-optimized initialization complete');
+    console.log('Optimized media system initialization complete');
 });
 
 // Create tears periodically
