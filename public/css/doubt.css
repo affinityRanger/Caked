@@ -1224,3 +1224,5 @@ body.visualizer-active {
     outline: 2px solid #ff1744;
     outline-offset: 2px;
 }
+.image-frame:focus-visible, .video-frame:focus-visible,
+.back-button:focus-visible, .message-icon:focus-visible,

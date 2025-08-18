@@ -39,98 +39,140 @@
         <source src="https://caked-production.up.railway.app/assets/audio/All Out - Juice WRLD.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="chaos-container">
-        <button class="back-button" role="button" aria-label="Go back to main page">← Back to Choice</button>
+    <!-- Fixed navigation -->
+    <div class="fixed-nav">
+        <button class="back-button" role="button" aria-label="Go back to main page">← Back</button>
         <button class="message-icon" role="button" aria-label="Open message">💌</button>
-        <!-- Theme toggle button will be added dynamically -->
-        
-        <!-- Main broken heart -->
-        <div class="broken-heart main-heart" id="mainHeart" role="button" aria-label="Play main song" tabindex="0">💔</div>
-        
-        <!-- Floating broken hearts -->
-        <div class="floating-heart" style="top: 10%; left: 20%; animation-delay: -1s;" aria-hidden="true">🖤</div>
-        <div class="floating-heart" style="top: 80%; left: 80%; animation-delay: -3s;" aria-hidden="true">💔</div>
-        <div class="floating-heart" style="top: 30%; left: 90%; animation-delay: -5s;" aria-hidden="true">🥀</div>
-        <div class="floating-heart" style="top: 70%; left: 10%; animation-delay: -2s;" aria-hidden="true">⚫</div>
-        <div class="floating-heart" style="top: 15%; left: 70%; animation-delay: -4s;" aria-hidden="true">🖤</div>
-        
-        <!-- Chaotic text messages -->
-        <div class="chaos-text glitch" style="top: 15%; left: 15%; animation-delay: -1s;" aria-hidden="true">
-            "I miss tuna"
-        </div>
-        <div class="chaos-text" style="top: 25%; right: 10%; animation-delay: -2s;" aria-hidden="true">
-            "Don't quit on me bruhh"
-        </div>
-        <div class="chaos-text glitch" style="bottom: 20%; left: 25%; animation-delay: -3s;" aria-hidden="true">
-            "What if?"
-        </div>
-        <div class="chaos-text" style="top: 40%; left: 5%; animation-delay: -4s;" aria-hidden="true">
-            "Lost in my Abyss"
-        </div>
-        <div class="chaos-text glitch" style="bottom: 40%; right: 20%; animation-delay: -5s;" aria-hidden="true">
-            "DREADED"
-        </div>
-        <div class="chaos-text" style="top: 60%; right: 15%; animation-delay: -6s;" aria-hidden="true">
-            "I CANT I tried"
-        </div>
-        
-        <!-- Image frames with your pre-uploaded photos -->
-        <div class="image-frame" style="top: 25%; left: 10%; animation-delay: -1s;" id="imageFrame1">
-            <img src="https://caked-production.up.railway.app/assets/images/sikununuli.png" alt="Our memories" loading="lazy" onerror="showPlaceholder(1)">
-            <div class="placeholder" style="display: none;">
-                🖼️<br>Our memories
+        <button class="theme-toggle" role="button" aria-label="Toggle theme">🌙</button>
+    </div>
+
+    <!-- Main container with mobile-first approach -->
+    <div class="chaos-container">
+        <!-- Hero section with main heart -->
+        <section class="hero-section">
+            <div class="main-heart" id="mainHeart" role="button" aria-label="Play main song" tabindex="0">💔</div>
+            <p class="hero-text">Touch the broken heart to begin</p>
+        </section>
+
+        <!-- Music controls section -->
+        <section class="music-section">
+            <h2 class="section-title">🎵 Music Collection</h2>
+            <div class="music-grid">
+                <button class="music-chaos compact" id="musicBtn1" data-track="1" role="button" aria-label="Play Amy Winehouse - Back To Black" tabindex="0">
+                    🎵
+                    <span class="music-label">Amy Winehouse</span>
+                </button>
+                <button class="music-chaos compact" id="musicBtn2" data-track="2" role="button" aria-label="Play Don Toliver - Easy" tabindex="0">
+                    🎶
+                    <span class="music-label">Don Toliver</span>
+                </button>
+                <button class="music-chaos compact" id="musicBtn3" data-track="3" role="button" aria-label="Play Juice WRLD - Faded" tabindex="0">
+                    🎼
+                    <span class="music-label">Juice WRLD</span>
+                </button>
+                <button class="music-chaos compact" id="musicBtn4" data-track="4" role="button" aria-label="Play All Out - Juice WRLD" tabindex="0">
+                    🎧
+                    <span class="music-label">All Out</span>
+                </button>
             </div>
-        </div>
-        <div class="image-frame" style="bottom: 15%; left: 40%; animation-delay: -3s;" id="imageFrame2">
-            <img src="https://caked-production.up.railway.app/assets/images/target.jpg" alt="Our special moment" loading="lazy" onerror="showPlaceholder(2)">
-            <div class="placeholder" style="display: none;">
-                📷<br>Our moment
+        </section>
+
+        <!-- Media gallery section -->
+        <section class="media-section">
+            <h2 class="section-title">📸 Our Memories</h2>
+            <div class="media-grid">
+                <div class="media-item image-frame" id="imageFrame1">
+                    <img src="https://caked-production.up.railway.app/assets/images/sikununuli.png" alt="Our memories" loading="lazy" onerror="showPlaceholder(1)">
+                    <div class="placeholder" style="display: none;">
+                        🖼️<br>Our memories
+                    </div>
+                    <div class="media-overlay">
+                        <span class="media-title">Our Memories</span>
+                    </div>
+                </div>
+
+                <div class="media-item image-frame" id="imageFrame2">
+                    <img src="https://caked-production.up.railway.app/assets/images/target.jpg" alt="Our special moment" loading="lazy" onerror="showPlaceholder(2)">
+                    <div class="placeholder" style="display: none;">
+                        📷<br>Our moment
+                    </div>
+                    <div class="media-overlay">
+                        <span class="media-title">Special Moment</span>
+                    </div>
+                </div>
+
+                <div class="media-item image-frame" id="imageFrame3">
+                    <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" loading="lazy" onerror="showPlaceholder(3)">
+                    <div class="placeholder" style="display: none;">
+                        🖼️<br>Missing this
+                    </div>
+                    <div class="media-overlay">
+                        <span class="media-title">Missing This</span>
+                    </div>
+                </div>
+
+                <div class="media-item image-frame" id="imageFrame4">
+                    <img src="https://caked-production.up.railway.app/assets/images/lost.png" alt="Your beauty" loading="lazy" onerror="showPlaceholder(4)">
+                    <div class="placeholder" style="display: none;">
+                        📸<br>Your beauty
+                    </div>
+                    <div class="media-overlay">
+                        <span class="media-title">Your Beauty</span>
+                    </div>
+                </div>
+
+                <div class="media-item video-frame" id="imageFrame5">
+                    <video muted autoplay loop playsinline preload="metadata" 
+                           style="width: 100%; height: 100%; object-fit: cover;"
+                           onerror="showPlaceholder(5)">
+                        <source src="https://caked-production.up.railway.app/assets/videos/tilapia.mp4" type="video/mp4">
+                    </video>
+                    <div class="placeholder" style="display: none;">
+                        🎬<br>Lonely times
+                    </div>
+                    <div class="media-overlay">
+                        <span class="media-title">Lonely Times</span>
+                        <span class="video-indicator">🎬</span>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="image-frame" style="top: 45%; right: 5%; animation-delay: -2s;" id="imageFrame3">
-            <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" loading="lazy" onerror="showPlaceholder(3)">
-            <div class="placeholder" style="display: none;">
-                🖼️<br>Missing this
+        </section>
+
+        <!-- Emotional quotes section -->
+        <section class="quotes-section">
+            <div class="quote-item">
+                <p class="chaos-text">"I miss tuna🍉"</p>
             </div>
-        </div>
-        <div class="image-frame" style="bottom: 45%; right: 40%; animation-delay: -4s;" id="imageFrame4">
-            <img src="https://caked-production.up.railway.app/assets/images/lost.png" alt="Your beauty" loading="lazy" onerror="showPlaceholder(4)">
-            <div class="placeholder" style="display: none;">
-                📸<br>Your beauty
+            <div class="quote-item">
+                <p class="chaos-text">"Don't quit on me bruhh"</p>
             </div>
-        </div>
-        <div class="video-frame" style="top: 35%; left: 25%; animation-delay: -5s;" id="imageFrame5">
-            <video muted autoplay loop playsinline preload="metadata" 
-                   style="width: 100%; height: 100%; object-fit: cover;"
-                   onerror="showPlaceholder(5)">
-                <source src="https://caked-production.up.railway.app/assets/videos/tilapia.mp4" type="video/mp4">
-            </video>
-            <div class="placeholder" style="display: none;">
-                🎬<br>Lonely times
+            <div class="quote-item">
+                <p class="chaos-text">"What if?"</p>
             </div>
-        </div>
-        
-        <!-- Music chaos buttons - Now only 4 buttons -->
-        <div class="music-chaos" style="top: 20%; left: 45%; animation-delay: -1s;" id="musicBtn1" data-track="1" role="button" aria-label="Play Amy Winehouse - Back To Black" tabindex="0">🎵</div>
-        <div class="music-chaos" style="bottom: 25%; left: 15%; animation-delay: -2s;" id="musicBtn2" data-track="2" role="button" aria-label="Play Don Toliver - Easy" tabindex="0">🎶</div>
-        <div class="music-chaos" style="top: 65%; left: 60%; animation-delay: -3s;" id="musicBtn3" data-track="3" role="button" aria-label="Play Juice WRLD - Faded" tabindex="0">🎼</div>
-        <div class="music-chaos" style="bottom: 10%; right: 30%; animation-delay: -4s;" id="musicBtn4" data-track="4" role="button" aria-label="Play All Out - Juice WRLD" tabindex="0">🎧</div>
-        
-        <div class="audio-status" id="audioStatus" role="status" aria-live="polite">🎵 Now Playing...</div>
-        
-        <!-- Audio visualizer will be added dynamically -->
-        <!-- Offline indicator will be added dynamically -->
-        <!-- Typing messages will be added dynamically -->
-        
-        <!-- Audio controls (hidden by default) -->
-        <div class="audio-controls" id="audioControls" style="display: none;">
-            <button id="playPauseBtn" aria-label="Play/Pause">⏸️</button>
-            <button id="stopBtn" aria-label="Stop">⏹️</button>
-            <div class="volume-control">
-                <input type="range" id="volumeSlider" min="0" max="100" value="30">
-                <span id="volumeDisplay">30%</span>
+            <div class="quote-item">
+                <p class="chaos-text">"Lost in my Abyss"</p>
             </div>
+            <div class="quote-item">
+                <p class="chaos-text">"DREADED"</p>
+            </div>
+            <div class="quote-item">
+                <p class="chaos-text">"I CANT I tried"</p>
+            </div>
+        </section>
+
+        <!-- Floating decorative hearts -->
+        <div class="floating-decorations" aria-hidden="true">
+            <div class="floating-heart">🖤</div>
+            <div class="floating-heart">💔</div>
+            <div class="floating-heart">🥀</div>
+            <div class="floating-heart">⚫</div>
+            <div class="floating-heart">🖤</div>
         </div>
+    </div>
+    
+    <!-- Audio status -->
+    <div class="audio-status" id="audioStatus" role="status" aria-live="polite">
+        🎵 Now Playing...
     </div>
     
     <!-- Message Modal -->
@@ -138,33 +180,38 @@
         <div class="message-content">
             <button class="close-message" aria-label="Close message">&times;</button>
             <div class="message-header">
-                <h2>💔 From Me to Yours 💔</h2>
+                <h2>💔 Bullet for my Valentine 💔</h2>
             </div>
             <div class="message-body">
                 <p>You can start by clicking the music icons🎶🎼🎧. Didnt think of a good song for this page. Still dont understand a dime whats going on😂demit</p>
                 <p>I wonder if you think 'what if it could have worked out like I do'</p>
                 <p>This page is minimal. The reason is obvious</p>
-                <p>I know I messed up. Cool who doesn't at times but trust me I know why. Nita admit vizuri One day trust. But trust I've always been into you</p>
-                <p>Nothing is a coincidence. From the start us meeting to... it was all there I hear you say I ain't ur type</p>
-                <p>Cool and all but know this If its nothing you see I cant change or be its ight but nothing is ok of what you just did. And I know you know it</p>
+                <p>guess i see light in all the darkness or i need anti-delulu pills🤪</p>
+                <p>I know I messed up. Cool who doesn't at times but trust me I know why. I'll tell maybe oneday. But trust I've always been into you</p>
+                <p>Nothing is a coincidence. From the start us meeting to... it was all there for reason. I hear you say I ain't ur type</p>
+                <p>Cool and all but know this If its nothing you see I cant change or be its iight but nothing is ok of what you just did. And I know you know it</p>
                 <p>Not a quitter though. I'll wait. I gotta million reasons why we are the perfect match. I saw what i saw I say what I say</p>
-                <p>I'm already dreaded 💜. Lakini sijaskia vibaya ata.</p>
+                <p>We was drunk love on our mind heavy vibez soul intertwined i can't lie i damn near died when you told me it can never work out you got your saftey on the whole time I dont got my saftey on don't tell me I shot myself on the foot.
+Na kwani unaniona useless aje una actively niblock kila kitu😅 ama unaogopa utafall back, funny I've always told myself I'll never fumble over a bitch till you came along know I gotta deal with erasing everything? And you acting like I'm supposed to just find the delete button and move on. There is only one way to do that easy. I'm no coward. I dont know what happened  I dont care anymore can we just talk noy gonna bother on that topic again i you don't want. I really do feel good talking with you still wanna drive the mac larren. I cant help but to stop and stare. So what I would kill for love big deal I was flying until cupid shot me down, I know that you gave me a chance for a reason girl I need it. Dont wanna lose you Queen I need you. Is you I value priceless value I hope you say it louder. Still racing on my mind gotta slow down come hold me down. Had a slightly less of A siezure. </p>
                 <p>I take mine every seriously no matter how small and I know you do too. I can see that</p>
-                <p>And I can't stop hoping that maybe, not hoping I know there is </p>
+                <p>You said i dont have appriciation for art, if thats true then how did I fall in love with your scars </p>
                 <p><strong>I need you not want you</strong></p>
                 <p>I'm not asking for an answer right now. I'm just asking you to know. Although you know I'm cracked might collapse anytime take your time but you know👾</p>
                 <p>Also we all got a free mind you know. But rarely does anything we think of happens. We hope. I heard you the first time. I'm usually a good listener😅 I jus dont agree thats all. Dont abuse my freedom.But just what if? we can be friends I really dont mind. Not distant. 47 aint the same without you.</p>
                 <p><strong>I still got a million things I wanna tell and experience with you.</strong></p>
                 <p>But its really your choice if we wanna date. It was never mines I just do the attracting😅 worked out untill whatever this is happened</p>
-                <p>Mine is to kill cats. Slaughter🔪💦 them till they accept what i have to say. I'm pretty sure if I just lulu slayed the cat, you will be craving for the big dog, not all this</p>
+                <p>Mine is to kill cats. Slaughter🔪💦 them till they accept what i have to say "Yes Daddy" I'm pretty sure if I just lulu slayed the cat, you will be craving for the big dog, not all this boboclat going on</p>
                 <p>This might be the dumbest things I might have done😂 Go easy on me ok. I was learning from you. I've been striding for to long I know youll save me.</p>
-                <p>Jus know If this dont work I got 30 more😅 I did my 10 early. Gotta atleast try to steal that heart again. You got mine </p>
+                <p>You got a lot off curvez it put me in a trance, did you put me in one? Is that why you kissed me like that? na kwann sikuchoraa, ju venye nilinyoywa na nikainyonya...ka kuna kitu uliekaa sa unaniblame nn? kwani ulikua unanipangia izi masaa zote? 
+                hii yote inakaaa pre meditated kabisaa huezi nishoo any😏 venye ume dip bila kujali ni kumaanisha we hu feel kitu na pia hujali kenye na feel. Sa utani blame nikiona nikaa ni on purpose kweli😅yooo walahi ulinipangia khaiii the hell did I do now? If its planed, you might be the coldest meanest bitch I know🧊maybe human. This is Jezebel level cold I'm telling you or that bitch that told on a servant in the Bible. You might be more attractive than I thought. Oh men what the helly is going on with me here, why do I find your flaws and sins sweet? whats the fuck is wrong wit me?
+The only one that made me break protocol </p>
                 <p>I wish we met last yr mapema anaku kitu ungekua unasema</p>
-                <p>Hii part ata haikaii sad ivo nimeona😂😂 I guess bado niko optimistic. Anyway najua...</p>
+                <p>Guess I see light in all the darkness or i need anti-delulu pills🤪. Anyway najua...</p>
                 <p>Kuf dread mm.Tebu  Niambie please stop!! vizuri😿 uone nikiacha very fast bora uni unblock</p>
-                <p>Anyway to wome it may concern, I am the table. If you cant see that, you were never ready to sit with me in the first place. So excuse me if I feel played. Because I did tell you I talk mines serious from the word go. So its either you dont hear me or you palyed me. Either I can see the disrespect. Its light but its concerning. Thats why I've come to see the need for space. Talk time. I'm not saying you not to mess around. Do as you wish. I have never even told you not to do anything except kujiteveva sana. All I'm saying try to think for a sec. I'd appreciate if we spaced peacefully   </p>
-                <p>Again usini expose mm👺 hapo sasa mm ndo nitakukalia si ww. Hii si group project tafathali. Nikijua imefikia group nakuja ku delete mm personaly na ni dip</p>
-                <p> Dead Cat😵</p>
+                <p>Anyway to wome it may concern, I am the table. If you cant see that, you were never ready to sit with me in the first place. So excuse me if I feel played. Because I did tell you I take mines serious from the word go. So its either you dont hear me or you played me. Either I can see the disrespect. Its light but its concerning. Thats why I've come to see the need for space. Take time. I'm not saying you not to mess around. Do as you wish. I have never even told you not to do anything except kujiteveva sana. All I'm saying try to think for a sec. I'd appreciate if we spaced peacefully   </p>
+                <p>Again usini expose mm👺 hapo sasa mm ndo nitakukalia si ww. Hii si group project tafathali. Nikijua imefikia group nakuja ku delete mm personaly na ni dip very serious this time ka izo zingine uliona ni para</p>
+                <p> I get so faded I can't move  im been feelin different when you away from me. I'm tempted to get to high
+your kiss your touch too perfect can't just erase it. I dont know why you don't wanna to fall in my arms</p>
             </div>
         </div>
     </div>
