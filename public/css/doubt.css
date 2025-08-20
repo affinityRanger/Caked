@@ -118,7 +118,7 @@ body.light-mode .message-content {
     overflow: hidden;
 }
 
-/* Central broken heart - remains centered with enhanced beating animation */
+/* Central broken heart */
 .main-heart {
     position: absolute;
     top: 50%;
@@ -161,7 +161,7 @@ body.light-mode .message-content {
     pointer-events: none;
 }
 
-/* Improved chaotic positioning for music buttons with better spacing */
+/* Improved music button layout */
 .music-chaos {
     position: absolute;
     display: flex;
@@ -209,7 +209,7 @@ body.light-mode .message-content {
     border-color: rgba(255, 23, 68, 0.6);
 }
 
-/* Better positioned music buttons with improved spacing */
+/* Music button positions - optimized for all screen sizes */
 .music-btn-1 {
     top: 8%;
     left: 8%;
@@ -234,11 +234,9 @@ body.light-mode .message-content {
     animation-delay: -2s;
 }
 
-/* Improved chaotic positioning for image frames with space for 6 frames */
-.image-frame, .video-frame {
+/* Enhanced media frame structure for better scaling */
+.media-item {
     position: absolute;
-    width: 150px;
-    height: 150px;
     border: 3px solid #ff1744;
     border-radius: 15px;
     overflow: hidden;
@@ -248,18 +246,44 @@ body.light-mode .message-content {
     cursor: pointer;
     transition: all 0.3s ease;
     pointer-events: auto;
+    background: rgba(0, 0, 0, 0.8);
 }
 
-.image-frame:hover, .video-frame:hover {
+.media-item:hover {
     transform: scale(1.1);
     filter: drop-shadow(0 0 25px rgba(255, 23, 68, 0.8));
 }
 
-.image-frame img, .video-frame img,
-.image-frame video, .video-frame video {
+/* Media container for perfect aspect ratio control */
+.media-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.media-container img,
+.media-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+.media-container:hover img,
+.media-container:hover video {
+    transform: scale(1.05);
+}
+
+/* Default frame sizes - will be responsive */
+.image-frame, .video-frame {
+    width: 150px;
+    height: 150px;
 }
 
 .media-overlay {
@@ -267,20 +291,31 @@ body.light-mode .message-content {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
     color: white;
-    padding: 10px;
-    font-size: 0.8rem;
+    padding: 10px 8px 6px;
+    font-size: 0.75rem;
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 5;
 }
 
-.image-frame:hover .media-overlay,
-.video-frame:hover .media-overlay {
+.media-item:hover .media-overlay {
     opacity: 1;
 }
 
-/* Better positioned frames - now with 6 frames */
+.media-title {
+    display: block;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+.video-indicator {
+    margin-left: 5px;
+    font-size: 0.8rem;
+}
+
+/* Optimized frame positions for desktop */
 .frame-1 {
     top: 5%;
     left: 32%;
@@ -317,7 +352,7 @@ body.light-mode .message-content {
     animation-delay: -2.5s;
 }
 
-/* Chaotic positioning for quotes - adjusted for 6 frames */
+/* Chaotic positioning for quotes */
 .chaos-text {
     font-size: 1.2rem;
     font-weight: bold;
@@ -340,7 +375,6 @@ body.light-mode .message-content {
     animation: textFloat 8s ease-in-out infinite;
 }
 
-/* Repositioned quotes to work with 6 frames */
 .quote-1 {
     top: 20%;
     left: 5%;
@@ -377,7 +411,7 @@ body.light-mode .message-content {
     animation-delay: -3s;
 }
 
-/* Chaotic floating hearts - repositioned for better layout */
+/* Chaotic floating hearts */
 .floating-heart {
     position: absolute;
     font-size: 3rem;
@@ -388,7 +422,7 @@ body.light-mode .message-content {
     user-select: none;
 }
 
-/* Better positioned floating hearts */
+/* Heart positions */
 .heart-1 {
     top: 15%;
     left: 65%;
@@ -486,7 +520,7 @@ body.light-mode .message-content {
     50% { transform: translateY(-15px); opacity: 1; }
 }
 
-/* Enhanced Audio visualization with improved performance */
+/* Enhanced Audio visualization */
 .audio-visualizer {
     position: fixed;
     bottom: 85px;
@@ -538,7 +572,6 @@ body.light-mode .message-content {
     z-index: -1;
 }
 
-/* Visualizer pulse animation */
 @keyframes visualizerPulse {
     0%, 100% { 
         background-position: 0% 50%; 
@@ -722,6 +755,7 @@ body.light-mode .message-content {
     text-align: center;
     font-size: 0.8rem;
     padding: 10px;
+    border-radius: 12px;
 }
 
 /* Media popup styles */
@@ -769,18 +803,34 @@ body.light-mode .message-content {
     opacity: 1;
 }
 
-.video-indicator {
-    margin-left: 5px;
-    font-size: 0.9rem;
-}
-
 /* Floating animation for popup */
 @keyframes floatPopup {
     0%, 100% { transform: scale(1) rotate(0deg) translateY(0px); }
     50% { transform: scale(1) rotate(1deg) translateY(-5px); }
 }
 
-/* Mobile responsive design - improved for better audio alignment */
+/* MOBILE RESPONSIVE DESIGN - MAJOR IMPROVEMENTS */
+
+/* Large tablets and small laptops */
+@media (max-width: 1024px) {
+    .image-frame, .video-frame {
+        width: 130px;
+        height: 130px;
+    }
+    
+    .music-chaos {
+        font-size: 2.8rem;
+        min-width: 110px;
+        padding: 12px;
+    }
+    
+    .audio-visualizer {
+        width: 350px;
+        height: 70px;
+    }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
     .main-heart {
         font-size: 6rem;
@@ -801,157 +851,73 @@ body.light-mode .message-content {
         max-width: 150px;
     }
     
+    /* Optimized media frames for tablets */
     .image-frame, .video-frame {
-        width: 120px;
-        height: 120px;
+        width: 110px;
+        height: 110px;
     }
     
     .music-chaos {
         font-size: 2.5rem;
-        min-width: 100px;
+        min-width: 95px;
         padding: 10px;
     }
     
     .music-chaos .music-label {
         font-size: 0.7rem;
-        max-width: 90px;
+        max-width: 85px;
     }
     
-    /* Better mobile positions for music buttons */
+    /* Better tablet positions for music buttons */
     .music-btn-1 {
-        top: 5%;
-        left: 5%;
+        top: 6%;
+        left: 6%;
     }
     
     .music-btn-2 {
-        top: 8%;
-        right: 5%;
+        top: 9%;
+        right: 6%;
     }
     
     .music-btn-3 {
-        bottom: 25%;
-        left: 8%;
+        bottom: 24%;
+        left: 9%;
     }
     
     .music-btn-4 {
-        bottom: 15%;
-        right: 10%;
+        bottom: 12%;
+        right: 12%;
     }
     
-    /* Mobile frame positions - optimized for 6 frames */
+    /* Tablet frame positions - better spacing */
     .frame-1 {
-        top: 20%;
-        left: 20%;
+        top: 18%;
+        left: 18%;
     }
     
     .frame-2 {
-        top: 23%;
-        right: 20%;
+        top: 21%;
+        right: 18%;
     }
     
     .frame-3 {
-        top: 35%;
-        left: 2%;
+        top: 33%;
+        left: 4%;
     }
     
     .frame-4 {
-        top: 38%;
-        right: 2%;
+        top: 36%;
+        right: 4%;
     }
     
     .frame-5 {
-        bottom: 38%;
-        left: 5%;
+        bottom: 36%;
+        left: 6%;
     }
     
     .frame-6 {
-        bottom: 41%;
-        right: 5%;
-    }
-    
-    /* Mobile quote positions */
-    .quote-1 {
-        top: 15%;
-        left: 2%;
-    }
-    
-    .quote-2 {
-        top: 28%;
-        right: 2%;
-    }
-    
-    .quote-3 {
-        bottom: 20%;
-        left: 22%;
-    }
-    
-    .quote-4 {
-        top: 58%;
-        left: 2%;
-    }
-    
-    .quote-5 {
-        bottom: 8%;
-        left: 40%;
-    }
-    
-    .quote-6 {
-        top: 75%;
-        right: 2%;
-    }
-    
-    /* Mobile heart positions */
-    .heart-1 {
-        top: 12%;
-        right: 15%;
-    }
-    
-    .heart-2 {
-        bottom: 12%;
-        left: 10%;
-    }
-    
-    .heart-3 {
-        top: 32%;
-        right: 8%;
-    }
-    
-    .heart-4 {
-        bottom: 32%;
-        left: 30%;
-    }
-    
-    .heart-5 {
-        top: 78%;
-        right: 20%;
-    }
-    
-    .heart-6 {
-        top: 42%;
-        left: 42%;
-    }
-    
-    .heart-7 {
-        bottom: 22%;
-        right: 8%;
-    }
-    
-    .heart-8 {
-        top: 65%;
-        left: 15%;
-    }
-    
-    .message-content {
-        max-width: 95%;
-        padding: 20px;
-    }
-    
-    .message-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .message-body p {
-        font-size: 1rem;
+        bottom: 39%;
+        right: 6%;
     }
     
     .audio-visualizer {
@@ -965,72 +931,267 @@ body.light-mode .message-content {
         font-size: 14px;
         padding: 12px 20px;
     }
-    
-    .fixed-nav {
-        padding: 15px;
-    }
-    
-    .back-button {
-        padding: 10px 16px;
-        font-size: 14px;
-    }
-    
-    .message-icon {
-        padding: 10px;
-        font-size: 20px;
-    }
 }
 
-/* Extra small screens */
-@media (max-width: 480px) {
+/* Mobile phones - landscape */
+@media (max-width: 640px) and (orientation: landscape) {
     .main-heart {
-        font-size: 5rem;
+        font-size: 4rem;
+    }
+    
+    .hero-text {
+        font-size: 0.8rem;
+        top: 70%;
     }
     
     .image-frame, .video-frame {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
     }
     
     .music-chaos {
-        font-size: 2rem;
-        min-width: 80px;
-        padding: 8px;
+        font-size: 1.8rem;
+        min-width: 70px;
+        padding: 6px;
+    }
+    
+    .music-chaos .music-label {
+        font-size: 0.6rem;
+        max-width: 60px;
     }
     
     .chaos-text {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+        max-width: 100px;
+    }
+    
+    .floating-heart {
+        font-size: 1.2rem;
+    }
+}
+
+/* Mobile phones - portrait (MAIN MOBILE FIXES) */
+@media (max-width: 480px) {
+    .main-heart {
+        font-size: 5rem;
+        top: 45%;
+    }
+    
+    .hero-text {
         font-size: 0.9rem;
+        top: 58%;
+    }
+    
+    /* CRITICAL: Properly sized media frames for mobile */
+    .image-frame, .video-frame {
+        width: 90px;
+        height: 90px;
+        border-width: 2px;
+        border-radius: 12px;
+    }
+    
+    /* Enhanced media container for mobile */
+    .media-container {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .media-container img,
+    .media-container video {
+        border-radius: 10px;
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    .media-overlay {
+        padding: 6px 4px 4px;
+        font-size: 0.65rem;
+        line-height: 1;
+    }
+    
+    .media-title {
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+    
+    .video-indicator {
+        font-size: 0.65rem;
+        margin-left: 3px;
+    }
+    
+    /* Optimized music buttons for mobile */
+    .music-chaos {
+        font-size: 2rem;
+        min-width: 75px;
+        padding: 8px;
+        border-radius: 12px;
+    }
+    
+    .music-chaos .music-label {
+        font-size: 0.65rem;
+        max-width: 70px;
+        margin-top: 3px;
+    }
+    
+    .chaos-text {
+        font-size: 0.85rem;
         padding: 6px 10px;
         max-width: 120px;
+        border-radius: 8px;
     }
     
     .floating-heart {
         font-size: 1.5rem;
     }
     
-    .hero-text {
-        font-size: 0.9rem;
-    }
+    /* MOBILE POSITIONING - NO OVERLAPS */
     
-    /* Ultra-tight positioning for very small screens */
+    /* Music buttons - corners with safe spacing */
     .music-btn-1 {
-        top: 3%;
-        left: 3%;
+        top: 4%;
+        left: 4%;
     }
     
     .music-btn-2 {
-        top: 5%;
-        right: 3%;
+        top: 4%;
+        right: 4%;
     }
     
     .music-btn-3 {
-        bottom: 28%;
-        left: 5%;
+        bottom: 25%;
+        left: 4%;
     }
     
     .music-btn-4 {
-        bottom: 18%;
-        right: 7%;
+        bottom: 25%;
+        right: 4%;
+    }
+    
+    /* Media frames - carefully positioned to avoid heart area */
+    .frame-1 {
+        top: 12%;
+        left: 25%;
+    }
+    
+    .frame-2 {
+        top: 12%;
+        right: 25%;
+    }
+    
+    .frame-3 {
+        top: 25%;
+        left: 8%;
+    }
+    
+    .frame-4 {
+        top: 25%;
+        right: 8%;
+    }
+    
+    .frame-5 {
+        bottom: 12%;
+        left: 8%;
+    }
+    
+    .frame-6 {
+        bottom: 12%;
+        right: 8%;
+    }
+    
+    /* Quotes - positioned to fill gaps */
+    .quote-1 {
+        top: 8%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .quote-2 {
+        top: 30%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .quote-3 {
+        top: 70%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .quote-4 {
+        bottom: 35%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .quote-5 {
+        bottom: 6%;
+        left: 30%;
+    }
+    
+    .quote-6 {
+        bottom: 6%;
+        right: 30%;
+    }
+    
+    /* Hearts - spread around avoiding main elements */
+    .heart-1 {
+        top: 18%;
+        left: 15%;
+    }
+    
+    .heart-2 {
+        top: 18%;
+        right: 15%;
+    }
+    
+    .heart-3 {
+        top: 35%;
+        left: 35%;
+    }
+    
+    .heart-4 {
+        top: 35%;
+        right: 35%;
+    }
+    
+    .heart-5 {
+        bottom: 20%;
+        left: 35%;
+    }
+    
+    .heart-6 {
+        bottom: 20%;
+        right: 35%;
+    }
+    
+    .heart-7 {
+        top: 65%;
+        left: 15%;
+    }
+    
+    .heart-8 {
+        top: 65%;
+        right: 15%;
+    }
+    
+    /* UI elements */
+    .message-content {
+        max-width: 95%;
+        padding: 20px 15px;
+        margin: 20px;
+        max-height: 90vh;
+    }
+    
+    .message-header h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+    
+    .message-body p {
+        font-size: 0.9rem;
+        line-height: 1.3;
+        margin-bottom: 12px;
     }
     
     .audio-visualizer {
@@ -1042,5 +1203,101 @@ body.light-mode .message-content {
     .audio-status {
         font-size: 13px;
         padding: 10px 16px;
+        bottom: 15px;
+    }
+    
+    .fixed-nav {
+        padding: 10px;
+    }
+    
+    .back-button {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+    
+    .message-icon {
+        padding: 8px;
+        font-size: 18px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .main-heart {
+        font-size: 4.5rem;
+        top: 42%;
+    }
+    
+    .hero-text {
+        font-size: 0.8rem;
+        top: 56%;
+    }
+    
+    .image-frame, .video-frame {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .music-chaos {
+        font-size: 1.8rem;
+        min-width: 65px;
+        padding: 6px;
+    }
+    
+    .music-chaos .music-label {
+        font-size: 0.6rem;
+        max-width: 60px;
+    }
+    
+    .chaos-text {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+        max-width: 100px;
+    }
+    
+    .floating-heart {
+        font-size: 1.3rem;
+    }
+    
+    .audio-visualizer {
+        width: 220px;
+        height: 45px;
+        bottom: 60px;
+    }
+    
+    .audio-status {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1920px) {
+    .image-frame, .video-frame {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .music-chaos {
+        font-size: 3.5rem;
+        min-width: 140px;
+        padding: 20px;
+    }
+    
+    .main-heart {
+        font-size: 10rem;
+    }
+    
+    .hero-text {
+        font-size: 1.4rem;
+    }
+    
+    .floating-heart {
+        font-size: 3.5rem;
+    }
+    
+    .audio-visualizer {
+        width: 500px;
+        height: 100px;
     }
 }
