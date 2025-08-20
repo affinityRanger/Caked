@@ -194,9 +194,9 @@ function restoreAudioState() {
     }
 }
 
-// Enhanced stop all audio function - properly resets ALL button states
-function stopAllAudio(preserveState = false) {
-    console.log('Stopping all audio, preserveState:', preserveState);
+// Enhanced stop all audio function - properly resets ALL button states but preserves heart beating
+function stopAllAudio(preserveState = false, keepHeartBeating = false) {
+    console.log('Stopping all audio, preserveState:', preserveState, 'keepHeartBeating:', keepHeartBeating);
     
     // Store state if requested and audio is playing
     if (preserveState) {
@@ -244,10 +244,13 @@ function stopAllAudio(preserveState = false) {
         btn.classList.remove('playing', 'pulsing');
     });
     
-    // Reset main heart state (only if not preserving state)
+    // Reset main heart state - but preserve beating if requested
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart && !preserveState) {
-        mainHeart.classList.remove('playing', 'beating');
+        mainHeart.classList.remove('playing');
+        if (!keepHeartBeating) {
+            mainHeart.classList.remove('beating');
+        }
     }
     
     stopVisualization();
@@ -334,13 +337,18 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         
         // Reset previous playing element's visual state immediately
         if (currentPlayingElement) {
-            currentPlayingElement.classList.remove('playing', 'pulsing', 'beating');
+            currentPlayingElement.classList.remove('playing', 'pulsing');
+            // Keep heart beating if it was the heart playing
+            if (currentPlayingElement.id !== 'mainHeart') {
+                currentPlayingElement.classList.remove('beating');
+            }
         }
         
         crossfadeToNext(currentAudio, nextAudio);
     } else {
-        // Stop all audio completely before starting new one
-        stopAllAudio();
+        // Stop all audio but keep heart beating if it was already beating
+        const heartWasBeating = document.getElementById('mainHeart')?.classList.contains('beating');
+        stopAllAudio(false, heartWasBeating);
     }
     
     // Set new current audio and playing element
@@ -412,11 +420,15 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         });
     }
     
-    // Handle audio end - reset all states
+    // Handle audio end - reset states but keep heart beating
     audioElement.onended = () => {
         console.log('Audio ended:', title);
         if (visualElement) {
-            visualElement.classList.remove('playing', 'pulsing', 'beating');
+            visualElement.classList.remove('playing', 'pulsing');
+            // Only remove beating if it's not the main heart
+            if (visualElement.id !== 'mainHeart') {
+                visualElement.classList.remove('beating');
+            }
         }
         stopVisualization();
         hideAudioStatus();
@@ -425,13 +437,17 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         showTypingMessage('Track ended');
     };
     
-    // Handle audio error - reset all states
+    // Handle audio error - reset states but keep heart beating
     audioElement.onerror = () => {
         console.log('Audio error:', title);
         showAudioStatus(`🎵 ${title} (Error loading)`);
         setTimeout(() => {
             if (visualElement) {
-                visualElement.classList.remove('playing', 'pulsing', 'beating');
+                visualElement.classList.remove('playing', 'pulsing');
+                // Only remove beating if it's not the main heart
+                if (visualElement.id !== 'mainHeart') {
+                    visualElement.classList.remove('beating');
+                }
             }
             hideAudioStatus();
             stopVisualization();
@@ -723,9 +739,9 @@ function createTear() {
     }, 4000);
 }
 
-// Go back to landing page
+// Go back to landing page - preserve heart beating state
 function goBackToMain() {
-    stopAllAudio();
+    stopAllAudio(false, true); // Keep heart beating when going back
     if (window.history.length > 1) {
         window.history.back();
     } else {
