@@ -35,6 +35,7 @@ let globalMusicFiles = [
     'Lovers Lane - JuiceWrld.mp3',
     'PARTYNEXTDOOR - Some Of Your Love.mp3',
     'PARTYNEXTDOOR - You ve Been Missed.mp3',
+    'Juicw WRLD - Toxic Hotel Room.mp3',
     'PARTYNEXTDOOR & Rihanna - BELIEVE IT.mp3'
 ];
 let globalMusicTitles = [
@@ -47,6 +48,7 @@ let globalMusicTitles = [
     "Lovers Lane - Juice WRLD",
     "Some Of Your Love - PARTYNEXTDOOR",
     "You've Been Missed - PARTYNEXTDOOR",
+    "Toxic Hotel Room - Juice WRLD",
     "BELIEVE IT - PARTYNEXTDOOR & Rihanna"
 ];
 
