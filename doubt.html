@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#000000">
     <meta name="description" content="A chaotic tribute to lost love.">
     <title>Chaos of Doubt</title>
-    <link rel="stylesheet" href="https://caked-production.up.railway.app/css/doubt.css">
+    <link rel="stylesheet" href="doubt.css">
     
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://caked-production.up.railway.app">
@@ -110,6 +110,7 @@
             </div>
         </div>
 
+        <!-- Fixed video frames -->
         <div class="media-item video-frame frame-5" id="imageFrame5">
             <video muted autoplay loop playsinline preload="metadata" 
                    style="width: 100%; height: 100%; object-fit: cover;"
@@ -121,6 +122,21 @@
             </div>
             <div class="media-overlay">
                 <span class="media-title">Lonely Times</span>
+                <span class="video-indicator">🎬</span>
+            </div>
+        </div>
+
+        <div class="media-item video-frame frame-6" id="imageFrame6">
+            <video muted autoplay loop playsinline preload="metadata" 
+                   style="width: 100%; height: 100%; object-fit: cover;"
+                   onerror="showPlaceholder(6)">
+                <source src="https://caked-production.up.railway.app/assets/videos/undead.mp4" type="video/mp4">
+            </video>
+            <div class="placeholder" style="display: none;">
+                🎬<br>Undead
+            </div>
+            <div class="media-overlay">
+                <span class="media-title">Undead</span>
                 <span class="video-indicator">🎬</span>
             </div>
         </div>
@@ -204,6 +220,6 @@
         </div>
     </div>
 
-    <script src="https://caked-production.up.railway.app/js/doubt.js"></script>
+    <script src="doubt.js"></script>
 </body>
 </html>

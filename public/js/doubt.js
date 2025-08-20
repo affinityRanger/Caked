@@ -1,4 +1,486 @@
-// Backend URL configuration
+// Enhanced expand media function with better detection and popup handling
+function expandMedia(frameId) {
+    const frame = document.getElementById(frameId);
+    if (!frame || expandedMedia) return;
+    
+    const video = frame.querySelector('video');
+    const img = frame.querySelector('img:not(.placeholder)');
+    
+    let mediaElement = null;
+    let isVideo = false;
+    
+    if (video && video.style.display !== 'none') {
+        mediaElement = video;
+        isVideo = true;
+    } else if (img && img.style.display !== 'none') {
+        mediaElement = img;
+        isVideo = false;
+    }
+    
+    if (!mediaElement) {
+        console.log('No media element found in frame:', frameId);
+        return;
+    }
+    
+    console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId);
+    
+    const frameRect = frame.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    const isMobile = window.innerWidth <= 768;
+    
+    let popupSize;
+    if (isVideo) {
+        popupSize = isMobile ? 280 : 430;
+    } else {
+        popupSize = isMobile ? 260 : 400;
+    }
+    
+    const offset = isMobile ? 20 : 40;
+    
+    let popupX, popupY;
+    
+    // Determine best position based on frame location
+    if (frameRect.right + popupSize + offset < viewportWidth) {
+        popupX = frameRect.right + offset;
+        popupY = frameRect.top + offset;
+    } else if (frameRect.left - popupSize - offset > 0) {
+        popupX = frameRect.left - popupSize - offset;
+        popupY = frameRect.top + offset;
+    } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
+        popupX = frameRect.left + offset;
+        popupY = frameRect.bottom + offset;
+    } else {
+        popupX = frameRect.left + offset;
+        popupY = frameRect.top - popupSize - offset;
+    }
+    
+    // Ensure popup stays within viewport
+    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupSize - 10));
+    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupSize - 10));
+    
+    // Create popup container
+    const popup = document.createElement('div');
+    popup.className = 'media-popup';
+    popup.style.cssText = `
+        position: fixed;
+        top: ${popupY}px;
+        left: ${popupX}px;
+        width: ${popupSize}px;
+        height: ${popupSize}px;
+        background: rgba(10, 10, 10, 0.95);
+        border: 3px solid #ff1744;
+        border-radius: ${isMobile ? '15px' : '20px'};
+        backdrop-filter: blur(15px);
+        box-shadow: 0 15px 35px rgba(255, 23, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+        z-index: 150;
+        opacity: 0;
+        transform: scale(0.3) rotate(-5deg);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+        cursor: pointer;
+    `;
+    
+    // Create expanded media element
+    let expandedElement;
+    if (isVideo) {
+        // Stop all audio and store state when video starts
+        console.log('Video starting, stopping all audio');
+        stopAllAudio(true);
+        
+        expandedElement = document.createElement('video');
+        expandedElement.src = mediaElement.src || mediaElement.querySelector('source')?.src;
+        expandedElement.controls = true;
+        expandedElement.autoplay = true;
+        expandedElement.loop = mediaElement.loop;
+        expandedElement.volume = 0.8;
+        expandedElement.muted = false;
+        expandedElement.playsInline = true;
+        expandedElement.preload = 'metadata';
+        currentVideo = expandedElement;
+        
+        // Video event handling
+        expandedElement.addEventListener('play', () => {
+            console.log('Video started playing');
+            showTypingMessage('Playing video...');
+        });
+        
+        expandedElement.addEventListener('pause', () => {
+            console.log('Video paused');
+            if (expandedElement.currentTime < expandedElement.duration - 0.1) {
+                showTypingMessage('Video paused');
+            }
+        });
+        
+        expandedElement.addEventListener('ended', () => {
+            console.log('Video ended, restoring audio');
+            currentVideo = null;
+            showTypingMessage('Video ended, restoring audio...');
+            setTimeout(() => {
+                restoreAudioState();
+            }, 500);
+        });
+        
+        expandedElement.addEventListener('error', (e) => {
+            console.log('Video playback error:', e);
+            currentVideo = null;
+            showTypingMessage('Video error, restoring audio...');
+            setTimeout(() => {
+                restoreAudioState();
+            }, 500);
+        });
+    } else {
+        // Better image handling
+        expandedElement = document.createElement('img');
+        expandedElement.src = mediaElement.src;
+        expandedElement.alt = mediaElement.alt || 'Memory';
+        
+        // Add loading state
+        expandedElement.onload = () => {
+            console.log('Image loaded in popup');
+        };
+        
+        expandedElement.onerror = () => {
+            console.log('Image failed to load in popup');
+            showTypingMessage('Image failed to load');
+        };
+    }
+    
+    // Consistent styling for both images and videos
+    expandedElement.style.cssText = `
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: ${isMobile ? '12px' : '17px'};
+        display: block;
+    `;
+    
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: ${isMobile ? '8px' : '10px'};
+        right: ${isMobile ? '8px' : '10px'};
+        background: rgba(255, 23, 68, 0.9);
+        border: none;
+        color: white;
+        font-size: ${isMobile ? '1.2rem' : '1.4rem'};
+        width: ${isMobile ? '30px' : '35px'};
+        height: ${isMobile ? '30px' : '35px'};
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 151;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    closeBtn.addEventListener('mouseenter', () => {
+        closeBtn.style.background = 'rgba(255, 23, 68, 1)';
+        closeBtn.style.transform = 'scale(1.1)';
+    });
+    
+    closeBtn.addEventListener('mouseleave', () => {
+        closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
+        closeBtn.style.transform = 'scale(1)';
+    });
+    
+    // Add elements to popup
+    popup.appendChild(expandedElement);
+    popup.appendChild(closeBtn);
+    document.body.appendChild(popup);
+    
+    expandedMedia = popup;
+    
+    // Show with smooth animation
+    requestAnimationFrame(() => {
+        popup.style.opacity = '1';
+        popup.style.transform = 'scale(1) rotate(0deg)';
+    });
+    
+    // Add subtle floating animation
+    setTimeout(() => {
+        if (popup.parentNode) {
+            popup.style.animation = 'floatPopup 3s ease-in-out infinite';
+        }
+    }, 400);
+    
+    // Create floating animation style if not exists
+    if (!document.getElementById('floatPopupStyle')) {
+        const style = document.createElement('style');
+        style.id = 'floatPopupStyle';
+        style.textContent = `
+            @keyframes floatPopup {
+                0%, 100% { transform: scale(1) rotate(0deg) translateY(0px); }
+                50% { transform: scale(1) rotate(1deg) translateY(-5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Close functionality
+    const closeMedia = () => {
+        if (currentVideo) {
+            console.log('Closing video, current time:', currentVideo.currentTime);
+            setTimeout(() => {
+                restoreAudioState();
+            }, 200);
+            currentVideo.pause();
+            currentVideo = null;
+        }
+        
+        popup.style.opacity = '0';
+        popup.style.transform = 'scale(0.3) rotate(-5deg)';
+        
+        setTimeout(() => {
+            if (popup.parentNode) {
+                popup.remove();
+            }
+            expandedMedia = null;
+        }, 400);
+    };
+    
+    closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMedia();
+    });
+    
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            closeMedia();
+        }
+    });
+    
+    // Auto-close after 15 seconds for images only on mobile
+    if (!isVideo && isMobile) {
+        setTimeout(() => {
+            if (expandedMedia === popup) {
+                closeMedia();
+            }
+        }, 15000);
+    } else if (!isVideo && !isMobile) {
+        setTimeout(() => {
+            if (expandedMedia === popup) {
+                closeMedia();
+            }
+        }, 20000);
+    }
+    
+    // ESC key to close
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            closeMedia();
+            document.removeEventListener('keydown', handleEsc);
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+}
+
+// Enhanced setup media frame function
+function setupMediaFrame(frameId, mediaSrc, altText) {
+    const frame = document.getElementById(frameId);
+    if (!frame || !mediaSrc) return;
+    
+    // Clear existing content except placeholder
+    const existingMedia = frame.querySelectorAll('img:not(.placeholder), video');
+    existingMedia.forEach(el => el.remove());
+    
+    let mediaElement;
+    if (isVideoSource(mediaSrc)) {
+        // Create video element
+        mediaElement = document.createElement('video');
+        mediaElement.src = mediaSrc;
+        mediaElement.muted = true;
+        mediaElement.loop = true;
+        mediaElement.autoplay = true;
+        mediaElement.playsInline = true;
+        mediaElement.preload = 'metadata';
+        
+        // Proper video styling
+        mediaElement.style.cssText = `
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        `;
+        
+        // Handle video loading errors
+        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+        
+        // Setup video when loaded
+        mediaElement.onloadedmetadata = () => {
+            setupVideoElement(mediaElement, frame);
+        };
+    } else {
+        // Create image element
+        mediaElement = document.createElement('img');
+        mediaElement.src = mediaSrc;
+        mediaElement.alt = altText || 'Memory';
+        mediaElement.loading = 'lazy';
+        
+        // Proper image styling
+        mediaElement.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        `;
+        
+        // Handle image loading errors
+        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+    }
+    
+    frame.appendChild(mediaElement);
+    
+    // Enhanced frame click handling
+    frame.style.cursor = 'pointer';
+    
+    // Remove existing click listeners to prevent duplicates
+    const newFrame = frame.cloneNode(true);
+    frame.parentNode.replaceChild(newFrame, frame);
+    
+    // Add new click handler
+    const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Frame clicked:', frameId);
+        expandMedia(frameId);
+    };
+    
+    newFrame.addEventListener('click', clickHandler);
+}
+
+// Show audio status
+function showAudioStatus(message) {
+    const status = document.getElementById('audioStatus');
+    if (status) {
+        status.textContent = message;
+        status.classList.add('show');
+        
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                hideAudioStatus();
+            }, 3000);
+        }
+    }
+}
+
+// Hide audio status
+function hideAudioStatus() {
+    const status = document.getElementById('audioStatus');
+    if (status) {
+        status.classList.remove('show');
+    }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing...');
+    
+    // Preload all audio immediately for better performance
+    setTimeout(() => {
+        preloadAllAudio();
+    }, 500);
+    
+    // Show initial welcome message
+    setTimeout(() => {
+        showTypingMessage('start by clicking the heart', 4000);
+    }, 1000);
+    
+    // Initialize audio context on first user interaction
+    document.addEventListener('click', initAudioContext, { once: true });
+    document.addEventListener('touchstart', initAudioContext, { once: true });
+    
+    // Setup offline detection
+    window.addEventListener('online', checkOfflineStatus);
+    window.addEventListener('offline', checkOfflineStatus);
+    
+    // Check initial status without showing online message
+    isOffline = !navigator.onLine;
+    if (!navigator.onLine) {
+        document.getElementById('offlineIndicator')?.classList.add('show');
+    }
+    
+    // Mark that initial load is complete after a short delay
+    setTimeout(() => {
+        isInitialLoad = false;
+    }, 2000);
+    
+    // Create offline indicator
+    createOfflineIndicator();
+    
+    // Initialize media frames first, then auto-detect videos
+    setTimeout(() => {
+        initializeMediaFrames();
+        autoDetectVideos();
+    }, 100);
+    
+    // Setup event listeners
+    const backButton = document.querySelector('.back-button');
+    if (backButton) {
+        backButton.addEventListener('click', goBackToMain);
+    }
+    
+    const messageIcon = document.querySelector('.message-icon');
+    if (messageIcon) {
+        messageIcon.addEventListener('click', showMessage);
+    }
+    
+    const closeMessage = document.querySelector('.close-message');
+    if (closeMessage) {
+        closeMessage.addEventListener('click', hideMessage);
+    }
+    
+    // Close modal when clicking outside
+    const messageModal = document.getElementById('messageModal');
+    if (messageModal) {
+        messageModal.addEventListener('click', (e) => {
+            if (e.target === messageModal) {
+                hideMessage();
+            }
+        });
+    }
+    
+    // Setup main heart with improved event handling
+    const mainHeart = document.getElementById('mainHeart');
+    if (mainHeart) {
+        mainHeart.addEventListener('click', playMainMusic);
+        mainHeart.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                playMainMusic();
+            }
+        });
+    }
+    
+    // Setup music buttons with improved event handling
+    for (let i = 1; i <= 4; i++) {
+        const musicBtn = document.getElementById(`musicBtn${i}`);
+        if (musicBtn) {
+            musicBtn.addEventListener('click', () => playMusic(i));
+            musicBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playMusic(i);
+                }
+            });
+        }
+    }
+    
+    console.log('Initialization complete');
+});
+
+// Create tears periodically
+setInterval(createTear, 800);// Backend URL configuration
 const BACKEND_URL = 'https://caked-production.up.railway.app';
 
 // Global variables
@@ -969,487 +1451,3 @@ function setupVideoElement(video, frame) {
         }
     }, 100);
 }
-
-// Enhanced expand media function with better detection and popup handling
-function expandMedia(frameId) {
-    const frame = document.getElementById(frameId);
-    if (!frame || expandedMedia) return;
-    
-    const video = frame.querySelector('video');
-    const img = frame.querySelector('img:not(.placeholder)');
-    
-    let mediaElement = null;
-    let isVideo = false;
-    
-    if (video && video.style.display !== 'none') {
-        mediaElement = video;
-        isVideo = true;
-    } else if (img && img.style.display !== 'none') {
-        mediaElement = img;
-        isVideo = false;
-    }
-    
-    if (!mediaElement) {
-        console.log('No media element found in frame:', frameId);
-        return;
-    }
-    
-    console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId);
-    
-    const frameRect = frame.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    const isMobile = window.innerWidth <= 768;
-    
-    let popupSize;
-    if (isVideo) {
-        popupSize = isMobile ? 280 : 430;
-    } else {
-        popupSize = isMobile ? 260 : 400;
-    }
-    
-    const offset = isMobile ? 20 : 40;
-    
-    let popupX, popupY;
-    
-    // Determine best position based on frame location
-    if (frameRect.right + popupSize + offset < viewportWidth) {
-        popupX = frameRect.right + offset;
-        popupY = frameRect.top + offset;
-    } else if (frameRect.left - popupSize - offset > 0) {
-        popupX = frameRect.left - popupSize - offset;
-        popupY = frameRect.top + offset;
-    } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
-        popupX = frameRect.left + offset;
-        popupY = frameRect.bottom + offset;
-    } else {
-        popupX = frameRect.left + offset;
-        popupY = frameRect.top - popupSize - offset;
-    }
-    
-    // Ensure popup stays within viewport
-    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupSize - 10));
-    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupSize - 10));
-    
-    // Create popup container
-    const popup = document.createElement('div');
-    popup.className = 'media-popup';
-    popup.style.cssText = `
-        position: fixed;
-        top: ${popupY}px;
-        left: ${popupX}px;
-        width: ${popupSize}px;
-        height: ${popupSize}px;
-        background: rgba(10, 10, 10, 0.95);
-        border: 3px solid #ff1744;
-        border-radius: ${isMobile ? '15px' : '20px'};
-        backdrop-filter: blur(15px);
-        box-shadow: 0 15px 35px rgba(255, 23, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
-        z-index: 150;
-        opacity: 0;
-        transform: scale(0.3) rotate(-5deg);
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        overflow: hidden;
-        cursor: pointer;
-    `;
-    
-    // Create expanded media element
-    let expandedElement;
-    if (isVideo) {
-        // Stop all audio and store state when video starts
-        console.log('Video starting, stopping all audio');
-        stopAllAudio(true);
-        
-        expandedElement = document.createElement('video');
-        expandedElement.src = mediaElement.src || mediaElement.querySelector('source')?.src;
-        expandedElement.controls = true;
-        expandedElement.autoplay = true;
-        expandedElement.loop = mediaElement.loop;
-        expandedElement.volume = 0.8;
-        expandedElement.muted = false;
-        expandedElement.playsInline = true;
-        expandedElement.preload = 'metadata';
-        currentVideo = expandedElement;
-        
-        // Video event handling
-        expandedElement.addEventListener('play', () => {
-            console.log('Video started playing');
-            showTypingMessage('Playing video...');
-        });
-        
-        expandedElement.addEventListener('pause', () => {
-            console.log('Video paused');
-            if (expandedElement.currentTime < expandedElement.duration - 0.1) {
-                showTypingMessage('Video paused');
-            }
-        });
-        
-        expandedElement.addEventListener('ended', () => {
-            console.log('Video ended, restoring audio');
-            currentVideo = null;
-            showTypingMessage('Video ended, restoring audio...');
-            setTimeout(() => {
-                restoreAudioState();
-            }, 500);
-        });
-        
-        expandedElement.addEventListener('error', (e) => {
-            console.log('Video playback error:', e);
-            currentVideo = null;
-            showTypingMessage('Video error, restoring audio...');
-            setTimeout(() => {
-                restoreAudioState();
-            }, 500);
-        });
-    } else {
-        // Better image handling
-        expandedElement = document.createElement('img');
-        expandedElement.src = mediaElement.src;
-        expandedElement.alt = mediaElement.alt || 'Memory';
-        
-        // Add loading state
-        expandedElement.onload = () => {
-            console.log('Image loaded in popup');
-        };
-        
-        expandedElement.onerror = () => {
-            console.log('Image failed to load in popup');
-            showTypingMessage('Image failed to load');
-        };
-    }
-    
-    // Consistent styling for both images and videos
-    expandedElement.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: ${isMobile ? '12px' : '17px'};
-        display: block;
-    `;
-    
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '✕';
-    closeBtn.style.cssText = `
-        position: absolute;
-        top: ${isMobile ? '8px' : '10px'};
-        right: ${isMobile ? '8px' : '10px'};
-        background: rgba(255, 23, 68, 0.9);
-        border: none;
-        color: white;
-        font-size: ${isMobile ? '1.2rem' : '1.4rem'};
-        width: ${isMobile ? '30px' : '35px'};
-        height: ${isMobile ? '30px' : '35px'};
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 151;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    `;
-    
-    closeBtn.addEventListener('mouseenter', () => {
-        closeBtn.style.background = 'rgba(255, 23, 68, 1)';
-        closeBtn.style.transform = 'scale(1.1)';
-    });
-    
-    closeBtn.addEventListener('mouseleave', () => {
-        closeBtn.style.background = 'rgba(255, 23, 68, 0.9)';
-        closeBtn.style.transform = 'scale(1)';
-    });
-    
-    // Add elements to popup
-    popup.appendChild(expandedElement);
-    popup.appendChild(closeBtn);
-    document.body.appendChild(popup);
-    
-    expandedMedia = popup;
-    
-    // Show with smooth animation
-    requestAnimationFrame(() => {
-        popup.style.opacity = '1';
-        popup.style.transform = 'scale(1) rotate(0deg)';
-    });
-    
-    // Add subtle floating animation
-    setTimeout(() => {
-        if (popup.parentNode) {
-            popup.style.animation = 'floatPopup 3s ease-in-out infinite';
-        }
-    }, 400);
-    
-    // Create floating animation style if not exists
-    if (!document.getElementById('floatPopupStyle')) {
-        const style = document.createElement('style');
-        style.id = 'floatPopupStyle';
-        style.textContent = `
-            @keyframes floatPopup {
-                0%, 100% { transform: scale(1) rotate(0deg) translateY(0px); }
-                50% { transform: scale(1) rotate(1deg) translateY(-5px); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // Close functionality
-    const closeMedia = () => {
-        if (currentVideo) {
-            console.log('Closing video, current time:', currentVideo.currentTime);
-            setTimeout(() => {
-                restoreAudioState();
-            }, 200);
-            currentVideo.pause();
-            currentVideo = null;
-        }
-        
-        popup.style.opacity = '0';
-        popup.style.transform = 'scale(0.3) rotate(-5deg)';
-        
-        setTimeout(() => {
-            if (popup.parentNode) {
-                popup.remove();
-            }
-            expandedMedia = null;
-        }, 400);
-    };
-    
-    closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMedia();
-    });
-    
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            closeMedia();
-        }
-    });
-    
-    // Auto-close after 15 seconds for images only on mobile
-    if (!isVideo && isMobile) {
-        setTimeout(() => {
-            if (expandedMedia === popup) {
-                closeMedia();
-            }
-        }, 15000);
-    } else if (!isVideo && !isMobile) {
-        setTimeout(() => {
-            if (expandedMedia === popup) {
-                closeMedia();
-            }
-        }, 20000);
-    }
-    
-    // ESC key to close
-    const handleEsc = (e) => {
-        if (e.key === 'Escape') {
-            closeMedia();
-            document.removeEventListener('keydown', handleEsc);
-        }
-    };
-    document.addEventListener('keydown', handleEsc);
-}
-
-// Enhanced setup media frame function
-function setupMediaFrame(frameId, mediaSrc, altText) {
-    const frame = document.getElementById(frameId);
-    if (!frame || !mediaSrc) return;
-    
-    // Clear existing content except placeholder
-    const existingMedia = frame.querySelectorAll('img:not(.placeholder), video');
-    existingMedia.forEach(el => el.remove());
-    
-    let mediaElement;
-    if (isVideoSource(mediaSrc)) {
-        // Create video element
-        mediaElement = document.createElement('video');
-        mediaElement.src = mediaSrc;
-        mediaElement.muted = true;
-        mediaElement.loop = true;
-        mediaElement.autoplay = true;
-        mediaElement.playsInline = true;
-        mediaElement.preload = 'metadata';
-        
-        // Proper video styling
-        mediaElement.style.cssText = `
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover;
-            border-radius: 12px;
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-        `;
-        
-        // Handle video loading errors
-        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
-        
-        // Setup video when loaded
-        mediaElement.onloadedmetadata = () => {
-            setupVideoElement(mediaElement, frame);
-        };
-    } else {
-        // Create image element
-        mediaElement = document.createElement('img');
-        mediaElement.src = mediaSrc;
-        mediaElement.alt = altText || 'Memory';
-        mediaElement.loading = 'lazy';
-        
-        // Proper image styling
-        mediaElement.style.cssText = `
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 12px;
-            display: block;
-        `;
-        
-        // Handle image loading errors
-        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
-    }
-    
-    frame.appendChild(mediaElement);
-    
-    // Enhanced frame click handling
-    frame.style.cursor = 'pointer';
-    
-    // Remove existing click listeners to prevent duplicates
-    const newFrame = frame.cloneNode(true);
-    frame.parentNode.replaceChild(newFrame, frame);
-    
-    // Add new click handler
-    const clickHandler = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Frame clicked:', frameId);
-        expandMedia(frameId);
-    };
-    
-    newFrame.addEventListener('click', clickHandler);
-}
-
-// Show audio status
-function showAudioStatus(message) {
-    const status = document.getElementById('audioStatus');
-    if (status) {
-        status.textContent = message;
-        status.classList.add('show');
-        
-        if (window.innerWidth <= 768) {
-            setTimeout(() => {
-                hideAudioStatus();
-            }, 3000);
-        }
-    }
-}
-
-// Hide audio status
-function hideAudioStatus() {
-    const status = document.getElementById('audioStatus');
-    if (status) {
-        status.classList.remove('show');
-    }
-}
-
-// Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing...');
-    
-    // Preload all audio immediately for better performance
-    setTimeout(() => {
-        preloadAllAudio();
-    }, 500);
-    
-    // Show initial welcome message
-    setTimeout(() => {
-        showTypingMessage('start by clicking the heart', 4000);
-    }, 1000);
-    
-    // Initialize audio context on first user interaction
-    document.addEventListener('click', initAudioContext, { once: true });
-    document.addEventListener('touchstart', initAudioContext, { once: true });
-    
-    // Setup offline detection
-    window.addEventListener('online', checkOfflineStatus);
-    window.addEventListener('offline', checkOfflineStatus);
-    
-    // Check initial status without showing online message
-    isOffline = !navigator.onLine;
-    if (!navigator.onLine) {
-        document.getElementById('offlineIndicator')?.classList.add('show');
-    }
-    
-    // Mark that initial load is complete after a short delay
-    setTimeout(() => {
-        isInitialLoad = false;
-    }, 2000);
-    
-    // Create offline indicator
-    createOfflineIndicator();
-    
-    // Initialize media frames first, then auto-detect videos
-    setTimeout(() => {
-        initializeMediaFrames();
-        autoDetectVideos();
-    }, 100);
-    
-    // Setup event listeners
-    const backButton = document.querySelector('.back-button');
-    if (backButton) {
-        backButton.addEventListener('click', goBackToMain);
-    }
-    
-    const messageIcon = document.querySelector('.message-icon');
-    if (messageIcon) {
-        messageIcon.addEventListener('click', showMessage);
-    }
-    
-    const closeMessage = document.querySelector('.close-message');
-    if (closeMessage) {
-        closeMessage.addEventListener('click', hideMessage);
-    }
-    
-    // Close modal when clicking outside
-    const messageModal = document.getElementById('messageModal');
-    if (messageModal) {
-        messageModal.addEventListener('click', (e) => {
-            if (e.target === messageModal) {
-                hideMessage();
-            }
-        });
-    }
-    
-    // Setup main heart with improved event handling
-    const mainHeart = document.getElementById('mainHeart');
-    if (mainHeart) {
-        mainHeart.addEventListener('click', playMainMusic);
-        mainHeart.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                playMainMusic();
-            }
-        });
-    }
-    
-    // Setup music buttons with improved event handling
-    for (let i = 1; i <= 4; i++) {
-        const musicBtn = document.getElementById(`musicBtn${i}`);
-        if (musicBtn) {
-            musicBtn.addEventListener('click', () => playMusic(i));
-            musicBtn.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    playMusic(i);
-                }
-            });
-        }
-    }
-    
-    console.log('Initialization complete');
-});
-
-// Create tears periodically
-setInterval(createTear, 800);
