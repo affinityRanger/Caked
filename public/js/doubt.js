@@ -38,12 +38,11 @@ function setupAudioAnalyser() {
     
     try {
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256; // Increased for better visualization
+        analyser.fftSize = 256;
         analyser.smoothingTimeConstant = 0.8;
         const bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         
-        // Create visualizer bars
         createVisualizer();
     } catch (error) {
         console.log('Audio analyser setup failed:', error);
@@ -52,14 +51,12 @@ function setupAudioAnalyser() {
 
 // Create audio visualizer with enhanced bars
 function createVisualizer() {
-    // Check if visualizer already exists
     if (document.getElementById('audioVisualizer')) return;
     
     const visualizer = document.createElement('div');
     visualizer.className = 'audio-visualizer';
     visualizer.id = 'audioVisualizer';
     
-    // Create 64 bars for better visualization
     for (let i = 0; i < 64; i++) {
         const bar = document.createElement('div');
         bar.className = 'visualizer-bar';
@@ -81,31 +78,26 @@ function updateVisualization() {
     
     if (bars) {
         bars.forEach((bar, index) => {
-            // Use multiple frequency bins for smoother animation
             const dataIndex = Math.floor((index / bars.length) * dataArray.length);
             const value = dataArray[dataIndex] || 0;
             
-            // Enhanced height calculation with dynamic range
             const minHeight = 3;
             const maxHeight = 80;
             const height = Math.max(minHeight, (value / 255) * maxHeight);
             
-            // Smooth transitions
             const currentHeight = parseInt(bar.style.height) || minHeight;
             const targetHeight = height;
             const smoothedHeight = currentHeight + (targetHeight - currentHeight) * 0.3;
             
             bar.style.height = smoothedHeight + 'px';
             
-            // Dynamic color based on intensity
             const intensity = value / 255;
-            const hue = 340 + (intensity * 40); // Red to pink spectrum
+            const hue = 340 + (intensity * 40);
             const saturation = 80 + (intensity * 20);
             const lightness = 40 + (intensity * 30);
             
             bar.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
             
-            // Add glow effect for high frequencies
             if (intensity > 0.7) {
                 bar.style.boxShadow = `0 0 10px hsl(${hue}, ${saturation}%, ${lightness}%)`;
             } else {
@@ -123,7 +115,6 @@ function startVisualization() {
     if (visualizer) {
         visualizer.classList.add('active');
         
-        // Add pulsing background effect
         visualizer.style.background = 'linear-gradient(90deg, rgba(255,23,68,0.1), rgba(255,23,68,0.2), rgba(255,23,68,0.1))';
         visualizer.style.backgroundSize = '200% 100%';
         visualizer.style.animation = 'visualizerPulse 2s ease-in-out infinite';
@@ -140,7 +131,6 @@ function stopVisualization() {
         visualizer.style.background = 'none';
         visualizer.style.animation = 'none';
         
-        // Reset all bars
         const bars = visualizer.querySelectorAll('.visualizer-bar');
         bars.forEach(bar => {
             bar.style.height = '2px';
@@ -180,18 +170,14 @@ function restoreAudioState() {
             audio.currentTime = currentTime;
             audio.volume = volume;
             
-            // Restore visual states
+            // Restore visual states - only heart can pulse
             if (playingElement) {
                 playingElement.classList.add('playing');
-                if (playingElement.classList.contains('music-chaos')) {
-                    playingElement.classList.add('pulsing');
-                }
                 if (playingElement.id === 'mainHeart') {
                     playingElement.classList.add('beating');
                 }
             }
             
-            // Resume playback
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
@@ -208,8 +194,10 @@ function restoreAudioState() {
     }
 }
 
-// Enhanced stop all audio with state preservation option
+// Enhanced stop all audio function - properly resets ALL button states
 function stopAllAudio(preserveState = false) {
+    console.log('Stopping all audio, preserveState:', preserveState);
+    
     // Store state if requested and audio is playing
     if (preserveState) {
         storeAudioState();
@@ -217,12 +205,24 @@ function stopAllAudio(preserveState = false) {
         audioStateBeforeVideo = null;
     }
     
-    // Stop current audio
+    // Stop current audio completely
     if (currentAudio) {
         currentAudio.pause();
         if (!preserveState) {
             currentAudio.currentTime = 0;
         }
+        
+        // Disconnect from analyser to prevent conflicts
+        try {
+            if (currentAudio.sourceNode) {
+                currentAudio.sourceNode.disconnect();
+                currentAudio.sourceNode = null;
+            }
+            currentAudio.connected = false;
+        } catch (error) {
+            console.log('Audio disconnect error:', error);
+        }
+        
         currentAudio = null;
     }
     
@@ -239,24 +239,29 @@ function stopAllAudio(preserveState = false) {
         crossfadeInterval = null;
     }
     
-    // Reset visual states
+    // Reset ALL music button states (remove spinning/pulsing)
     document.querySelectorAll('.music-chaos').forEach(btn => {
         btn.classList.remove('playing', 'pulsing');
     });
     
+    // Reset main heart state (only if not preserving state)
     const mainHeart = document.getElementById('mainHeart');
-    if (mainHeart) {
+    if (mainHeart && !preserveState) {
         mainHeart.classList.remove('playing', 'beating');
     }
     
     stopVisualization();
     hideAudioStatus();
     currentPlayingElement = null;
+    
+    console.log('All audio stopped and states reset');
 }
 
-// Crossfade between tracks
+// Improved crossfade function with better audio management
 function crossfadeToNext(currentElement, nextElement, duration = 2000) {
     if (!currentElement || !nextElement) return;
+    
+    console.log('Starting crossfade from current to next audio');
     
     const steps = 50;
     const stepDuration = duration / steps;
@@ -283,22 +288,38 @@ function crossfadeToNext(currentElement, nextElement, duration = 2000) {
             clearInterval(crossfadeInterval);
             crossfadeInterval = null;
             
-            // Stop the previous track
+            // Completely stop and reset the previous track
             currentElement.pause();
             currentElement.currentTime = 0;
+            
+            // Clean up previous audio connection
+            try {
+                if (currentElement.sourceNode) {
+                    currentElement.sourceNode.disconnect();
+                    currentElement.sourceNode = null;
+                }
+                currentElement.connected = false;
+            } catch (error) {
+                console.log('Previous audio cleanup error:', error);
+            }
+            
+            console.log('Crossfade completed');
         }
     }, stepDuration);
 }
 
-// Play audio with enhanced features
+// Enhanced play audio function with better state management
 function playAudioWithFallback(audioElement, title, visualElement) {
     if (!audioElement) {
         console.log('Audio element not found');
         return;
     }
     
-    // If same track is playing, stop it
-    if (currentAudio === audioElement) {
+    console.log('Playing audio:', title, 'Element:', visualElement?.id);
+    
+    // If same track is playing, stop it completely
+    if (currentAudio === audioElement && !audioElement.paused) {
+        console.log('Same track playing, stopping it');
         stopAllAudio();
         return;
     }
@@ -307,34 +328,47 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     cacheAudio(audioElement.id);
     
     // Handle crossfade if another track is playing
-    if (currentAudio && currentAudio !== audioElement) {
+    if (currentAudio && currentAudio !== audioElement && !currentAudio.paused) {
+        console.log('Another track playing, starting crossfade');
         nextAudio = audioElement;
+        
+        // Reset previous playing element's visual state immediately
+        if (currentPlayingElement) {
+            currentPlayingElement.classList.remove('playing', 'pulsing', 'beating');
+        }
+        
         crossfadeToNext(currentAudio, nextAudio);
     } else {
+        // Stop all audio completely before starting new one
         stopAllAudio();
     }
     
+    // Set new current audio and playing element
     currentAudio = audioElement;
     currentPlayingElement = visualElement;
     
-    // Add visual feedback
+    // Add visual feedback - only heart can pulse/beat
     if (visualElement) {
         visualElement.classList.add('playing');
-        if (visualElement.classList.contains('music-chaos')) {
-            visualElement.classList.add('pulsing');
-        }
         if (visualElement.id === 'mainHeart') {
             visualElement.classList.add('beating');
         }
+        // Remove pulsing class from music buttons (no background spinning)
     }
     
     // Connect to analyser for visualization
     if (audioContext && analyser && !audioElement.connected) {
         try {
-            const source = audioContext.createMediaElementSource(audioElement);
-            source.connect(analyser);
+            // Clean up any existing connection first
+            if (audioElement.sourceNode) {
+                audioElement.sourceNode.disconnect();
+            }
+            
+            audioElement.sourceNode = audioContext.createMediaElementSource(audioElement);
+            audioElement.sourceNode.connect(analyser);
             analyser.connect(audioContext.destination);
             audioElement.connected = true;
+            console.log('Audio connected to analyser');
         } catch (error) {
             console.log('Audio connection failed:', error);
         }
@@ -343,15 +377,19 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     showAudioStatus(`🎵 ${title}`);
     startVisualization();
     
+    // Set appropriate volume for mobile/desktop
     const isMobile = window.innerWidth <= 768;
     audioElement.volume = isMobile ? 0.4 : 0.3;
+    
+    // Reset audio to beginning
+    audioElement.currentTime = 0;
     
     // Try to play the audio
     const playPromise = audioElement.play();
     
     if (playPromise !== undefined) {
         playPromise.then(() => {
-            console.log('Audio playing:', title);
+            console.log('Audio playing successfully:', title);
             
             // Add haptic feedback on mobile if available
             if (isMobile && navigator.vibrate) {
@@ -361,13 +399,22 @@ function playAudioWithFallback(audioElement, title, visualElement) {
             showTypingMessage(`🎵 Now playing: ${title}`);
         }).catch(error => {
             console.log('Audio play failed:', error);
-            showTypingMessage('Audio playback failed, restoring audio...');
-            restoreAudioState();
+            showTypingMessage('Audio playback failed');
+            
+            // Reset states on failure
+            if (visualElement) {
+                visualElement.classList.remove('playing', 'pulsing', 'beating');
+            }
+            stopVisualization();
+            hideAudioStatus();
+            currentAudio = null;
+            currentPlayingElement = null;
         });
     }
     
-    // Handle audio end
+    // Handle audio end - reset all states
     audioElement.onended = () => {
+        console.log('Audio ended:', title);
         if (visualElement) {
             visualElement.classList.remove('playing', 'pulsing', 'beating');
         }
@@ -378,8 +425,9 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         showTypingMessage('Track ended');
     };
     
-    // Handle audio error
+    // Handle audio error - reset all states
     audioElement.onerror = () => {
+        console.log('Audio error:', title);
         showAudioStatus(`🎵 ${title} (Error loading)`);
         setTimeout(() => {
             if (visualElement) {
@@ -387,12 +435,16 @@ function playAudioWithFallback(audioElement, title, visualElement) {
             }
             hideAudioStatus();
             stopVisualization();
+            currentAudio = null;
+            currentPlayingElement = null;
         }, 2000);
     };
 }
 
-// Music functionality with updated track list
+// Fixed music functionality with proper state management
 function playMusic(num) {
+    console.log('Play music button clicked:', num);
+    
     preloadAudioOnDemand(`musicAudio${num}`);
     
     const audioElement = document.getElementById(`musicAudio${num}`);
@@ -404,22 +456,35 @@ function playMusic(num) {
         "All Out - Juice WRLD"
     ];
     
+    if (!audioElement || !buttonElement) {
+        console.log('Audio element or button not found:', `musicAudio${num}`, `musicBtn${num}`);
+        return;
+    }
+    
     playAudioWithFallback(audioElement, titles[num - 1], buttonElement);
     createMusicExplosion(buttonElement);
 }
 
-// Main heart music
+// Fixed main heart music
 function playMainMusic() {
+    console.log('Main heart clicked');
+    
     const audioElement = document.getElementById('mainHeartAudio');
     const heartElement = document.getElementById('mainHeart');
+    
+    if (!audioElement || !heartElement) {
+        console.log('Main heart audio or element not found');
+        return;
+    }
     
     playAudioWithFallback(audioElement, "You've Been Missed - PARTYNEXTDOOR", heartElement);
     createHeartExplosion();
 }
 
-// Create heart explosion effect
+// Create heart explosion effect - improved for mobile
 function createHeartExplosion() {
-    const heartCount = window.innerWidth <= 768 ? 6 : 10;
+    const isMobile = window.innerWidth <= 768;
+    const heartCount = isMobile ? 6 : 10;
     
     for (let i = 0; i < heartCount; i++) {
         setTimeout(() => {
@@ -429,7 +494,7 @@ function createHeartExplosion() {
             heart.style.left = '50%';
             heart.style.top = '50%';
             heart.style.transform = 'translate(-50%, -50%)';
-            heart.style.fontSize = '2rem';
+            heart.style.fontSize = isMobile ? '1.5rem' : '2rem';
             heart.style.pointerEvents = 'none';
             heart.style.zIndex = '100';
             heart.style.animation = `heartExplode${i} 2s ease-out forwards`;
@@ -439,7 +504,7 @@ function createHeartExplosion() {
                 const style = document.createElement('style');
                 style.id = `heartExplodeStyle${i}`;
                 const angle = (360 / heartCount) * i;
-                const distance = window.innerWidth <= 768 ? 150 : 200;
+                const distance = isMobile ? 120 : 200;
                 style.textContent = `
                     @keyframes heartExplode${i} {
                         0% {
@@ -476,7 +541,7 @@ function createHeartExplosion() {
     }
 }
 
-// Create music explosion effect
+// Create music explosion effect - improved for mobile
 function createMusicExplosion(element) {
     if (!element) return;
     
@@ -484,7 +549,8 @@ function createMusicExplosion(element) {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
-    const noteCount = window.innerWidth <= 768 ? 4 : 6;
+    const isMobile = window.innerWidth <= 768;
+    const noteCount = isMobile ? 4 : 6;
     const notes = ['🎵', '🎶', '🎼', '🎧'];
     
     for (let i = 0; i < noteCount; i++) {
@@ -495,7 +561,7 @@ function createMusicExplosion(element) {
             note.style.left = centerX + 'px';
             note.style.top = centerY + 'px';
             note.style.transform = 'translate(-50%, -50%)';
-            note.style.fontSize = '1.5rem';
+            note.style.fontSize = isMobile ? '1.2rem' : '1.5rem';
             note.style.pointerEvents = 'none';
             note.style.zIndex = '100';
             note.style.animation = `musicExplode${i} 1.5s ease-out forwards`;
@@ -505,7 +571,7 @@ function createMusicExplosion(element) {
                 const style = document.createElement('style');
                 style.id = `musicExplodeStyle${i}`;
                 const angle = (360 / noteCount) * i;
-                const distance = 80;
+                const distance = isMobile ? 60 : 80;
                 style.textContent = `
                     @keyframes musicExplode${i} {
                         0% {
@@ -542,7 +608,6 @@ function handleNetworkStatus(isOnline) {
         showTypingMessage('You are now offline. Playing cached content...');
     } else {
         document.getElementById('offlineIndicator')?.classList.remove('show');
-        // Only show "you are back online" message if it's not the initial load
         if (!isInitialLoad) {
             showTypingMessage('You are back online. Restoring audio...');
         }
@@ -551,7 +616,6 @@ function handleNetworkStatus(isOnline) {
 
 // Typing message display function
 function showTypingMessage(message, duration = 3000) {
-    // Remove existing typing message
     const existingMessage = document.getElementById('typingMessage');
     if (existingMessage) {
         existingMessage.remove();
@@ -570,7 +634,6 @@ function showTypingMessage(message, duration = 3000) {
     typingDiv.appendChild(cursor);
     document.body.appendChild(typingDiv);
     
-    // Show the container
     setTimeout(() => typingDiv.classList.add('show'), 100);
     
     let i = 0;
@@ -580,7 +643,6 @@ function showTypingMessage(message, duration = 3000) {
             i++;
         } else {
             clearInterval(typeInterval);
-            // Hide after duration
             setTimeout(() => {
                 typingDiv.classList.remove('show');
                 setTimeout(() => {
@@ -601,7 +663,6 @@ function checkOfflineStatus() {
 
 // Enhanced frame initialization for better media handling
 function initializeMediaFrames() {
-    // Get all image and video frames
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
     frames.forEach(frame => {
@@ -609,16 +670,10 @@ function initializeMediaFrames() {
         const video = frame.querySelector('video');
         
         if (video) {
-            // Ensure video is properly styled and set up
             setupVideoElement(video, frame);
         } else if (img) {
-            // Set up image click handling
             frame.style.cursor = 'pointer';
-            
-            // Remove existing listeners
             frame.onclick = null;
-            
-            // Add click handler for images
             frame.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -645,7 +700,6 @@ function createOfflineIndicator() {
 function cacheAudio(audioId) {
     const audio = document.getElementById(audioId);
     if (audio && !cachedTracks.has(audioId)) {
-        // Simulate caching by preloading
         audio.preload = 'auto';
         audio.load();
         cachedTracks.add(audioId);
@@ -719,18 +773,15 @@ function isVideoSource(src) {
 
 // Auto-detect and setup video elements
 function autoDetectVideos() {
-    // Get all frames
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
     frames.forEach((frame, index) => {
-        // Check if frame already has video
         let video = frame.querySelector('video');
         if (video) {
             setupVideoElement(video, frame);
             return;
         }
         
-        // Check if frame has image with video extension
         const img = frame.querySelector('img');
         if (img && isVideoSource(img.src)) {
             convertImageToVideo(img, frame);
@@ -748,7 +799,6 @@ function convertImageToVideo(img, frame) {
     video.playsInline = true;
     video.preload = 'metadata';
     
-    // Ensure video takes full frame space
     video.style.cssText = `
         width: 100%;
         height: 100%;
@@ -757,21 +807,17 @@ function convertImageToVideo(img, frame) {
         display: block;
     `;
     
-    // Add error handling
     video.onerror = () => {
-        // If video fails to load, keep the image
         console.log('Video failed to load, keeping image:', img.src);
     };
     
     video.onloadedmetadata = () => {
-        // Video loaded successfully, replace image
         img.style.display = 'none';
         frame.insertBefore(video, frame.firstChild);
         setupVideoElement(video, frame);
         console.log('Video loaded and replaced image:', video.src);
     };
     
-    // Try to load the video
     video.load();
 }
 
@@ -779,13 +825,11 @@ function convertImageToVideo(img, frame) {
 function setupVideoElement(video, frame) {
     if (!video || !frame) return;
     
-    // Ensure video displays properly with full styling
     video.muted = true;
     video.playsInline = true;
     video.loop = true;
     video.preload = 'metadata';
     
-    // Apply proper styling to ensure full display
     video.style.cssText = `
         width: 100% !important;
         height: 100% !important;
@@ -797,14 +841,12 @@ function setupVideoElement(video, frame) {
         left: 0;
     `;
     
-    // Handle video interactions
     video.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         expandMedia(frame.id);
     });
     
-    // Auto-play when video comes into view
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -820,7 +862,6 @@ function setupVideoElement(video, frame) {
     
     observer.observe(video);
     
-    // Try to start playing immediately with better error handling
     setTimeout(() => {
         const playPromise = video.play();
         if (playPromise) {
@@ -834,13 +875,11 @@ function setupVideoElement(video, frame) {
 // Enhanced expand media function with better detection and popup handling
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
-    if (!frame || expandedMedia) return; // Prevent multiple expansions
+    if (!frame || expandedMedia) return;
     
-    // Better media element detection
     const video = frame.querySelector('video');
     const img = frame.querySelector('img:not(.placeholder)');
     
-    // Determine which element to use - prioritize video if it exists and is visible
     let mediaElement = null;
     let isVideo = false;
     
@@ -859,22 +898,20 @@ function expandMedia(frameId) {
     
     console.log('Expanding media:', isVideo ? 'video' : 'image', 'from frame:', frameId);
     
-    // Get frame position and decide popup position
     const frameRect = frame.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Calculate popup size - slightly larger for videos
     const isMobile = window.innerWidth <= 768;
     
     let popupSize;
     if (isVideo) {
-        popupSize = isMobile ? 350 : 430;
+        popupSize = isMobile ? 280 : 430;
     } else {
-        popupSize = isMobile ? 320 : 400;
+        popupSize = isMobile ? 260 : 400;
     }
     
-    const offset = 40;
+    const offset = isMobile ? 20 : 40;
     
     let popupX, popupY;
     
@@ -894,8 +931,8 @@ function expandMedia(frameId) {
     }
     
     // Ensure popup stays within viewport
-    popupX = Math.max(20, Math.min(popupX, viewportWidth - popupSize - 20));
-    popupY = Math.max(20, Math.min(popupY, viewportHeight - popupSize - 20));
+    popupX = Math.max(10, Math.min(popupX, viewportWidth - popupSize - 10));
+    popupY = Math.max(10, Math.min(popupY, viewportHeight - popupSize - 10));
     
     // Create popup container
     const popup = document.createElement('div');
@@ -908,7 +945,7 @@ function expandMedia(frameId) {
         height: ${popupSize}px;
         background: rgba(10, 10, 10, 0.95);
         border: 3px solid #ff1744;
-        border-radius: 20px;
+        border-radius: ${isMobile ? '15px' : '20px'};
         backdrop-filter: blur(15px);
         box-shadow: 0 15px 35px rgba(255, 23, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
         z-index: 150;
@@ -989,7 +1026,7 @@ function expandMedia(frameId) {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 17px;
+        border-radius: ${isMobile ? '12px' : '17px'};
         display: block;
     `;
     
@@ -998,14 +1035,14 @@ function expandMedia(frameId) {
     closeBtn.innerHTML = '✕';
     closeBtn.style.cssText = `
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: ${isMobile ? '8px' : '10px'};
+        right: ${isMobile ? '8px' : '10px'};
         background: rgba(255, 23, 68, 0.9);
         border: none;
         color: white;
-        font-size: 1.4rem;
-        width: 35px;
-        height: 35px;
+        font-size: ${isMobile ? '1.2rem' : '1.4rem'};
+        width: ${isMobile ? '30px' : '35px'};
+        height: ${isMobile ? '30px' : '35px'};
         border-radius: 50%;
         cursor: pointer;
         z-index: 151;
@@ -1087,14 +1124,19 @@ function expandMedia(frameId) {
     });
     
     popup.addEventListener('click', (e) => {
-        // Only close if clicking the popup background, not the media
         if (e.target === popup) {
             closeMedia();
         }
     });
     
-    // Auto-close after 20 seconds for images only
-    if (!isVideo) {
+    // Auto-close after 15 seconds for images only on mobile
+    if (!isVideo && isMobile) {
+        setTimeout(() => {
+            if (expandedMedia === popup) {
+                closeMedia();
+            }
+        }, 15000);
+    } else if (!isVideo && !isMobile) {
         setTimeout(() => {
             if (expandedMedia === popup) {
                 closeMedia();
@@ -1286,7 +1328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Setup main heart
+    // Setup main heart with improved event handling
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart) {
         mainHeart.addEventListener('click', playMainMusic);
@@ -1298,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Setup music buttons
+    // Setup music buttons with improved event handling
     for (let i = 1; i <= 4; i++) {
         const musicBtn = document.getElementById(`musicBtn${i}`);
         if (musicBtn) {
