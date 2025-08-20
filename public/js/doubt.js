@@ -18,6 +18,7 @@ let isOffline = false;
 let expandedMedia = null;
 let currentVideo = null;
 let audioStateBeforeVideo = null;
+let heartBeating = false; // Track heart beating state independently
 
 // Initialize audio context
 function initAudioContext() {
@@ -47,6 +48,33 @@ function setupAudioAnalyser() {
     } catch (error) {
         console.log('Audio analyser setup failed:', error);
     }
+}
+
+// Preload all audio elements immediately for better performance
+function preloadAllAudio() {
+    const audioIds = ['mainHeartAudio', 'musicAudio1', 'musicAudio2', 'musicAudio3', 'musicAudio4'];
+    
+    audioIds.forEach(audioId => {
+        const audio = document.getElementById(audioId);
+        if (audio) {
+            audio.preload = 'auto';
+            audio.load();
+            
+            // Add event listeners for better loading feedback
+            audio.addEventListener('canplaythrough', () => {
+                console.log(`${audioId} ready to play`);
+                cachedTracks.add(audioId);
+            });
+            
+            audio.addEventListener('loadstart', () => {
+                console.log(`${audioId} loading started`);
+            });
+            
+            // Set consistent volume
+            const isMobile = window.innerWidth <= 768;
+            audio.volume = isMobile ? 0.4 : 0.3;
+        }
+    });
 }
 
 // Create audio visualizer with enhanced bars
@@ -170,11 +198,12 @@ function restoreAudioState() {
             audio.currentTime = currentTime;
             audio.volume = volume;
             
-            // Restore visual states - only heart can pulse
+            // Restore visual states
             if (playingElement) {
                 playingElement.classList.add('playing');
                 if (playingElement.id === 'mainHeart') {
                     playingElement.classList.add('beating');
+                    heartBeating = true;
                 }
             }
             
@@ -194,9 +223,9 @@ function restoreAudioState() {
     }
 }
 
-// Enhanced stop all audio function - properly resets ALL button states but preserves heart beating
-function stopAllAudio(preserveState = false, keepHeartBeating = false) {
-    console.log('Stopping all audio, preserveState:', preserveState, 'keepHeartBeating:', keepHeartBeating);
+// Enhanced stop all audio function - maintains heart beating state properly
+function stopAllAudio(preserveState = false) {
+    console.log('Stopping all audio, preserveState:', preserveState);
     
     // Store state if requested and audio is playing
     if (preserveState) {
@@ -239,17 +268,19 @@ function stopAllAudio(preserveState = false, keepHeartBeating = false) {
         crossfadeInterval = null;
     }
     
-    // Reset ALL music button states (remove spinning/pulsing)
+    // Reset ALL music button states (remove spinning/pulsing) but preserve heart
     document.querySelectorAll('.music-chaos').forEach(btn => {
         btn.classList.remove('playing', 'pulsing');
     });
     
-    // Reset main heart state - but preserve beating if requested
+    // Handle main heart state - maintain beating if it was previously set
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart && !preserveState) {
         mainHeart.classList.remove('playing');
-        if (!keepHeartBeating) {
+        // Only remove beating if we're not preserving state and it wasn't already beating
+        if (!heartBeating || !preserveState) {
             mainHeart.classList.remove('beating');
+            heartBeating = false;
         }
     }
     
@@ -311,19 +342,67 @@ function crossfadeToNext(currentElement, nextElement, duration = 2000) {
     }, stepDuration);
 }
 
-// Enhanced play audio function with better state management
+// Enhanced play audio function with immediate response and better sync
 function playAudioWithFallback(audioElement, title, visualElement) {
     if (!audioElement) {
         console.log('Audio element not found');
+        showTypingMessage('Audio not available');
         return;
     }
     
     console.log('Playing audio:', title, 'Element:', visualElement?.id);
     
+    // Immediate visual feedback for responsiveness
+    if (visualElement) {
+        // Handle heart beating state
+        if (visualElement.id === 'mainHeart') {
+            if (currentAudio === audioElement && !audioElement.paused) {
+                // Same heart track playing, stop it
+                console.log('Same heart track playing, stopping it');
+                stopAllAudio();
+                heartBeating = false;
+                return;
+            } else {
+                // Heart clicked, should start beating
+                heartBeating = true;
+            }
+        }
+        
+        // Remove previous playing states from all elements
+        document.querySelectorAll('.music-chaos, #mainHeart').forEach(el => {
+            if (el !== visualElement) {
+                el.classList.remove('playing', 'pulsing');
+            }
+        });
+        
+        // Add visual state immediately
+        visualElement.classList.add('playing');
+        if (visualElement.id === 'mainHeart') {
+            visualElement.classList.add('beating');
+        }
+    }
+    
+    // Check if audio is ready to play
+    if (audioElement.readyState < 2) {
+        showTypingMessage('Loading audio...');
+        console.log('Audio not ready, waiting...');
+        
+        const loadHandler = () => {
+            audioElement.removeEventListener('canplaythrough', loadHandler);
+            playAudioWithFallback(audioElement, title, visualElement);
+        };
+        
+        audioElement.addEventListener('canplaythrough', loadHandler);
+        return;
+    }
+    
     // If same track is playing, stop it completely
     if (currentAudio === audioElement && !audioElement.paused) {
         console.log('Same track playing, stopping it');
         stopAllAudio();
+        if (visualElement?.id === 'mainHeart') {
+            heartBeating = false;
+        }
         return;
     }
     
@@ -334,35 +413,23 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     if (currentAudio && currentAudio !== audioElement && !currentAudio.paused) {
         console.log('Another track playing, starting crossfade');
         nextAudio = audioElement;
-        
-        // Reset previous playing element's visual state immediately
-        if (currentPlayingElement) {
-            currentPlayingElement.classList.remove('playing', 'pulsing');
-            // Keep heart beating if it was the heart playing
-            if (currentPlayingElement.id !== 'mainHeart') {
-                currentPlayingElement.classList.remove('beating');
-            }
-        }
-        
         crossfadeToNext(currentAudio, nextAudio);
     } else {
-        // Stop all audio but keep heart beating if it was already beating
-        const heartWasBeating = document.getElementById('mainHeart')?.classList.contains('beating');
-        stopAllAudio(false, heartWasBeating);
+        // Stop all audio but preserve heart beating state if needed
+        stopAllAudio(false);
+        
+        // Restore heart beating if it should be beating
+        if (visualElement?.id === 'mainHeart' && heartBeating) {
+            const mainHeart = document.getElementById('mainHeart');
+            if (mainHeart) {
+                mainHeart.classList.add('beating');
+            }
+        }
     }
     
     // Set new current audio and playing element
     currentAudio = audioElement;
     currentPlayingElement = visualElement;
-    
-    // Add visual feedback - only heart can pulse/beat
-    if (visualElement) {
-        visualElement.classList.add('playing');
-        if (visualElement.id === 'mainHeart') {
-            visualElement.classList.add('beating');
-        }
-        // Remove pulsing class from music buttons (no background spinning)
-    }
     
     // Connect to analyser for visualization
     if (audioContext && analyser && !audioElement.connected) {
@@ -385,7 +452,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
     showAudioStatus(`🎵 ${title}`);
     startVisualization();
     
-    // Set appropriate volume for mobile/desktop
+    // Set appropriate volume
     const isMobile = window.innerWidth <= 768;
     audioElement.volume = isMobile ? 0.4 : 0.3;
     
@@ -411,7 +478,10 @@ function playAudioWithFallback(audioElement, title, visualElement) {
             
             // Reset states on failure
             if (visualElement) {
-                visualElement.classList.remove('playing', 'pulsing', 'beating');
+                visualElement.classList.remove('playing', 'pulsing');
+                if (visualElement.id !== 'mainHeart' || !heartBeating) {
+                    visualElement.classList.remove('beating');
+                }
             }
             stopVisualization();
             hideAudioStatus();
@@ -420,13 +490,16 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         });
     }
     
-    // Handle audio end - reset states but keep heart beating
+    // Handle audio end - preserve heart beating
     audioElement.onended = () => {
         console.log('Audio ended:', title);
         if (visualElement) {
             visualElement.classList.remove('playing', 'pulsing');
-            // Only remove beating if it's not the main heart
-            if (visualElement.id !== 'mainHeart') {
+            // Keep heart beating after song ends if it's the heart
+            if (visualElement.id === 'mainHeart') {
+                // Heart keeps beating after song ends
+                heartBeating = true;
+            } else {
                 visualElement.classList.remove('beating');
             }
         }
@@ -437,15 +510,15 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         showTypingMessage('Track ended');
     };
     
-    // Handle audio error - reset states but keep heart beating
+    // Handle audio error - reset states appropriately
     audioElement.onerror = () => {
         console.log('Audio error:', title);
         showAudioStatus(`🎵 ${title} (Error loading)`);
         setTimeout(() => {
             if (visualElement) {
                 visualElement.classList.remove('playing', 'pulsing');
-                // Only remove beating if it's not the main heart
-                if (visualElement.id !== 'mainHeart') {
+                // Only remove beating if it's not the main heart or heart wasn't beating
+                if (visualElement.id !== 'mainHeart' || !heartBeating) {
                     visualElement.classList.remove('beating');
                 }
             }
@@ -461,8 +534,6 @@ function playAudioWithFallback(audioElement, title, visualElement) {
 function playMusic(num) {
     console.log('Play music button clicked:', num);
     
-    preloadAudioOnDemand(`musicAudio${num}`);
-    
     const audioElement = document.getElementById(`musicAudio${num}`);
     const buttonElement = document.getElementById(`musicBtn${num}`);
     const titles = [
@@ -474,6 +545,7 @@ function playMusic(num) {
     
     if (!audioElement || !buttonElement) {
         console.log('Audio element or button not found:', `musicAudio${num}`, `musicBtn${num}`);
+        showTypingMessage('Audio element not found');
         return;
     }
     
@@ -481,7 +553,7 @@ function playMusic(num) {
     createMusicExplosion(buttonElement);
 }
 
-// Fixed main heart music
+// Fixed main heart music - maintains beating state
 function playMainMusic() {
     console.log('Main heart clicked');
     
@@ -490,6 +562,7 @@ function playMainMusic() {
     
     if (!audioElement || !heartElement) {
         console.log('Main heart audio or element not found');
+        showTypingMessage('Heart audio not found');
         return;
     }
     
@@ -741,7 +814,16 @@ function createTear() {
 
 // Go back to landing page - preserve heart beating state
 function goBackToMain() {
-    stopAllAudio(false, true); // Keep heart beating when going back
+    stopAllAudio(false);
+    
+    // Preserve heart beating state when going back
+    if (heartBeating) {
+        const mainHeart = document.getElementById('mainHeart');
+        if (mainHeart) {
+            mainHeart.classList.add('beating');
+        }
+    }
+    
     if (window.history.length > 1) {
         window.history.back();
     } else {
@@ -993,7 +1075,7 @@ function expandMedia(frameId) {
         // Video event handling
         expandedElement.addEventListener('play', () => {
             console.log('Video started playing');
-            showTypingMessage('Playing video... 🎬');
+            showTypingMessage('Playing video...');
         });
         
         expandedElement.addEventListener('pause', () => {
@@ -1272,22 +1354,18 @@ function hideAudioStatus() {
     }
 }
 
-// Preload audio on demand
-function preloadAudioOnDemand(audioId) {
-    const audio = document.getElementById(audioId);
-    if (audio && audio.preload === 'none') {
-        audio.preload = 'auto';
-        audio.load();
-    }
-}
-
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
     
+    // Preload all audio immediately for better performance
+    setTimeout(() => {
+        preloadAllAudio();
+    }, 500);
+    
     // Show initial welcome message
     setTimeout(() => {
-        showTypingMessage('🔪start by 💔', 4000);
+        showTypingMessage('start by clicking the heart', 4000);
     }, 1000);
     
     // Initialize audio context on first user interaction

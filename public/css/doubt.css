@@ -118,7 +118,7 @@ body.light-mode .message-content {
     overflow: hidden;
 }
 
-/* Central broken heart - remains centered */
+/* Central broken heart - remains centered with enhanced beating animation */
 .main-heart {
     position: absolute;
     top: 50%;
@@ -144,6 +144,11 @@ body.light-mode .message-content {
     filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1));
 }
 
+.main-heart.beating {
+    animation: heartbeat 0.6s ease-in-out infinite, continuousGlow 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 40px rgba(255, 23, 68, 0.9));
+}
+
 .hero-text {
     position: absolute;
     top: 65%;
@@ -156,7 +161,7 @@ body.light-mode .message-content {
     pointer-events: none;
 }
 
-/* Chaotic positioning for music buttons */
+/* Improved chaotic positioning for music buttons with better spacing */
 .music-chaos {
     position: absolute;
     display: flex;
@@ -168,7 +173,7 @@ body.light-mode .message-content {
     animation: musicFloat 4s ease-in-out infinite;
     filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
     z-index: 15;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     pointer-events: auto;
     user-select: none;
     background: rgba(0, 0, 0, 0.3);
@@ -185,6 +190,10 @@ body.light-mode .message-content {
     margin-top: 5px;
     line-height: 1.1;
     opacity: 0.9;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100px;
 }
 
 .music-chaos:hover {
@@ -194,37 +203,38 @@ body.light-mode .message-content {
 }
 
 .music-chaos.playing {
-    animation: musicFloat 0.5s ease-in-out infinite, spin 2s linear infinite;
+    animation: musicFloat 0.5s ease-in-out infinite, musicPulse 1s ease-in-out infinite;
     filter: drop-shadow(0 0 30px rgba(255, 23, 68, 1));
     background: rgba(255, 23, 68, 0.2);
+    border-color: rgba(255, 23, 68, 0.6);
 }
 
-/* Individual chaotic positions for music buttons */
+/* Better positioned music buttons with improved spacing */
 .music-btn-1 {
-    top: 15%;
-    left: 15%;
+    top: 8%;
+    left: 8%;
     animation-delay: -0.5s;
 }
 
 .music-btn-2 {
-    top: 20%;
-    right: 12%;
+    top: 12%;
+    right: 8%;
     animation-delay: -1s;
 }
 
 .music-btn-3 {
-    bottom: 25%;
-    left: 18%;
+    bottom: 22%;
+    left: 12%;
     animation-delay: -1.5s;
 }
 
 .music-btn-4 {
-    bottom: 15%;
-    right: 20%;
+    bottom: 8%;
+    right: 15%;
     animation-delay: -2s;
 }
 
-/* Chaotic positioning for image frames */
+/* Improved chaotic positioning for image frames with space for 6 frames */
 .image-frame, .video-frame {
     position: absolute;
     width: 150px;
@@ -270,38 +280,44 @@ body.light-mode .message-content {
     opacity: 1;
 }
 
-/* Individual chaotic positions for frames */
+/* Better positioned frames - now with 6 frames */
 .frame-1 {
-    top: 8%;
-    left: 35%;
+    top: 5%;
+    left: 32%;
     animation-delay: -0.3s;
 }
 
 .frame-2 {
-    top: 12%;
-    right: 35%;
+    top: 8%;
+    right: 32%;
     animation-delay: -0.8s;
 }
 
 .frame-3 {
-    bottom: 35%;
-    left: 8%;
+    top: 32%;
+    left: 5%;
     animation-delay: -1.2s;
 }
 
 .frame-4 {
-    bottom: 40%;
-    right: 8%;
+    top: 35%;
+    right: 5%;
     animation-delay: -1.7s;
 }
 
 .frame-5 {
-    top: 35%;
-    right: 25%;
+    bottom: 32%;
+    left: 8%;
     animation-delay: -2.1s;
 }
 
-/* Chaotic positioning for quotes */
+.frame-6 {
+    bottom: 35%;
+    right: 8%;
+    animation-delay: -2.5s;
+}
+
+/* Chaotic positioning for quotes - adjusted for 6 frames */
 .chaos-text {
     font-size: 1.2rem;
     font-weight: bold;
@@ -324,44 +340,44 @@ body.light-mode .message-content {
     animation: textFloat 8s ease-in-out infinite;
 }
 
-/* Individual positions for quotes */
+/* Repositioned quotes to work with 6 frames */
 .quote-1 {
-    top: 25%;
+    top: 20%;
     left: 5%;
     animation-delay: -0.5s;
 }
 
 .quote-2 {
-    top: 35%;
-    left: 75%;
+    top: 25%;
+    right: 5%;
     animation-delay: -1s;
 }
 
 .quote-3 {
-    bottom: 20%;
-    left: 35%;
+    bottom: 18%;
+    left: 32%;
     animation-delay: -1.5s;
 }
 
 .quote-4 {
-    top: 45%;
-    left: 5%;
+    top: 55%;
+    left: 2%;
     animation-delay: -2s;
 }
 
 .quote-5 {
-    bottom: 8%;
-    left: 60%;
+    bottom: 5%;
+    left: 55%;
     animation-delay: -2.5s;
 }
 
 .quote-6 {
-    top: 60%;
-    right: 5%;
+    top: 72%;
+    right: 2%;
     animation-delay: -3s;
 }
 
-/* Chaotic floating hearts */
+/* Chaotic floating hearts - repositioned for better layout */
 .floating-heart {
     position: absolute;
     font-size: 3rem;
@@ -372,56 +388,56 @@ body.light-mode .message-content {
     user-select: none;
 }
 
-/* Individual positions for floating hearts */
+/* Better positioned floating hearts */
 .heart-1 {
-    top: 10%;
-    left: 70%;
+    top: 15%;
+    left: 65%;
     animation-delay: -0.2s;
 }
 
 .heart-2 {
-    top: 70%;
-    left: 10%;
+    top: 75%;
+    left: 15%;
     animation-delay: -0.7s;
 }
 
 .heart-3 {
-    top: 30%;
-    left: 90%;
+    top: 25%;
+    left: 85%;
     animation-delay: -1.2s;
 }
 
 .heart-4 {
-    bottom: 10%;
-    left: 45%;
+    bottom: 12%;
+    left: 42%;
     animation-delay: -1.7s;
 }
 
 .heart-5 {
-    top: 80%;
-    right: 30%;
+    top: 85%;
+    right: 25%;
     animation-delay: -2.2s;
 }
 
 .heart-6 {
-    top: 15%;
-    left: 50%;
+    top: 18%;
+    left: 48%;
     animation-delay: -2.7s;
 }
 
 .heart-7 {
-    bottom: 30%;
-    right: 15%;
+    bottom: 28%;
+    right: 12%;
     animation-delay: -3.2s;
 }
 
 .heart-8 {
-    top: 55%;
-    left: 25%;
+    top: 62%;
+    left: 22%;
     animation-delay: -3.7s;
 }
 
-/* Animations */
+/* Enhanced animations */
 @keyframes heartbeat {
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
     50% { transform: translate(-50%, -50%) scale(1.1); }
@@ -430,6 +446,22 @@ body.light-mode .message-content {
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
+}
+
+@keyframes continuousGlow {
+    0%, 100% { filter: drop-shadow(0 0 30px rgba(255, 23, 68, 0.8)); }
+    50% { filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1)); }
+}
+
+@keyframes musicPulse {
+    0%, 100% { 
+        background: rgba(255, 23, 68, 0.2);
+        border-color: rgba(255, 23, 68, 0.6);
+    }
+    50% { 
+        background: rgba(255, 23, 68, 0.3);
+        border-color: rgba(255, 23, 68, 0.8);
+    }
 }
 
 @keyframes float {
@@ -443,11 +475,6 @@ body.light-mode .message-content {
     50% { transform: translateY(-15px); }
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
 @keyframes frameFloat {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
     33% { transform: translateY(-10px) rotate(2deg); }
@@ -459,10 +486,10 @@ body.light-mode .message-content {
     50% { transform: translateY(-15px); opacity: 1; }
 }
 
-/* Enhanced Audio visualization with glowing bars */
+/* Enhanced Audio visualization with improved performance */
 .audio-visualizer {
     position: fixed;
-    bottom: 80px;
+    bottom: 85px;
     left: 50%;
     transform: translateX(-50%);
     width: 400px;
@@ -473,7 +500,7 @@ body.light-mode .message-content {
     gap: 3px;
     z-index: 20;
     opacity: 0;
-    transition: all 0.5s ease;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     padding: 10px;
     border-radius: 15px;
     backdrop-filter: blur(10px);
@@ -481,8 +508,8 @@ body.light-mode .message-content {
 
 .audio-visualizer.active {
     opacity: 1;
-    transform: translateX(-50%) translateY(-10px);
-    box-shadow: 0 10px 30px rgba(255, 23, 68, 0.3);
+    transform: translateX(-50%) translateY(-15px);
+    box-shadow: 0 15px 40px rgba(255, 23, 68, 0.4);
 }
 
 .visualizer-bar {
@@ -493,6 +520,7 @@ body.light-mode .message-content {
     min-height: 3px;
     position: relative;
     box-shadow: 0 0 5px rgba(255, 23, 68, 0.5);
+    will-change: transform, height;
 }
 
 .visualizer-bar::before {
@@ -514,18 +542,18 @@ body.light-mode .message-content {
 @keyframes visualizerPulse {
     0%, 100% { 
         background-position: 0% 50%; 
-        box-shadow: 0 10px 30px rgba(255, 23, 68, 0.3);
+        box-shadow: 0 15px 40px rgba(255, 23, 68, 0.4);
     }
     50% { 
         background-position: 100% 50%; 
-        box-shadow: 0 15px 40px rgba(255, 23, 68, 0.5);
+        box-shadow: 0 20px 50px rgba(255, 23, 68, 0.6);
     }
 }
 
-/* Audio status */
+/* Enhanced audio status */
 .audio-status {
     position: fixed;
-    bottom: 30px;
+    bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 23, 68, 0.2);
@@ -536,13 +564,15 @@ body.light-mode .message-content {
     font-size: 16px;
     backdrop-filter: blur(10px);
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 15;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .audio-status.show {
     opacity: 1;
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateX(-50%) translateY(-15px);
+    box-shadow: 0 10px 25px rgba(255, 23, 68, 0.3);
 }
 
 /* Offline indicator */
@@ -583,6 +613,7 @@ body.light-mode .message-content {
     opacity: 0;
     transition: opacity 0.3s ease;
     backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(255, 23, 68, 0.3);
 }
 
 .typing-text.show {
@@ -749,7 +780,7 @@ body.light-mode .message-content {
     50% { transform: scale(1) rotate(1deg) translateY(-5px); }
 }
 
-/* Mobile responsive design */
+/* Mobile responsive design - improved for better audio alignment */
 @media (max-width: 768px) {
     .main-heart {
         font-size: 6rem;
@@ -783,124 +814,131 @@ body.light-mode .message-content {
     
     .music-chaos .music-label {
         font-size: 0.7rem;
+        max-width: 90px;
     }
     
-    /* Adjust mobile positions to avoid overlap */
+    /* Better mobile positions for music buttons */
     .music-btn-1 {
-        top: 12%;
-        left: 8%;
-    }
-    
-    .music-btn-2 {
-        top: 15%;
-        right: 8%;
-    }
-    
-    .music-btn-3 {
-        bottom: 28%;
-        left: 12%;
-    }
-    
-    .music-btn-4 {
-        bottom: 18%;
-        right: 15%;
-    }
-    
-    .frame-1 {
-        top: 28%;
-        left: 25%;
-    }
-    
-    .frame-2 {
-        top: 32%;
-        right: 25%;
-    }
-    
-    .frame-3 {
-        bottom: 45%;
+        top: 5%;
         left: 5%;
     }
     
-    .frame-4 {
-        bottom: 48%;
+    .music-btn-2 {
+        top: 8%;
         right: 5%;
     }
     
-    .frame-5 {
-        top: 42%;
-        right: 15%;
+    .music-btn-3 {
+        bottom: 25%;
+        left: 8%;
     }
     
-    /* Mobile quote positions */
-    .quote-1 {
+    .music-btn-4 {
+        bottom: 15%;
+        right: 10%;
+    }
+    
+    /* Mobile frame positions - optimized for 6 frames */
+    .frame-1 {
         top: 20%;
+        left: 20%;
+    }
+    
+    .frame-2 {
+        top: 23%;
+        right: 20%;
+    }
+    
+    .frame-3 {
+        top: 35%;
         left: 2%;
     }
     
-    .quote-2 {
+    .frame-4 {
         top: 38%;
         right: 2%;
     }
     
+    .frame-5 {
+        bottom: 38%;
+        left: 5%;
+    }
+    
+    .frame-6 {
+        bottom: 41%;
+        right: 5%;
+    }
+    
+    /* Mobile quote positions */
+    .quote-1 {
+        top: 15%;
+        left: 2%;
+    }
+    
+    .quote-2 {
+        top: 28%;
+        right: 2%;
+    }
+    
     .quote-3 {
-        bottom: 25%;
-        left: 25%;
+        bottom: 20%;
+        left: 22%;
     }
     
     .quote-4 {
-        top: 52%;
+        top: 58%;
         left: 2%;
     }
     
     .quote-5 {
         bottom: 8%;
-        left: 45%;
+        left: 40%;
     }
     
     .quote-6 {
-        top: 68%;
+        top: 75%;
         right: 2%;
     }
     
     /* Mobile heart positions */
     .heart-1 {
-        top: 8%;
-        right: 20%;
+        top: 12%;
+        right: 15%;
     }
     
     .heart-2 {
         bottom: 12%;
-        left: 8%;
+        left: 10%;
     }
     
     .heart-3 {
-        top: 35%;
-        right: 5%;
+        top: 32%;
+        right: 8%;
     }
     
     .heart-4 {
-        bottom: 35%;
-        left: 35%;
+        bottom: 32%;
+        left: 30%;
     }
     
     .heart-5 {
-        top: 75%;
-        right: 25%;
+        top: 78%;
+        right: 20%;
     }
     
     .heart-6 {
-        top: 25%;
-        left: 45%;
+        top: 42%;
+        left: 42%;
     }
     
     .heart-7 {
         bottom: 22%;
-        right: 12%;
+        right: 8%;
     }
     
     .heart-8 {
-        top: 58%;
-        left: 18%;
+        top: 65%;
+        left: 15%;
     }
     
     .message-content {
@@ -919,7 +957,13 @@ body.light-mode .message-content {
     .audio-visualizer {
         width: 300px;
         height: 60px;
-        bottom: 70px;
+        bottom: 75px;
+    }
+    
+    .audio-status {
+        bottom: 20px;
+        font-size: 14px;
+        padding: 12px 20px;
     }
     
     .fixed-nav {
@@ -968,24 +1012,35 @@ body.light-mode .message-content {
         font-size: 0.9rem;
     }
     
-    /* Tighter positioning for very small screens */
+    /* Ultra-tight positioning for very small screens */
     .music-btn-1 {
-        top: 10%;
-        left: 5%;
+        top: 3%;
+        left: 3%;
     }
     
     .music-btn-2 {
-        top: 12%;
-        right: 5%;
+        top: 5%;
+        right: 3%;
     }
     
     .music-btn-3 {
-        bottom: 30%;
-        left: 8%;
+        bottom: 28%;
+        left: 5%;
     }
     
     .music-btn-4 {
-        bottom: 22%;
-        right: 10%;
+        bottom: 18%;
+        right: 7%;
+    }
+    
+    .audio-visualizer {
+        width: 250px;
+        height: 50px;
+        bottom: 65px;
+    }
+    
+    .audio-status {
+        font-size: 13px;
+        padding: 10px 16px;
     }
 }
