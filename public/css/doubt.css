@@ -14,7 +14,6 @@ body {
     height: 100vh;
     position: relative;
     transition: all 0.3s ease;
-    /* REMOVED pointer-events: none; - This was blocking clicks */
 }
 
 /* Light mode styles */
@@ -61,17 +60,19 @@ body.light-mode .message-content {
     50% { background-position: 100% 50%; }
 }
 
-.chaos-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+/* Fixed navigation */
+.fixed-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 25;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
 }
 
 .back-button {
-    position: fixed;
-    top: 20px;
-    left: 20px;
     background: rgba(255, 23, 68, 0.2);
     border: 2px solid #ff1744;
     color: #ff1744;
@@ -79,7 +80,6 @@ body.light-mode .message-content {
     border-radius: 25px;
     cursor: pointer;
     font-size: 16px;
-    z-index: 25;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     pointer-events: auto;
@@ -92,9 +92,6 @@ body.light-mode .message-content {
 }
 
 .message-icon {
-    position: fixed;
-    top: 20px;
-    right: 20px;
     background: rgba(255, 23, 68, 0.2);
     border: 2px solid #ff1744;
     color: #ff1744;
@@ -102,7 +99,6 @@ body.light-mode .message-content {
     border-radius: 50%;
     cursor: pointer;
     font-size: 24px;
-    z-index: 25;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     pointer-events: auto;
@@ -114,28 +110,353 @@ body.light-mode .message-content {
     box-shadow: 0 0 20px rgba(255, 23, 68, 0.5);
 }
 
-/* Theme toggle button */
-.theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 80px;
-    background: rgba(255, 23, 68, 0.2);
-    border: 2px solid #ff1744;
-    color: #ff1744;
-    padding: 12px;
-    border-radius: 50%;
+/* Main chaos container */
+.chaos-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Central broken heart - remains centered */
+.main-heart {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8rem;
     cursor: pointer;
-    font-size: 24px;
-    z-index: 25;
+    filter: drop-shadow(0 0 30px rgba(255, 23, 68, 0.8));
+    animation: heartbeat 2s ease-in-out infinite;
+    z-index: 20;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    pointer-events: auto;
+    user-select: none;
+}
+
+.main-heart:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1));
+}
+
+.main-heart.playing {
+    animation: heartbeat 0.5s ease-in-out infinite, pulse 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1));
+}
+
+.hero-text {
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2rem;
+    text-align: center;
+    opacity: 0.8;
+    z-index: 19;
+    pointer-events: none;
+}
+
+/* Chaotic positioning for music buttons */
+.music-chaos {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    cursor: pointer;
+    animation: musicFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
+    z-index: 15;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    user-select: none;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 23, 68, 0.3);
+    border-radius: 15px;
+    padding: 15px;
+    backdrop-filter: blur(5px);
+    min-width: 120px;
+    text-align: center;
+}
+
+.music-chaos .music-label {
+    font-size: 0.8rem;
+    margin-top: 5px;
+    line-height: 1.1;
+    opacity: 0.9;
+}
+
+.music-chaos:hover {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 25px rgba(255, 23, 68, 1));
+    background: rgba(255, 23, 68, 0.1);
+}
+
+.music-chaos.playing {
+    animation: musicFloat 0.5s ease-in-out infinite, spin 2s linear infinite;
+    filter: drop-shadow(0 0 30px rgba(255, 23, 68, 1));
+    background: rgba(255, 23, 68, 0.2);
+}
+
+/* Individual chaotic positions for music buttons */
+.music-btn-1 {
+    top: 15%;
+    left: 15%;
+    animation-delay: -0.5s;
+}
+
+.music-btn-2 {
+    top: 20%;
+    right: 12%;
+    animation-delay: -1s;
+}
+
+.music-btn-3 {
+    bottom: 25%;
+    left: 18%;
+    animation-delay: -1.5s;
+}
+
+.music-btn-4 {
+    bottom: 15%;
+    right: 20%;
+    animation-delay: -2s;
+}
+
+/* Chaotic positioning for image frames */
+.image-frame, .video-frame {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 3px solid #ff1744;
+    border-radius: 15px;
+    overflow: hidden;
+    animation: frameFloat 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.5));
+    z-index: 12;
+    cursor: pointer;
+    transition: all 0.3s ease;
     pointer-events: auto;
 }
 
-.theme-toggle:hover {
-    background: rgba(255, 23, 68, 0.4);
+.image-frame:hover, .video-frame:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 23, 68, 0.5);
+    filter: drop-shadow(0 0 25px rgba(255, 23, 68, 0.8));
+}
+
+.image-frame img, .video-frame img,
+.image-frame video, .video-frame video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 10px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-frame:hover .media-overlay,
+.video-frame:hover .media-overlay {
+    opacity: 1;
+}
+
+/* Individual chaotic positions for frames */
+.frame-1 {
+    top: 8%;
+    left: 35%;
+    animation-delay: -0.3s;
+}
+
+.frame-2 {
+    top: 12%;
+    right: 35%;
+    animation-delay: -0.8s;
+}
+
+.frame-3 {
+    bottom: 35%;
+    left: 8%;
+    animation-delay: -1.2s;
+}
+
+.frame-4 {
+    bottom: 40%;
+    right: 8%;
+    animation-delay: -1.7s;
+}
+
+.frame-5 {
+    top: 35%;
+    right: 25%;
+    animation-delay: -2.1s;
+}
+
+/* Chaotic positioning for quotes */
+.chaos-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
+    z-index: 10;
+    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 23, 68, 0.3);
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quote-item {
+    position: absolute;
+    animation: textFloat 8s ease-in-out infinite;
+}
+
+/* Individual positions for quotes */
+.quote-1 {
+    top: 25%;
+    left: 5%;
+    animation-delay: -0.5s;
+}
+
+.quote-2 {
+    top: 35%;
+    left: 75%;
+    animation-delay: -1s;
+}
+
+.quote-3 {
+    bottom: 20%;
+    left: 35%;
+    animation-delay: -1.5s;
+}
+
+.quote-4 {
+    top: 45%;
+    left: 5%;
+    animation-delay: -2s;
+}
+
+.quote-5 {
+    bottom: 8%;
+    left: 60%;
+    animation-delay: -2.5s;
+}
+
+.quote-6 {
+    top: 60%;
+    right: 5%;
+    animation-delay: -3s;
+}
+
+/* Chaotic floating hearts */
+.floating-heart {
+    position: absolute;
+    font-size: 3rem;
+    animation: float 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
+    z-index: 5;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Individual positions for floating hearts */
+.heart-1 {
+    top: 10%;
+    left: 70%;
+    animation-delay: -0.2s;
+}
+
+.heart-2 {
+    top: 70%;
+    left: 10%;
+    animation-delay: -0.7s;
+}
+
+.heart-3 {
+    top: 30%;
+    left: 90%;
+    animation-delay: -1.2s;
+}
+
+.heart-4 {
+    bottom: 10%;
+    left: 45%;
+    animation-delay: -1.7s;
+}
+
+.heart-5 {
+    top: 80%;
+    right: 30%;
+    animation-delay: -2.2s;
+}
+
+.heart-6 {
+    top: 15%;
+    left: 50%;
+    animation-delay: -2.7s;
+}
+
+.heart-7 {
+    bottom: 30%;
+    right: 15%;
+    animation-delay: -3.2s;
+}
+
+.heart-8 {
+    top: 55%;
+    left: 25%;
+    animation-delay: -3.7s;
+}
+
+/* Animations */
+@keyframes heartbeat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-20px) rotate(5deg); }
+    66% { transform: translateY(10px) rotate(-5deg); }
+}
+
+@keyframes musicFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes frameFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(2deg); }
+    66% { transform: translateY(5px) rotate(-2deg); }
+}
+
+@keyframes textFloat {
+    0%, 100% { transform: translateY(0px); opacity: 0.8; }
+    50% { transform: translateY(-15px); opacity: 1; }
 }
 
 /* Enhanced Audio visualization with glowing bars */
@@ -201,6 +522,29 @@ body.light-mode .message-content {
     }
 }
 
+/* Audio status */
+.audio-status {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 23, 68, 0.2);
+    border: 2px solid #ff1744;
+    color: #ff1744;
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-size: 16px;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 15;
+}
+
+.audio-status.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px);
+}
+
 /* Offline indicator */
 .offline-indicator {
     position: fixed;
@@ -255,190 +599,7 @@ body.light-mode .message-content {
     51%, 100% { opacity: 0; }
 }
 
-.main-heart {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 8rem;
-    cursor: pointer;
-    filter: drop-shadow(0 0 30px rgba(255, 23, 68, 0.8));
-    animation: heartbeat 2s ease-in-out infinite;
-    z-index: 15;
-    transition: all 0.3s ease;
-    pointer-events: auto;
-    user-select: none;
-}
-
-.main-heart:hover {
-    transform: translate(-50%, -50%) scale(1.2);
-    filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1));
-}
-
-.main-heart.playing {
-    animation: heartbeat 0.5s ease-in-out infinite, pulse 1s ease-in-out infinite;
-    filter: drop-shadow(0 0 50px rgba(255, 23, 68, 1));
-}
-
-@keyframes heartbeat {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.1); }
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.floating-heart {
-    position: absolute;
-    font-size: 3rem;
-    animation: float 6s ease-in-out infinite;
-    filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
-    z-index: 5;
-    pointer-events: none;
-    user-select: none;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    33% { transform: translateY(-20px) rotate(5deg); }
-    66% { transform: translateY(10px) rotate(-5deg); }
-}
-
-.chaos-text {
-    position: absolute;
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
-    animation: textFloat 8s ease-in-out infinite;
-    z-index: 6;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 23, 68, 0.3);
-    pointer-events: none;
-}
-
-@keyframes textFloat {
-    0%, 100% { transform: translateY(0px); opacity: 0.8; }
-    50% { transform: translateY(-15px); opacity: 1; }
-}
-
-.glitch {
-    animation: glitch 0.3s ease-in-out infinite;
-}
-
-@keyframes glitch {
-    0% { transform: translate(0); filter: hue-rotate(0deg); }
-    20% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
-    40% { transform: translate(-2px, -2px); filter: hue-rotate(180deg); }
-    60% { transform: translate(2px, 2px); filter: hue-rotate(270deg); }
-    80% { transform: translate(2px, -2px); filter: hue-rotate(360deg); }
-    100% { transform: translate(0); filter: hue-rotate(0deg); }
-}
-
-.image-frame, .video-frame {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    border: 3px solid #ff1744;
-    border-radius: 15px;
-    overflow: hidden;
-    animation: frameFloat 6s ease-in-out infinite;
-    filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.5));
-    z-index: 12;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    pointer-events: auto;
-}
-
-.image-frame:hover, .video-frame:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 25px rgba(255, 23, 68, 0.8));
-}
-
-.image-frame img, .video-frame img,
-.image-frame video, .video-frame video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    background: rgba(255, 23, 68, 0.1);
-    color: #ff1744;
-    text-align: center;
-    font-size: 0.8rem;
-    padding: 10px;
-}
-
-@keyframes frameFloat {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    33% { transform: translateY(-10px) rotate(2deg); }
-    66% { transform: translateY(5px) rotate(-2deg); }
-}
-
-.music-chaos {
-    position: absolute;
-    font-size: 3rem;
-    cursor: pointer;
-    animation: musicFloat 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.6));
-    z-index: 14;
-    transition: all 0.3s ease;
-    pointer-events: auto;
-    user-select: none;
-}
-
-.music-chaos:hover {
-    transform: scale(1.3);
-    filter: drop-shadow(0 0 25px rgba(255, 23, 68, 1));
-}
-
-.music-chaos.playing {
-    animation: musicFloat 0.5s ease-in-out infinite, spin 2s linear infinite;
-    filter: drop-shadow(0 0 30px rgba(255, 23, 68, 1));
-}
-
-@keyframes musicFloat {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-15px); }
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.audio-status {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 23, 68, 0.2);
-    border: 2px solid #ff1744;
-    color: #ff1744;
-    padding: 15px 25px;
-    border-radius: 25px;
-    font-size: 16px;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 15;
-}
-
-.audio-status.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-10px);
-}
-
+/* Falling tears */
 .tear {
     position: fixed;
     font-size: 2rem;
@@ -455,6 +616,7 @@ body.light-mode .message-content {
     }
 }
 
+/* Message modal */
 .message-modal {
     display: none;
     position: fixed;
@@ -517,11 +679,21 @@ body.light-mode .message-content {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
-.file-input {
-    display: none;
+/* Placeholder styles */
+.placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: rgba(255, 23, 68, 0.1);
+    color: #ff1744;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 10px;
 }
 
-/* Media popup styles - Updated for slightly larger video popups */
+/* Media popup styles */
 .media-popup {
     position: fixed;
     background: rgba(10, 10, 10, 0.95);
@@ -566,38 +738,9 @@ body.light-mode .message-content {
     opacity: 1;
 }
 
-/* Enhanced video popup styles */
-.media-popup video {
-    border-radius: 17px;
-    box-shadow: inset 0 0 20px rgba(255, 23, 68, 0.1);
-}
-
-.media-popup video::-webkit-media-controls-panel {
-    background: rgba(0, 0, 0, 0.8);
-}
-
-.media-popup video::-webkit-media-controls-play-button,
-.media-popup video::-webkit-media-controls-pause-button {
-    background-color: rgba(255, 23, 68, 0.8);
-    border-radius: 50%;
-}
-
-/* Improved video loading state */
-.media-popup video[preload="metadata"] {
-    background: linear-gradient(45deg, 
-        rgba(255, 23, 68, 0.1) 0%, 
-        rgba(0, 0, 0, 0.9) 50%, 
-        rgba(255, 23, 68, 0.1) 100%);
-}
-
-/* Loading animation for videos */
-@keyframes videoLoading {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
-}
-
-.media-popup video[preload="metadata"]:not([src]) {
-    animation: videoLoading 1.5s ease-in-out infinite;
+.video-indicator {
+    margin-left: 5px;
+    font-size: 0.9rem;
 }
 
 /* Floating animation for popup */
@@ -606,10 +749,15 @@ body.light-mode .message-content {
     50% { transform: scale(1) rotate(1deg) translateY(-5px); }
 }
 
-/* Responsive design */
+/* Mobile responsive design */
 @media (max-width: 768px) {
     .main-heart {
         font-size: 6rem;
+    }
+    
+    .hero-text {
+        font-size: 1rem;
+        top: 67%;
     }
     
     .floating-heart {
@@ -618,7 +766,8 @@ body.light-mode .message-content {
     
     .chaos-text {
         font-size: 1rem;
-        padding: 8px;
+        padding: 8px 12px;
+        max-width: 150px;
     }
     
     .image-frame, .video-frame {
@@ -628,6 +777,130 @@ body.light-mode .message-content {
     
     .music-chaos {
         font-size: 2.5rem;
+        min-width: 100px;
+        padding: 10px;
+    }
+    
+    .music-chaos .music-label {
+        font-size: 0.7rem;
+    }
+    
+    /* Adjust mobile positions to avoid overlap */
+    .music-btn-1 {
+        top: 12%;
+        left: 8%;
+    }
+    
+    .music-btn-2 {
+        top: 15%;
+        right: 8%;
+    }
+    
+    .music-btn-3 {
+        bottom: 28%;
+        left: 12%;
+    }
+    
+    .music-btn-4 {
+        bottom: 18%;
+        right: 15%;
+    }
+    
+    .frame-1 {
+        top: 28%;
+        left: 25%;
+    }
+    
+    .frame-2 {
+        top: 32%;
+        right: 25%;
+    }
+    
+    .frame-3 {
+        bottom: 45%;
+        left: 5%;
+    }
+    
+    .frame-4 {
+        bottom: 48%;
+        right: 5%;
+    }
+    
+    .frame-5 {
+        top: 42%;
+        right: 15%;
+    }
+    
+    /* Mobile quote positions */
+    .quote-1 {
+        top: 20%;
+        left: 2%;
+    }
+    
+    .quote-2 {
+        top: 38%;
+        right: 2%;
+    }
+    
+    .quote-3 {
+        bottom: 25%;
+        left: 25%;
+    }
+    
+    .quote-4 {
+        top: 52%;
+        left: 2%;
+    }
+    
+    .quote-5 {
+        bottom: 8%;
+        left: 45%;
+    }
+    
+    .quote-6 {
+        top: 68%;
+        right: 2%;
+    }
+    
+    /* Mobile heart positions */
+    .heart-1 {
+        top: 8%;
+        right: 20%;
+    }
+    
+    .heart-2 {
+        bottom: 12%;
+        left: 8%;
+    }
+    
+    .heart-3 {
+        top: 35%;
+        right: 5%;
+    }
+    
+    .heart-4 {
+        bottom: 35%;
+        left: 35%;
+    }
+    
+    .heart-5 {
+        top: 75%;
+        right: 25%;
+    }
+    
+    .heart-6 {
+        top: 25%;
+        left: 45%;
+    }
+    
+    .heart-7 {
+        bottom: 22%;
+        right: 12%;
+    }
+    
+    .heart-8 {
+        top: 58%;
+        left: 18%;
     }
     
     .message-content {
@@ -646,22 +919,73 @@ body.light-mode .message-content {
     .audio-visualizer {
         width: 300px;
         height: 60px;
+        bottom: 70px;
     }
     
-    .theme-toggle {
-        right: 70px;
-        top: 80px;
+    .fixed-nav {
+        padding: 15px;
     }
     
-    /* Mobile video popup adjustments */
-    .media-popup video {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+    .back-button {
+        padding: 10px 16px;
+        font-size: 14px;
     }
     
-    .video-frame::before {
-        font-size: 0.7rem;
-        padding: 1px 3px;
+    .message-icon {
+        padding: 10px;
+        font-size: 20px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .main-heart {
+        font-size: 5rem;
+    }
+    
+    .image-frame, .video-frame {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .music-chaos {
+        font-size: 2rem;
+        min-width: 80px;
+        padding: 8px;
+    }
+    
+    .chaos-text {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+        max-width: 120px;
+    }
+    
+    .floating-heart {
+        font-size: 1.5rem;
+    }
+    
+    .hero-text {
+        font-size: 0.9rem;
+    }
+    
+    /* Tighter positioning for very small screens */
+    .music-btn-1 {
+        top: 10%;
+        left: 5%;
+    }
+    
+    .music-btn-2 {
+        top: 12%;
+        right: 5%;
+    }
+    
+    .music-btn-3 {
+        bottom: 30%;
+        left: 8%;
+    }
+    
+    .music-btn-4 {
+        bottom: 22%;
+        right: 10%;
     }
 }

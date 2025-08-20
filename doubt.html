@@ -45,127 +45,116 @@
         <button class="message-icon" role="button" aria-label="Open message">💌</button>
     </div>
 
-    <!-- Main container with mobile-first approach -->
+    <!-- Main container with chaotic floating layout -->
     <div class="chaos-container">
-        <!-- Hero section with main heart -->
-        <section class="hero-section">
-            <div class="main-heart" id="mainHeart" role="button" aria-label="Play main song" tabindex="0">💔</div>
-            <p class="hero-text">Touch the broken heart to begin</p>
-        </section>
+        <!-- Central broken heart -->
+        <div class="main-heart" id="mainHeart" role="button" aria-label="Play main song" tabindex="0">💔</div>
+        <p class="hero-text">Touch the broken heart to begin</p>
 
-        <!-- Music controls section -->
-        <section class="music-section">
-            <h2 class="section-title">🎵 Music Collection</h2>
-            <div class="music-grid">
-                <button class="music-chaos compact" id="musicBtn1" data-track="1" role="button" aria-label="Play Amy Winehouse - Back To Black" tabindex="0">
-                    🎵
-                    <span class="music-label">Amy Winehouse</span>
-                </button>
-                <button class="music-chaos compact" id="musicBtn2" data-track="2" role="button" aria-label="Play Don Toliver - Easy" tabindex="0">
-                    🎶
-                    <span class="music-label">Don Toliver</span>
-                </button>
-                <button class="music-chaos compact" id="musicBtn3" data-track="3" role="button" aria-label="Play Juice WRLD - Faded" tabindex="0">
-                    🎼
-                    <span class="music-label">Juice WRLD</span>
-                </button>
-                <button class="music-chaos compact" id="musicBtn4" data-track="4" role="button" aria-label="Play All Out - Juice WRLD" tabindex="0">
-                    🎧
-                    <span class="music-label">All Out</span>
-                </button>
-            </div>
-        </section>
+        <!-- Chaotically positioned music buttons -->
+        <button class="music-chaos music-btn-1" id="musicBtn1" data-track="1" role="button" aria-label="Play Amy Winehouse - Back To Black" tabindex="0">
+            🎵
+            <span class="music-label">Amy<br>Winehouse</span>
+        </button>
+        <button class="music-chaos music-btn-2" id="musicBtn2" data-track="2" role="button" aria-label="Play Don Toliver - Easy" tabindex="0">
+            🎶
+            <span class="music-label">Don<br>Toliver</span>
+        </button>
+        <button class="music-chaos music-btn-3" id="musicBtn3" data-track="3" role="button" aria-label="Play Juice WRLD - Faded" tabindex="0">
+            🎼
+            <span class="music-label">Juice<br>WRLD</span>
+        </button>
+        <button class="music-chaos music-btn-4" id="musicBtn4" data-track="4" role="button" aria-label="Play All Out - Juice WRLD" tabindex="0">
+            🎧
+            <span class="music-label">All<br>Out</span>
+        </button>
 
-        <!-- Media gallery section -->
-        <section class="media-section">
-            <h2 class="section-title">📸 Our Memories</h2>
-            <div class="media-grid">
-                <div class="media-item image-frame" id="imageFrame1">
-                    <img src="https://caked-production.up.railway.app/assets/images/sikununuli.png" alt="Our memories" loading="lazy" onerror="showPlaceholder(1)">
-                    <div class="placeholder" style="display: none;">
-                        🖼️<br>Our memories
-                    </div>
-                    <div class="media-overlay">
-                        <span class="media-title">Our Memories</span>
-                    </div>
-                </div>
+        <!-- Chaotically positioned image frames -->
+        <div class="media-item image-frame frame-1" id="imageFrame1">
+            <img src="https://caked-production.up.railway.app/assets/images/sikununuli.png" alt="Our memories" loading="lazy" onerror="showPlaceholder(1)">
+            <div class="placeholder" style="display: none;">
+                🖼️<br>Our memories
+            </div>
+            <div class="media-overlay">
+                <span class="media-title">Our Memories</span>
+            </div>
+        </div>
 
-                <div class="media-item image-frame" id="imageFrame2">
-                    <img src="https://caked-production.up.railway.app/assets/images/target.jpg" alt="Our special moment" loading="lazy" onerror="showPlaceholder(2)">
-                    <div class="placeholder" style="display: none;">
-                        📷<br>Our moment
-                    </div>
-                    <div class="media-overlay">
-                        <span class="media-title">Special Moment</span>
-                    </div>
-                </div>
+        <div class="media-item image-frame frame-2" id="imageFrame2">
+            <img src="https://caked-production.up.railway.app/assets/images/target.jpg" alt="Our special moment" loading="lazy" onerror="showPlaceholder(2)">
+            <div class="placeholder" style="display: none;">
+                📷<br>Our moment
+            </div>
+            <div class="media-overlay">
+                <span class="media-title">Special Moment</span>
+            </div>
+        </div>
 
-                <div class="media-item image-frame" id="imageFrame3">
-                    <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" loading="lazy" onerror="showPlaceholder(3)">
-                    <div class="placeholder" style="display: none;">
-                        🖼️<br>Missing this
-                    </div>
-                    <div class="media-overlay">
-                        <span class="media-title">Missing This</span>
-                    </div>
-                </div>
+        <div class="media-item image-frame frame-3" id="imageFrame3">
+            <img src="https://caked-production.up.railway.app/assets/images/gal.png" alt="Missing this" loading="lazy" onerror="showPlaceholder(3)">
+            <div class="placeholder" style="display: none;">
+                🖼️<br>Missing this
+            </div>
+            <div class="media-overlay">
+                <span class="media-title">Missing This</span>
+            </div>
+        </div>
 
-                <div class="media-item image-frame" id="imageFrame4">
-                    <img src="https://caked-production.up.railway.app/assets/images/lost.png" alt="Your beauty" loading="lazy" onerror="showPlaceholder(4)">
-                    <div class="placeholder" style="display: none;">
-                        📸<br>Your beauty
-                    </div>
-                    <div class="media-overlay">
-                        <span class="media-title">Your Beauty</span>
-                    </div>
-                </div>
+        <div class="media-item image-frame frame-4" id="imageFrame4">
+            <img src="https://caked-production.up.railway.app/assets/images/lost.png" alt="Your beauty" loading="lazy" onerror="showPlaceholder(4)">
+            <div class="placeholder" style="display: none;">
+                📸<br>Your beauty
+            </div>
+            <div class="media-overlay">
+                <span class="media-title">Your Beauty</span>
+            </div>
+        </div>
 
-                <div class="media-item video-frame" id="imageFrame5">
-                    <video muted autoplay loop playsinline preload="metadata" 
-                           style="width: 100%; height: 100%; object-fit: cover;"
-                           onerror="showPlaceholder(5)">
-                        <source src="https://caked-production.up.railway.app/assets/videos/tilapia.mp4" type="video/mp4">
-                    </video>
-                    <div class="placeholder" style="display: none;">
-                        🎬<br>Lonely times
-                    </div>
-                    <div class="media-overlay">
-                        <span class="media-title">Lonely Times</span>
-                        <span class="video-indicator">🎬</span>
-                    </div>
-                </div>
+        <div class="media-item video-frame frame-5" id="imageFrame5">
+            <video muted autoplay loop playsinline preload="metadata" 
+                   style="width: 100%; height: 100%; object-fit: cover;"
+                   onerror="showPlaceholder(5)">
+                <source src="https://caked-production.up.railway.app/assets/videos/tilapia.mp4" type="video/mp4">
+            </video>
+            <div class="placeholder" style="display: none;">
+                🎬<br>Lonely times
             </div>
-        </section>
+            <div class="media-overlay">
+                <span class="media-title">Lonely Times</span>
+                <span class="video-indicator">🎬</span>
+            </div>
+        </div>
 
-        <!-- Emotional quotes section -->
-        <section class="quotes-section">
-            <div class="quote-item">
-                <p class="chaos-text">"I miss tuna🍉"</p>
-            </div>
-            <div class="quote-item">
-                <p class="chaos-text">"Don't quit on me bruhh"</p>
-            </div>
-            <div class="quote-item">
-                <p class="chaos-text">"What if?"</p>
-            </div>
-            <div class="quote-item">
-                <p class="chaos-text">"Lost in my Abyss"</p>
-            </div>
-            <div class="quote-item">
-                <p class="chaos-text">"DREADED"</p>
-            </div>
-            <div class="quote-item">
-                <p class="chaos-text">"I CANT I tried"</p>
-            </div>
-        </section>
+        <!-- Chaotically positioned emotional quotes -->
+        <div class="quote-item quote-1">
+            <p class="chaos-text">"I miss tuna🍉"</p>
+        </div>
+        <div class="quote-item quote-2">
+            <p class="chaos-text">"Don't quit on me bruhh"</p>
+        </div>
+        <div class="quote-item quote-3">
+            <p class="chaos-text">"What if?"</p>
+        </div>
+        <div class="quote-item quote-4">
+            <p class="chaos-text">"Lost in my Abyss"</p>
+        </div>
+        <div class="quote-item quote-5">
+            <p class="chaos-text">"DREADED"</p>
+        </div>
+        <div class="quote-item quote-6">
+            <p class="chaos-text">"I CANT I tried"</p>
+        </div>
 
         <!-- Floating decorative hearts -->
         <div class="floating-decorations" aria-hidden="true">
-            <div class="floating-heart">🖤</div>
-            <div class="floating-heart">💔</div>
-            <div class="floating-heart">🥀</div>
-            <div class="floating-heart">⚫</div>
-            <div class="floating-heart">🖤</div>
+            <div class="floating-heart heart-1">🖤</div>
+            <div class="floating-heart heart-2">💔</div>
+            <div class="floating-heart heart-3">🥀</div>
+            <div class="floating-heart heart-4">⚫</div>
+            <div class="floating-heart heart-5">🖤</div>
+            <div class="floating-heart heart-6">💔</div>
+            <div class="floating-heart heart-7">🥀</div>
+            <div class="floating-heart heart-8">🖤</div>
         </div>
     </div>
     
