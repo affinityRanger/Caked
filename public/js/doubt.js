@@ -169,7 +169,7 @@ function stopVisualization() {
     }
 }
 
-// Store current audio state
+// Store and restore audio state
 function storeAudioState() {
     if (currentAudio && !currentAudio.paused) {
         audioStateBeforeVideo = {
@@ -182,7 +182,6 @@ function storeAudioState() {
     }
 }
 
-// Restore audio state after video stops
 function restoreAudioState() {
     if (audioStateBeforeVideo) {
         console.log('Restoring audio state:', audioStateBeforeVideo);
@@ -220,7 +219,7 @@ function restoreAudioState() {
     }
 }
 
-// Enhanced stop all audio function
+// Stop all audio
 function stopAllAudio(preserveState = false) {
     console.log('Stopping all audio, preserveState:', preserveState);
     
@@ -276,11 +275,9 @@ function stopAllAudio(preserveState = false) {
     stopVisualization();
     hideAudioStatus();
     currentPlayingElement = null;
-    
-    console.log('All audio stopped and states reset');
 }
 
-// Improved crossfade function
+// Crossfade function
 function crossfadeToNext(currentElement, nextElement, duration = 2000) {
     if (!currentElement || !nextElement) return;
     
@@ -648,20 +645,13 @@ function createMusicExplosion(element) {
     }
 }
 
-// Enhanced expand media function with better mobile handling
+// Enhanced expand media function with better popup positioning
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
     if (!frame || expandedMedia) return;
     
-    // Look for media element in the media-container
-    const mediaContainer = frame.querySelector('.media-container');
-    if (!mediaContainer) {
-        console.log('No media container found in frame:', frameId);
-        return;
-    }
-    
-    const video = mediaContainer.querySelector('video');
-    const img = mediaContainer.querySelector('img:not(.placeholder)');
+    const video = frame.querySelector('video');
+    const img = frame.querySelector('img:not(.placeholder)');
     
     let mediaElement = null;
     let isVideo = false;
@@ -687,38 +677,30 @@ function expandMedia(frameId) {
     
     const isMobile = window.innerWidth <= 768;
     
-    // Better mobile popup sizing
     let popupSize;
-    if (isMobile) {
-        // Use most of screen on mobile, but leave room for UI
-        popupSize = Math.min(viewportWidth * 0.85, viewportHeight * 0.7);
+    if (isVideo) {
+        popupSize = isMobile ? 300 : 450;
     } else {
-        popupSize = isVideo ? 430 : 400;
+        popupSize = isMobile ? 280 : 420;
     }
     
     const offset = isMobile ? 20 : 40;
     
     let popupX, popupY;
     
-    if (isMobile) {
-        // Center on mobile for best experience
-        popupX = (viewportWidth - popupSize) / 2;
-        popupY = (viewportHeight - popupSize) / 2;
+    // Smart positioning based on available space
+    if (frameRect.right + popupSize + offset < viewportWidth) {
+        popupX = frameRect.right + offset;
+        popupY = frameRect.top + offset;
+    } else if (frameRect.left - popupSize - offset > 0) {
+        popupX = frameRect.left - popupSize - offset;
+        popupY = frameRect.top + offset;
+    } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
+        popupX = frameRect.left + offset;
+        popupY = frameRect.bottom + offset;
     } else {
-        // Desktop positioning logic
-        if (frameRect.right + popupSize + offset < viewportWidth) {
-            popupX = frameRect.right + offset;
-            popupY = frameRect.top + offset;
-        } else if (frameRect.left - popupSize - offset > 0) {
-            popupX = frameRect.left - popupSize - offset;
-            popupY = frameRect.top + offset;
-        } else if (frameRect.bottom + popupSize + offset < viewportHeight) {
-            popupX = frameRect.left + offset;
-            popupY = frameRect.bottom + offset;
-        } else {
-            popupX = frameRect.left + offset;
-            popupY = frameRect.top - popupSize - offset;
-        }
+        popupX = frameRect.left + offset;
+        popupY = frameRect.top - popupSize - offset;
     }
     
     // Ensure popup stays within viewport
@@ -808,12 +790,10 @@ function expandMedia(frameId) {
         };
     }
     
-    // Consistent styling for both images and videos
     expandedElement.style.cssText = `
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center;
         border-radius: ${isMobile ? '12px' : '17px'};
         display: block;
     `;
@@ -917,14 +897,19 @@ function expandMedia(frameId) {
         }
     });
     
-    // Auto-close timing adjusted for mobile
-    const autoCloseTime = isMobile ? (isVideo ? 0 : 12000) : (isVideo ? 0 : 18000);
-    if (autoCloseTime > 0) {
+    // Auto-close for images only
+    if (!isVideo && isMobile) {
         setTimeout(() => {
             if (expandedMedia === popup) {
                 closeMedia();
             }
-        }, autoCloseTime);
+        }, 15000);
+    } else if (!isVideo && !isMobile) {
+        setTimeout(() => {
+            if (expandedMedia === popup) {
+                closeMedia();
+            }
+        }, 20000);
     }
     
     // ESC key to close
@@ -937,21 +922,16 @@ function expandMedia(frameId) {
     document.addEventListener('keydown', handleEsc);
 }
 
-// Enhanced setup media frame function
+// Setup media frame function
 function setupMediaFrame(frameId, mediaSrc, altText) {
     const frame = document.getElementById(frameId);
     if (!frame || !mediaSrc) return;
     
-    const mediaContainer = frame.querySelector('.media-container');
-    if (!mediaContainer) return;
-    
-    // Clear existing content except placeholder
-    const existingMedia = mediaContainer.querySelectorAll('img:not(.placeholder), video');
+    const existingMedia = frame.querySelectorAll('img:not(.placeholder), video');
     existingMedia.forEach(el => el.remove());
     
     let mediaElement;
     if (isVideoSource(mediaSrc)) {
-        // Create video element
         mediaElement = document.createElement('video');
         mediaElement.src = mediaSrc;
         mediaElement.muted = true;
@@ -960,16 +940,15 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         mediaElement.playsInline = true;
         mediaElement.preload = 'metadata';
         
-        // Proper video styling for responsive design
         mediaElement.style.cssText = `
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            border-radius: 10px;
         `;
         
         mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
@@ -978,37 +957,29 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
             setupVideoElement(mediaElement, frame);
         };
     } else {
-        // Create image element
         mediaElement = document.createElement('img');
         mediaElement.src = mediaSrc;
         mediaElement.alt = altText || 'Memory';
         mediaElement.loading = 'lazy';
         
-        // Proper image styling for responsive design
         mediaElement.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
-            border-radius: 10px;
+            border-radius: 12px;
+            display: block;
         `;
         
         mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
     }
     
-    mediaContainer.appendChild(mediaElement);
+    frame.appendChild(mediaElement);
     
-    // Enhanced frame click handling
     frame.style.cursor = 'pointer';
     
-    // Remove existing click listeners to prevent duplicates
     const newFrame = frame.cloneNode(true);
     frame.parentNode.replaceChild(newFrame, frame);
     
-    // Add new click handler
     const clickHandler = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1019,7 +990,7 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
     newFrame.addEventListener('click', clickHandler);
 }
 
-// Show audio status
+// Utility functions
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
     if (status) {
@@ -1034,7 +1005,6 @@ function showAudioStatus(message) {
     }
 }
 
-// Hide audio status
 function hideAudioStatus() {
     const status = document.getElementById('audioStatus');
     if (status) {
@@ -1042,7 +1012,6 @@ function hideAudioStatus() {
     }
 }
 
-// Network status handler
 function handleNetworkStatus(isOnline) {
     if (!isOnline) {
         document.getElementById('offlineIndicator')?.classList.add('show');
@@ -1055,7 +1024,6 @@ function handleNetworkStatus(isOnline) {
     }
 }
 
-// Typing message display function
 function showTypingMessage(message, duration = 3000) {
     const existingMessage = document.getElementById('typingMessage');
     if (existingMessage) {
@@ -1096,22 +1064,17 @@ function showTypingMessage(message, duration = 3000) {
     }, 100);
 }
 
-// Check offline status function
 function checkOfflineStatus() {
     isOffline = !navigator.onLine;
     handleNetworkStatus(navigator.onLine);
 }
 
-// Enhanced frame initialization for better media handling
 function initializeMediaFrames() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
     frames.forEach(frame => {
-        const mediaContainer = frame.querySelector('.media-container');
-        if (!mediaContainer) return;
-        
-        const img = mediaContainer.querySelector('img:not(.placeholder)');
-        const video = mediaContainer.querySelector('video');
+        const img = frame.querySelector('img:not(.placeholder)');
+        const video = frame.querySelector('video');
         
         if (video) {
             setupVideoElement(video, frame);
@@ -1129,7 +1092,6 @@ function initializeMediaFrames() {
     console.log('Media frames initialized:', frames.length);
 }
 
-// Create offline indicator
 function createOfflineIndicator() {
     if (document.getElementById('offlineIndicator')) return;
     
@@ -1140,7 +1102,6 @@ function createOfflineIndicator() {
     document.body.appendChild(indicator);
 }
 
-// Cache audio for offline use
 function cacheAudio(audioId) {
     const audio = document.getElementById(audioId);
     if (audio && !cachedTracks.has(audioId)) {
@@ -1151,7 +1112,6 @@ function cacheAudio(audioId) {
     }
 }
 
-// Create falling tears
 function createTear() {
     const tear = document.createElement('div');
     tear.className = 'tear';
@@ -1167,7 +1127,6 @@ function createTear() {
     }, 4000);
 }
 
-// Go back to landing page
 function goBackToMain() {
     stopAllAudio(false);
     
@@ -1185,7 +1144,6 @@ function goBackToMain() {
     }
 }
 
-// Show message modal
 function showMessage() {
     const modal = document.getElementById('messageModal');
     if (modal) {
@@ -1194,7 +1152,6 @@ function showMessage() {
     }
 }
 
-// Hide message modal
 function hideMessage() {
     const modal = document.getElementById('messageModal');
     if (modal) {
@@ -1203,15 +1160,11 @@ function hideMessage() {
     }
 }
 
-// Show placeholder if media fails to load
 function showPlaceholder(num) {
     const frame = document.getElementById(`imageFrame${num}`);
     if (frame) {
-        const mediaContainer = frame.querySelector('.media-container');
-        if (!mediaContainer) return;
-        
-        const img = mediaContainer.querySelector('img:not(.placeholder)');
-        const video = mediaContainer.querySelector('video');
+        const img = frame.querySelector('img');
+        const video = frame.querySelector('video');
         const placeholder = frame.querySelector('.placeholder');
         
         if (img) img.style.display = 'none';
@@ -1220,38 +1173,29 @@ function showPlaceholder(num) {
     }
 }
 
-// Check if media source is video
 function isVideoSource(src) {
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv'];
     return videoExtensions.some(ext => src.toLowerCase().includes(ext));
 }
 
-// Auto-detect and setup video elements
 function autoDetectVideos() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
     frames.forEach((frame, index) => {
-        const mediaContainer = frame.querySelector('.media-container');
-        if (!mediaContainer) return;
-        
-        let video = mediaContainer.querySelector('video');
+        let video = frame.querySelector('video');
         if (video) {
             setupVideoElement(video, frame);
             return;
         }
         
-        const img = mediaContainer.querySelector('img:not(.placeholder)');
+        const img = frame.querySelector('img');
         if (img && isVideoSource(img.src)) {
             convertImageToVideo(img, frame);
         }
     });
 }
 
-// Convert image element to video if it's actually a video
 function convertImageToVideo(img, frame) {
-    const mediaContainer = frame.querySelector('.media-container');
-    if (!mediaContainer) return;
-    
     const video = document.createElement('video');
     video.src = img.src;
     video.muted = true;
@@ -1261,14 +1205,11 @@ function convertImageToVideo(img, frame) {
     video.preload = 'metadata';
     
     video.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center;
-        border-radius: 10px;
+        border-radius: 12px;
+        display: block;
     `;
     
     video.onerror = () => {
@@ -1277,7 +1218,7 @@ function convertImageToVideo(img, frame) {
     
     video.onloadedmetadata = () => {
         img.style.display = 'none';
-        mediaContainer.insertBefore(video, mediaContainer.firstChild);
+        frame.insertBefore(video, frame.firstChild);
         setupVideoElement(video, frame);
         console.log('Video loaded and replaced image:', video.src);
     };
@@ -1285,7 +1226,6 @@ function convertImageToVideo(img, frame) {
     video.load();
 }
 
-// Setup video element with proper handling
 function setupVideoElement(video, frame) {
     if (!video || !frame) return;
     
@@ -1294,16 +1234,15 @@ function setupVideoElement(video, frame) {
     video.loop = true;
     video.preload = 'metadata';
     
-    // Ensure proper video styling for responsive design
     video.style.cssText = `
-        position: absolute !important;
-        top: 0;
-        left: 0;
         width: 100% !important;
         height: 100% !important;
         object-fit: cover;
-        object-position: center;
-        border-radius: 10px;
+        border-radius: 12px;
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
     `;
     
     video.addEventListener('click', (e) => {
@@ -1312,7 +1251,6 @@ function setupVideoElement(video, frame) {
         expandMedia(frame.id);
     });
     
-    // Enhanced intersection observer for better mobile performance
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -1324,14 +1262,10 @@ function setupVideoElement(video, frame) {
                 video.pause();
             }
         });
-    }, { 
-        threshold: 0.3,  // Lower threshold for mobile
-        rootMargin: '20px'  // Start playing a bit before fully visible
-    });
+    }, { threshold: 0.5 });
     
     observer.observe(video);
     
-    // Initial play attempt with delay for mobile
     setTimeout(() => {
         const playPromise = video.play();
         if (playPromise) {
@@ -1339,7 +1273,7 @@ function setupVideoElement(video, frame) {
                 .then(() => console.log('Video autoplay successful'))
                 .catch(e => console.log('Video autoplay failed:', e));
         }
-    }, 200);
+    }, 100);
 }
 
 // Initialize everything when DOM is loaded
@@ -1441,55 +1375,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Create tears periodically
 setInterval(createTear, 800);
-
-// Handle window resize for better responsive behavior
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        // Close any expanded media on resize to prevent positioning issues
-        if (expandedMedia) {
-            const closeBtn = expandedMedia.querySelector('button');
-            if (closeBtn) {
-                closeBtn.click();
-            }
-        }
-        
-        // Reinitialize media frames if needed
-        console.log('Window resized, reinitializing media frames...');
-        setTimeout(() => {
-            initializeMediaFrames();
-        }, 100);
-    }, 250);
-});
-
-// Handle orientation change for mobile devices
-window.addEventListener('orientationchange', () => {
-    setTimeout(() => {
-        // Force re-layout after orientation change
-        document.body.style.height = '100vh';
-        
-        // Close any expanded media
-        if (expandedMedia) {
-            const closeBtn = expandedMedia.querySelector('button');
-            if (closeBtn) {
-                closeBtn.click();
-            }
-        }
-        
-        // Reinitialize media elements
-        initializeMediaFrames();
-        autoDetectVideos();
-    }, 100);
-});
-
-// Prevent zoom on double tap for iOS
-document.addEventListener('touchend', (e) => {
-    const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
-let lastTouchEnd = 0;
