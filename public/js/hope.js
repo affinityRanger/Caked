@@ -27,8 +27,10 @@ let autoPlayAttempted = false;
 let globalMusicIndex = 0;
 let globalMusicFiles = [
     'PARTYNEXTDOOR - Dreamin.mp3',
+    'Niko Sawa - Nviiri ft. Bien.mp3', // ADDED: New song
     'PARTYNEXTDOOR - DEEPER.mp3',
     'PARTYNEXTDOOR - TRAUMA .mp3',
+    'blink-182 - I Miss You.mp3', // ADDED: New song
     'KEEP IT-Juice WRLD.mp3',
     'Juice WRLD - GRACE.mp3',
     'Kiss - I Was Made For Lovin You.mp3',
@@ -40,8 +42,10 @@ let globalMusicFiles = [
 ];
 let globalMusicTitles = [
     "Dreamin' - PARTYNEXTDOOR",
+    "Niko Sawa - Nviiri ft. Bien",
     "DEEPER - PARTYNEXTDOOR",
     "TRAUMA - PARTYNEXTDOOR",
+    "I Miss You - blink-182",
     "KEEP IT - Juice WRLD",
     "GRACE - Juice WRLD",
     "Kiss - I Was Made For Lovin' You",

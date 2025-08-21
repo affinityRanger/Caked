@@ -677,30 +677,6 @@ function checkOfflineStatus() {
     handleNetworkStatus(navigator.onLine);
 }
 
-// Enhanced frame initialization for better media handling with improved video sizing
-function initializeMediaFrames() {
-    const frames = document.querySelectorAll('.image-frame, .video-frame');
-    
-    frames.forEach(frame => {
-        const img = frame.querySelector('img:not(.placeholder)');
-        const video = frame.querySelector('video');
-        
-        if (video) {
-            setupVideoElement(video, frame);
-        } else if (img) {
-            frame.style.cursor = 'pointer';
-            frame.onclick = null;
-            frame.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                expandMedia(frame.id);
-            });
-        }
-    });
-    
-    console.log('Media frames initialized:', frames.length);
-}
-
 // Create offline indicator
 function createOfflineIndicator() {
     if (document.getElementById('offlineIndicator')) return;
@@ -1206,8 +1182,8 @@ function expandMedia(frameId) {
     document.addEventListener('keydown', handleEsc);
 }
 
-// Enhanced setup media frame function with better video handling
-function setupMediaFrame(frameId, mediaSrc, altText) {
+// Enhanced setup media frame function with center-zone constraint for videos
+function setupMediaFrame(frameId, mediaSrc, altText, isVideo = false) {
     const frame = document.getElementById(frameId);
     if (!frame || !mediaSrc) return;
     
@@ -1215,9 +1191,27 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
     const existingMedia = frame.querySelectorAll('img:not(.placeholder), video');
     existingMedia.forEach(el => el.remove());
     
+    // Determine if this should be a video frame based on source or parameter
+    const shouldBeVideo = isVideo || isVideoSource(mediaSrc);
+    
+    // Apply appropriate frame class
+    if (shouldBeVideo) {
+        frame.classList.remove('image-frame');
+        frame.classList.add('video-frame');
+        
+        // Ensure video frames are positioned in center zone
+        applyVideoCenterPositioning(frame, frameId);
+    } else {
+        frame.classList.remove('video-frame');
+        frame.classList.add('image-frame');
+        
+        // Ensure image frames stay in peripheral positions
+        applyImagePeripheralPositioning(frame, frameId);
+    }
+    
     let mediaElement;
-    if (isVideoSource(mediaSrc)) {
-        // Create video element with optimized settings
+    if (shouldBeVideo) {
+        // Create video element with center-constrained settings
         mediaElement = document.createElement('video');
         mediaElement.src = mediaSrc;
         mediaElement.muted = true;
@@ -1226,7 +1220,7 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         mediaElement.playsInline = true;
         mediaElement.preload = 'metadata';
         
-        // Optimized video styling for better frame fitting
+        // Video styling optimized for center area display
         mediaElement.style.cssText = `
             width: 100% !important;
             height: 100% !important;
@@ -1237,25 +1231,18 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
             position: absolute;
             top: 0;
             left: 0;
-            transition: transform 0.3s ease;
         `;
         
-        // Handle video loading errors
-        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+        mediaElement.onerror = () => showPlaceholder(frameId.replace('Frame', '').replace(/\D/g, ''));
+        mediaElement.onloadedmetadata = () => setupVideoElement(mediaElement, frame);
         
-        // Setup video when loaded
-        mediaElement.onloadedmetadata = () => {
-            optimizeVideoAspectRatio(mediaElement, frame);
-            setupVideoElement(mediaElement, frame);
-        };
     } else {
-        // Create image element
+        // Create image element for peripheral display
         mediaElement = document.createElement('img');
         mediaElement.src = mediaSrc;
         mediaElement.alt = altText || 'Memory';
         mediaElement.loading = 'lazy';
         
-        // Proper image styling
         mediaElement.style.cssText = `
             width: 100%;
             height: 100%;
@@ -1265,28 +1252,115 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
             display: block;
         `;
         
-        // Handle image loading errors
-        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+        mediaElement.onerror = () => showPlaceholder(frameId.replace('Frame', '').replace(/\D/g, ''));
     }
     
     frame.appendChild(mediaElement);
-    
-    // Enhanced frame click handling
     frame.style.cursor = 'pointer';
     
-    // Remove existing click listeners to prevent duplicates
+    // Enhanced frame click handling
     const newFrame = frame.cloneNode(true);
     frame.parentNode.replaceChild(newFrame, frame);
     
-    // Add new click handler
     const clickHandler = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Frame clicked:', frameId);
         expandMedia(frameId);
     };
     
     newFrame.addEventListener('click', clickHandler);
+}
+
+// Apply center positioning for video frames
+function applyVideoCenterPositioning(frame, frameId) {
+    const centerPositions = {
+        'frame1': { top: '25%', left: '30%' },
+        'frame2': { top: '35%', right: '30%' },
+        'frame3': { top: '55%', left: '35%' },
+        'frame4': { bottom: '30%', right: '32%' }
+    };
+    
+    const frameNumber = frameId.replace(/\D/g, '');
+    const position = centerPositions[`frame${frameNumber}`];
+    
+    if (position) {
+        Object.assign(frame.style, {
+            position: 'absolute',
+            width: '160px',
+            height: '120px',
+            ...position
+        });
+    }
+}
+
+// Apply peripheral positioning for image frames  
+function applyImagePeripheralPositioning(frame, frameId) {
+    const peripheralPositions = {
+        'frame5': { top: '6%', left: '22%' },
+        'frame6': { top: '8%', right: '22%' },
+        'frame7': { bottom: '25%', left: '6%' },
+        'frame8': { bottom: '27%', right: '6%' }
+    };
+    
+    const frameNumber = frameId.replace(/\D/g, '');
+    const position = peripheralPositions[`frame${frameNumber}`];
+    
+    if (position) {
+        Object.assign(frame.style, {
+            position: 'absolute',
+            width: '180px',
+            height: '140px',
+            ...position
+        });
+    }
+}
+
+// Enhanced initialization to properly separate videos and images
+function initializeMediaFrames() {
+    // Define which frames should be videos (center area) vs images (peripheral)
+    const videoFrames = ['imageFrame1', 'imageFrame2', 'imageFrame3', 'imageFrame4'];
+    const imageFrames = ['imageFrame5', 'imageFrame6', 'imageFrame7', 'imageFrame8'];
+    
+    // Process video frames for center area
+    videoFrames.forEach(frameId => {
+        const frame = document.getElementById(frameId);
+        if (frame) {
+            frame.classList.remove('image-frame');
+            frame.classList.add('video-frame');
+            applyVideoCenterPositioning(frame, frameId);
+            
+            const video = frame.querySelector('video');
+            if (video) {
+                setupVideoElement(video, frame);
+            } else {
+                // Set up click handler for video frames
+                frame.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    expandMedia(frameId);
+                });
+            }
+        }
+    });
+    
+    // Process image frames for peripheral area
+    imageFrames.forEach(frameId => {
+        const frame = document.getElementById(frameId);
+        if (frame) {
+            frame.classList.remove('video-frame');
+            frame.classList.add('image-frame');
+            applyImagePeripheralPositioning(frame, frameId);
+            
+            // Set up click handler for image frames
+            frame.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                expandMedia(frameId);
+            });
+        }
+    });
+    
+    console.log('Media frames initialized with spatial constraints');
 }
 
 // Show audio status
