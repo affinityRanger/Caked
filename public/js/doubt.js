@@ -361,6 +361,7 @@ function playAudioWithFallback(audioElement, title, visualElement) {
         if (visualElement.id === 'mainHeart') {
             visualElement.classList.add('beating');
         }
+        // Remove pulsing class from music buttons (no background spinning)
     }
     
     // Connect to analyser for visualization
@@ -676,7 +677,7 @@ function checkOfflineStatus() {
     handleNetworkStatus(navigator.onLine);
 }
 
-// Enhanced frame initialization for better media handling - FIXED VERSION
+// Enhanced frame initialization for better media handling
 function initializeMediaFrames() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
@@ -684,30 +685,16 @@ function initializeMediaFrames() {
         const img = frame.querySelector('img:not(.placeholder)');
         const video = frame.querySelector('video');
         
-        // Set up video elements
         if (video) {
             setupVideoElement(video, frame);
-        }
-        
-        // Set up click handlers for frames with proper event handling
-        frame.style.cursor = 'pointer';
-        
-        // Remove any existing event listeners by cloning the element
-        const newFrame = frame.cloneNode(true);
-        frame.parentNode.replaceChild(newFrame, frame);
-        
-        // Add fresh click event listener
-        newFrame.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Frame clicked:', newFrame.id);
-            expandMedia(newFrame.id);
-        });
-        
-        // Re-setup video if it exists in the new frame
-        const newVideo = newFrame.querySelector('video');
-        if (newVideo) {
-            setupVideoElement(newVideo, newFrame);
+        } else if (img) {
+            frame.style.cursor = 'pointer';
+            frame.onclick = null;
+            frame.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                expandMedia(frame.id);
+            });
         }
     });
     
@@ -1183,6 +1170,85 @@ function expandMedia(frameId) {
     document.addEventListener('keydown', handleEsc);
 }
 
+// Enhanced setup media frame function
+function setupMediaFrame(frameId, mediaSrc, altText) {
+    const frame = document.getElementById(frameId);
+    if (!frame || !mediaSrc) return;
+    
+    // Clear existing content except placeholder
+    const existingMedia = frame.querySelectorAll('img:not(.placeholder), video');
+    existingMedia.forEach(el => el.remove());
+    
+    let mediaElement;
+    if (isVideoSource(mediaSrc)) {
+        // Create video element
+        mediaElement = document.createElement('video');
+        mediaElement.src = mediaSrc;
+        mediaElement.muted = true;
+        mediaElement.loop = true;
+        mediaElement.autoplay = true;
+        mediaElement.playsInline = true;
+        mediaElement.preload = 'metadata';
+        
+        // Proper video styling
+        mediaElement.style.cssText = `
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        `;
+        
+        // Handle video loading errors
+        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+        
+        // Setup video when loaded
+        mediaElement.onloadedmetadata = () => {
+            setupVideoElement(mediaElement, frame);
+        };
+    } else {
+        // Create image element
+        mediaElement = document.createElement('img');
+        mediaElement.src = mediaSrc;
+        mediaElement.alt = altText || 'Memory';
+        mediaElement.loading = 'lazy';
+        
+        // Proper image styling
+        mediaElement.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        `;
+        
+        // Handle image loading errors
+        mediaElement.onerror = () => showPlaceholder(frameId.replace('imageFrame', ''));
+    }
+    
+    frame.appendChild(mediaElement);
+    
+    // Enhanced frame click handling
+    frame.style.cursor = 'pointer';
+    
+    // Remove existing click listeners to prevent duplicates
+    const newFrame = frame.cloneNode(true);
+    frame.parentNode.replaceChild(newFrame, frame);
+    
+    // Add new click handler
+    const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Frame clicked:', frameId);
+        expandMedia(frameId);
+    };
+    
+    newFrame.addEventListener('click', clickHandler);
+}
+
 // Show audio status
 function showAudioStatus(message) {
     const status = document.getElementById('audioStatus');
@@ -1282,7 +1348,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainHeart = document.getElementById('mainHeart');
     if (mainHeart) {
         mainHeart.addEventListener('click', playMainMusic);
-        mainHeart.addEventListener('touchstart', playMainMusic, { passive: true });
         mainHeart.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -1295,24 +1360,8 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let i = 1; i <= 4; i++) {
         const musicBtn = document.getElementById(`musicBtn${i}`);
         if (musicBtn) {
-            // Remove any existing listeners by cloning
-            const newMusicBtn = musicBtn.cloneNode(true);
-            musicBtn.parentNode.replaceChild(newMusicBtn, musicBtn);
-            
-            // Add fresh event listeners
-            newMusicBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Music button clicked:', i);
-                playMusic(i);
-            });
-            
-            newMusicBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                playMusic(i);
-            }, { passive: false });
-            
-            newMusicBtn.addEventListener('keydown', (e) => {
+            musicBtn.addEventListener('click', () => playMusic(i));
+            musicBtn.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     playMusic(i);
