@@ -677,7 +677,7 @@ function checkOfflineStatus() {
     handleNetworkStatus(navigator.onLine);
 }
 
-// Enhanced frame initialization for better media handling
+// Enhanced frame initialization for better media handling with improved video sizing
 function initializeMediaFrames() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
@@ -787,7 +787,7 @@ function isVideoSource(src) {
     return videoExtensions.some(ext => src.toLowerCase().includes(ext));
 }
 
-// Auto-detect and setup video elements
+// Auto-detect and setup video elements with optimized sizing
 function autoDetectVideos() {
     const frames = document.querySelectorAll('.image-frame, .video-frame');
     
@@ -805,7 +805,7 @@ function autoDetectVideos() {
     });
 }
 
-// Convert image element to video if it's actually a video
+// Convert image element to video if it's actually a video - with optimized sizing
 function convertImageToVideo(img, frame) {
     const video = document.createElement('video');
     video.src = img.src;
@@ -815,12 +815,17 @@ function convertImageToVideo(img, frame) {
     video.playsInline = true;
     video.preload = 'metadata';
     
+    // Optimized video styling for better fitting
     video.style.cssText = `
-        width: 100%;
-        height: 100%;
+        width: 100% !important;
+        height: 100% !important;
         object-fit: cover;
+        object-position: center center;
         border-radius: 12px;
         display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
     `;
     
     video.onerror = () => {
@@ -828,6 +833,8 @@ function convertImageToVideo(img, frame) {
     };
     
     video.onloadedmetadata = () => {
+        // Optimize aspect ratio handling
+        optimizeVideoAspectRatio(video, frame);
         img.style.display = 'none';
         frame.insertBefore(video, frame.firstChild);
         setupVideoElement(video, frame);
@@ -837,7 +844,26 @@ function convertImageToVideo(img, frame) {
     video.load();
 }
 
-// Setup video element with proper handling
+// Optimize video aspect ratio for better fitting
+function optimizeVideoAspectRatio(video, frame) {
+    video.addEventListener('loadedmetadata', () => {
+        const videoRatio = video.videoWidth / video.videoHeight;
+        const frameRatio = frame.offsetWidth / frame.offsetHeight;
+        
+        if (Math.abs(videoRatio - frameRatio) > 0.2) {
+            // Adjust object-fit based on aspect ratio difference
+            if (videoRatio > frameRatio) {
+                video.style.objectFit = 'cover';
+                video.style.objectPosition = 'center center';
+            } else {
+                video.style.objectFit = 'cover';
+                video.style.objectPosition = 'center center';
+            }
+        }
+    });
+}
+
+// Setup video element with proper handling and optimized sizing
 function setupVideoElement(video, frame) {
     if (!video || !frame) return;
     
@@ -846,16 +872,24 @@ function setupVideoElement(video, frame) {
     video.loop = true;
     video.preload = 'metadata';
     
+    // Enhanced video styling for better fitting
     video.style.cssText = `
         width: 100% !important;
         height: 100% !important;
         object-fit: cover;
+        object-position: center center;
         border-radius: 12px;
         display: block;
         position: absolute;
         top: 0;
         left: 0;
+        transition: transform 0.3s ease;
     `;
+    
+    // Optimize video for frame on metadata load
+    video.addEventListener('loadedmetadata', () => {
+        optimizeVideoAspectRatio(video, frame);
+    });
     
     video.addEventListener('click', (e) => {
         e.preventDefault();
@@ -888,7 +922,7 @@ function setupVideoElement(video, frame) {
     }, 100);
 }
 
-// Enhanced expand media function with better detection and popup handling
+// Enhanced expand media function with better detection, popup handling, and video optimization
 function expandMedia(frameId) {
     const frame = document.getElementById(frameId);
     if (!frame || expandedMedia) return;
@@ -920,11 +954,12 @@ function expandMedia(frameId) {
     
     const isMobile = window.innerWidth <= 768;
     
+    // Improved popup sizing for better video display
     let popupSize;
     if (isVideo) {
-        popupSize = isMobile ? 280 : 430;
+        popupSize = isMobile ? 320 : 480;
     } else {
-        popupSize = isMobile ? 260 : 400;
+        popupSize = isMobile ? 280 : 420;
     }
     
     const offset = isMobile ? 20 : 40;
@@ -1037,11 +1072,12 @@ function expandMedia(frameId) {
         };
     }
     
-    // Consistent styling for both images and videos
+    // Optimized styling for both images and videos with better fitting
     expandedElement.style.cssText = `
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center center;
         border-radius: ${isMobile ? '12px' : '17px'};
         display: block;
     `;
@@ -1170,7 +1206,7 @@ function expandMedia(frameId) {
     document.addEventListener('keydown', handleEsc);
 }
 
-// Enhanced setup media frame function
+// Enhanced setup media frame function with better video handling
 function setupMediaFrame(frameId, mediaSrc, altText) {
     const frame = document.getElementById(frameId);
     if (!frame || !mediaSrc) return;
@@ -1181,7 +1217,7 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
     
     let mediaElement;
     if (isVideoSource(mediaSrc)) {
-        // Create video element
+        // Create video element with optimized settings
         mediaElement = document.createElement('video');
         mediaElement.src = mediaSrc;
         mediaElement.muted = true;
@@ -1190,16 +1226,18 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         mediaElement.playsInline = true;
         mediaElement.preload = 'metadata';
         
-        // Proper video styling
+        // Optimized video styling for better frame fitting
         mediaElement.style.cssText = `
             width: 100% !important;
             height: 100% !important;
             object-fit: cover;
+            object-position: center center;
             border-radius: 12px;
             display: block;
             position: absolute;
             top: 0;
             left: 0;
+            transition: transform 0.3s ease;
         `;
         
         // Handle video loading errors
@@ -1207,6 +1245,7 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
         
         // Setup video when loaded
         mediaElement.onloadedmetadata = () => {
+            optimizeVideoAspectRatio(mediaElement, frame);
             setupVideoElement(mediaElement, frame);
         };
     } else {
@@ -1221,6 +1260,7 @@ function setupMediaFrame(frameId, mediaSrc, altText) {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
             border-radius: 12px;
             display: block;
         `;
